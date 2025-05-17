@@ -1,11 +1,5 @@
 !(register-module! ../utils)
-!(register-module! ../utilities-module)
 !(import! &self utils)
-!(import! &self utilities-module:utils)
-; there is an import error
-
-
-
 
 
 (= (EnergyDemandUpdater)
@@ -50,18 +44,7 @@
            ($changes_with_arg (get_changes_with_arg) )
            ($change_with_tv_level 0)
            ($change_with_arg_level 0)
-         )
-         ; Normalize levels of changes to [0, 1]
-         ;
-         ; Note: The formular is 
-         ;       xxx_level = 1 / (1 + a*x^2)
-         ;
-         ; TODO: we add a random number to introduce some noise, which would
-         ;       make this function still works even the virtual world is not 
-         ;       ready to populate interesting stuff. Remove these random noise later. 
-         ;
-         
-         (let ($change_with_tv_level
+            ($change_with_tv_level
              (/ 1
                 (+ 1 
                    (* 0.001 
@@ -70,9 +53,8 @@
                    )  
                 )
              )
-         ))
-
-         (let ($change_with_arg_level
+            )
+          ($change_with_arg_level
              (/ 1
                 (+ 1 
                    (* 0.001
@@ -81,6 +63,7 @@
                    )  
                 )
              )
+            )
          )
 
          ; Return certainty level
@@ -89,20 +72,20 @@
             (* 0.20 (get_truth_value_mean (cog-tv CertaintyDemandGoal)) )
          )
     ) 
-))
+)
 
 
 (= (CompetenceDemandUpdater)
     (let* ( ($plan_done_at_time_link_list 
-                (match $self (find_at_time_link actionDone) ) 
+                (collapse (match $self (find_at_time_link actionDone) $action_done)) 
             )
 
             ($plan_failed_at_time_link_list
-                (match $self (find_at_time_link actionFailed) ) 
+                (collapse (match $self (find_at_time_link actionFailed) $action_failed)) 
             )
 
-            ($plan_done_number (len $plan_done_at_time_link_list) )
-            ($plan_failed_number (len $plan_failed_at_time_link_list) )
+            ($plan_done_number (size-atom $plan_done_at_time_link_list) )
+            ($plan_failed_number (size-atom $plan_failed_at_time_link_list) )
           )
  
           ; avoid division by zero and decimal part will force guile return floating
@@ -133,3 +116,4 @@
 ;          )
     ); let*
 )
+
