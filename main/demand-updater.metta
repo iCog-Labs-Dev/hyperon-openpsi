@@ -1,7 +1,7 @@
 !(register-module! ../utils)
 !(register-module! ../utilities-module)
 !(import! &self utils)
-!(import! &self utilities-module)
+!(import! &self utilities-module:utils)
 ; there is an import error
 
 
