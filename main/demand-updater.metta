@@ -12,8 +12,8 @@
 
 
 (= (AffiliationDemandUpdater)
-    (let* ( ($tv_unanswered (get_predicate_truth_value "has_unanswered_question"))
-            ($tv_changes (get_predicate_truth_value "has_dramatic_changes"))
+    (let* ( ($tv_unanswered (get_predicate_truth_value has_unanswered_question))
+            ($tv_changes (get_predicate_truth_value has_dramatic_changes))
             ($mean_unanswered (get_truth_value_mean $tv_unanswered))
             ($mean_changes (get_truth_value_mean $tv_changes))
             ($random (random-float 0 1))
@@ -52,7 +52,7 @@
                 )
              )
             )
-         ($goal_mean (get_latest_predicate_truth_value_mean "CertaintyDemandGoal"))
+         ($goal_mean (get_latest_predicate_truth_value_mean CertaintyDemandGoal))
          )
 
          ; Return certainty level
