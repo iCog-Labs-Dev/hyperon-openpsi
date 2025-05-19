@@ -66,11 +66,11 @@
 
 (= (CompetenceDemandUpdater)
     (let* ( ($plan_done_at_time_link_list 
-                (collapse (match $self (find_at_time_link actionDone) $action_done)) 
+                (collapse (match $self (find_at_time_link "actionDone") $action_done)) 
             )
 
             ($plan_failed_at_time_link_list
-                (collapse (match $self (find_at_time_link actionFailed) $action_failed)) 
+                (collapse (match $self (find_at_time_link "actionFailed") $action_failed)) 
             )
 
             ($plan_done_number (size-atom $plan_done_at_time_link_list) )

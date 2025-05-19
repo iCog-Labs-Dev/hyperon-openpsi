@@ -7,12 +7,12 @@
            ($tv (get_latest_predicate_truth_value energy))
            ($mean (TVMean $tv))
          )
-         (assertEqual $mean (get_latest_predicate_truth_value_mean energy)))
+         (assertEqual $mean (EnergyDemandUpdater)))
 )
 
 !(TestWaterDemand
    (let* (
-           ($thirst_mean (get_latest_predicate_truth_value_mean "thirst"))
+           ($thirst_mean (get_latest_predicate_truth_value_mean thirst))
            ($expected (- 1 $thirst_mean))
          )
          (assertEqual $expected (WaterDemandUpdater)))
@@ -20,12 +20,10 @@
 
 !(TestAffiliationDemand
    (let* (
-           ($eval_unanswered (get_evaluation_link "has_unanswered_question"))
-           ($eval_changes (get_evaluation_link "has_dramatic_changes"))
-           ($tv_unanswered (get-tv $eval_unanswered))
-           ($tv_changes (get-tv $eval_changes))
-           ($mean_unanswered (TVMean $tv_unanswered))
-           ($mean_changes (TVMean $tv_changes))
+           ($tv_unanswered (get_predicate_truth_value "has_unanswered_question"))
+           ($tv_changes (get_predicate_truth_value "has_dramatic_changes"))
+           ($mean_unanswered (get_truth_value_mean $tv_unanswered));
+           ($mean_changes (get_truth_value_mean $tv_changes))
            ($random (random-float 0 1))
            ($expected (- (+ 0.75 (* $random 0.25)) (+ (* 0.4 $mean_unanswered) (* 0.35 $mean_changes))))
          )
@@ -47,8 +45,8 @@
 
 !(TestCompetenceDemand
    (let* (
-           ($done_list (find_at_time_link actionDone))
-           ($failed_list (find_at_time_link actionFailed))
+           ($done_list (find_at_time_link "actionDone"))
+           ($failed_list (find_at_time_link "actionFailed"))
            ($done_num (+ (size-atom $done_list) (+(* (random-float 0 1) 2) 3.0123)))
            ($failed_num (+ (size-atom $failed_list) (+(* (random-float 0 1) 1) 0.0123)))
            ($expected (/ $done_num (+ $done_num (pow-math $failed_num 1.5))))

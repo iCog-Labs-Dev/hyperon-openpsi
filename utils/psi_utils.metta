@@ -133,7 +133,7 @@
 ;helper function
 (= (get_evaluation_link $predicate_name)
    (let* (
-           ($evaluation_link_list (collapse (match &self (Evaluation (Predicate $predicate_name) $args) (Evaluation (Predicate $predicate_name) $args))))
+           ($evaluation_link_list 0.2)
          )
          (if (== (size-atom $evaluation_link_list) 1)
              (car-atom $evaluation_link_list)
@@ -174,7 +174,7 @@
          )
          (if (== $at_time_list ())
              ()
-             (fold1-atom (cdr-atom $at_time_list) (car-atom $at_time_list) $max $current (if (> (index-atom $current 1) (index-atom $max 1)) $current $max))
+             (foldl-atom (cdr-atom $at_time_list) (car-atom $at_time_list) $max $current (if (> (index-atom $current 1) (index-atom $max 1)) $current $max))
          )
    )
 )
@@ -195,7 +195,7 @@
 )
 
 (= (find_at_time_link $predicate_name)
-   (collapse (match &self (AtTime $time (Evaluation (Predicate $predicate_name) $args)) (AtTime $time (Evaluation (Predicate $predicate_name) $args))))
+   (collapse (match &self ((Evaluation (Predicate $predicate_name)) $args)))
 )
 
 (= (get_truth_value_mean $tv)
