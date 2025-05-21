@@ -1,8 +1,6 @@
 !(register-module!  ../../hyperon-openpsi)
 !(import! &self hyperon-openpsi:utils:psi_utils)
-
-!(import! &self utils:psi-utils)
-!(import! &self demand-updater)
+!(import! &self hyperon-openpsi:main:demand-updater)
 
 !(TestEnergyDemand
    (let* (
