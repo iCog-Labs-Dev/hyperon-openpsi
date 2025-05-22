@@ -1,4 +1,15 @@
 ;!(bind! uniRand (py-atom numpy.random.uniform))
+; Fuzzy logic function: fuzzy_equal(x, t, a) = 1 / (1 + a * (x - t)^2)
+
+; Fuzzy logic function: fuzzy_new(ti, ts) = 2 / (1 + exp(0.002 * (ts - ti)))
+(= (fuzzy_new $ti $ts)
+   (/ 2 (+ 1 (pow-math 2.71828 (* 0.002 (- $ts $ti))))))
+
+; Fuzzy logic function: fuzzy_near(di, dmax) = 1 / (1 + 0.00015 * (di - dmax))
+(= (fuzzy_near $di $dmax)
+   (/ 1 (+ 1 (* 0.00015 (- $di $dmax)))))
+
+
 (= (fuzzy_equal $x $t $a)
    ( / 1 (+ 1 (* $a (* (- $x $t) (- $x $t)))))
 )
@@ -28,11 +39,7 @@
         1
     )
 )
-(= (fuzzy_new $ti $ts)
-    (/ 2
-    ( + 1 (power-mat 2.71828 (* 0.0002 (- $ts $ti)) ) )
-    )
-)
+
 
 ;;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ;; The code below is borrowed from the hyperon-pln's implementation
@@ -190,7 +197,7 @@
            ($evaluation_link (get_evaluation_link $predicate_name))
          )
          (if (== $evaluation_link ())
-             (STV (random-float 0 1) (random-float 0 1))
+             (STV ((py-dot np-rnd rand)) ((py-dot np-rnd rand)))
              (get-tv $evaluation_link)
          )
    )
@@ -200,16 +207,6 @@
    (get_truth_value_mean (get_predicate_truth_value $predicate_name))
 )
 
-(= (set_predicate_truth_value $predicate_name $truth_value)
-   (let* (
-           ($evaluation_link (get_evaluation_link $predicate_name))
-         )
-         (if (== $evaluation_link ())
-             ()
-             (set-tv! $evaluation_link $truth_value)
-         )
-   )
-)
 
 (= (get_latest_at_time_link $predicate_name)
    (let* (
@@ -227,7 +224,7 @@
            ($latest_at_time_link (get_latest_at_time_link $predicate_name))
          )
          (if (== $latest_at_time_link ())
-             (STV (random-float 0 1) (random-float 0 1))
+             (STV ((py-dot np-rnd rand)) ((py-dot np-rnd rand)))
              (get-tv $latest_at_time_link)
          )
    )
