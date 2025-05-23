@@ -48,9 +48,6 @@
               (+ $friend_num 1))))
 )
 
-; Exponential function approximation
-(: exp-math (-> Number Number))
-(= (exp-math $x) (pow-math 2.71828 $x))
 
 ; Main demand updater function
 (: demand_updater (-> String Number Number Number Number Number (List Number) Number (List Number) Number Number))
