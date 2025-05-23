@@ -39,7 +39,6 @@
 !(+ (foldl-atom (1 2 3 4) 0 $acc $x (+ $acc (fuzzy_near $x 4000)))
               0.2)
 ; Calculate affiliation demand level
-(: calc_affiliation (-> (List Number) Number Number))
 (= (calc_affiliation $di_list $dmax)
    (let*( $friend_num (size-atom $di_list)
          ($h (foldl-atom $di_list 0 $acc $x (+ $acc (fuzzy_near $x $dmax))))
