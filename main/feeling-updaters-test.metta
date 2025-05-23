@@ -1,6 +1,6 @@
 !(register-module!  ../../hyperon-openpsi)
-!(register-module! ../utilities-module)
-!(import! &self utilities-module:utils)
+;!(register-module! ../utilities-module)
+;(import! &self utilities-module:utils)
 !(import! &self hyperon-openpsi:utils:psi_utils)
 !(import! &self hyperon-openpsi:main:feeling-updaters)
 
