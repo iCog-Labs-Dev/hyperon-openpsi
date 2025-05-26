@@ -17,7 +17,7 @@
      )
 )
 
-(: addRuleLink (-> Symbol Goal Expression Expression))
+;(: addRuleLink (-> Symbol Goal Expression Expression))
 (= (addRuleLink $handle $goal $andLink)
    (let*
      (
@@ -43,7 +43,7 @@
    ( let $res (collapse (get-type-space $space $atom)) (not (== (%Undefined%) $res)) )
 )
 
-(: addRule (-> Symbol Expression Action Symbol Goal Expression))
+;(: addRule (-> Symbol Expression Action Symbol Goal Expression))
 (= (addRule $ruleHandle $context $action $goal $tv)
     (let* (
             ($andLink (addAndLink $context $action))
@@ -114,10 +114,10 @@
 
 (= (getRuleType $id $space) (collapse (get-type-space $space $id)))
 
-(: getTV (-> Symbol Expression))
-(= (getTV $id) 
+(: getTV (-> Symbol Grounded Expression))
+(= (getTV $id $space) 
    (
-    case (getRuleType $id &self)
+    case (getRuleType $id $space)
     (
       (((TTV $timestamp $stv) $link) (TTV $timestamp $stv))
       (($link (TTV $timestamp $stv)) (TTV $timestamp $stv))
@@ -128,15 +128,15 @@
 
 
 ;(: x (Goal $value $dgv))
-(: addGoalHelper (-> Symbol Number Number Atom))
-(= (addGoalHelper $name $value $dgv)
+(: addGoalHelper (-> Symbol Number Number Grounded Atom))
+(= (addGoalHelper $name $value $dgv $space)
    (if (and (isGvValid $value) (isGvValid $dgv)) 
-      (if (not (existsIn &self $name))
+      (if (goalExists $name $space)
+          (Goal With Id $name Already Exists)
           (let () 
-              (add-atom &self (: $name (Goal $value $dgv))) 
+              (add-atom $space (Goal $name $value $dgv)) 
               $name
           )
-          (Goal With Id $name Already Exists)
         )
       (Invalid goal/dgv Value) 
     )
@@ -150,34 +150,31 @@
 ;This function accepts an optional third argument,
 ;dgv(desiredGoalValue), if () is passed then a default value of 1.0 is used.
 ;Returns the symbol representing the added goal.
-(: addGoal (-> Symbol Number Atom Expression))
-(= (addGoal $name $value $dgv)
+(: addGoal (-> Symbol Number Atom Grounded Expression))
+(= (addGoal $name $value $dgv $space)
    (if (== () $dgv) 
-      (addGoalHelper $name $value 1.0) 
-      (addGoalHelper $name $value $dgv)
+      (addGoalHelper $name $value 1.0 $space) 
+      (addGoalHelper $name $value $dgv $space)
     )
    )
 
-(: setGv (-> Symbol Number (->)))
-(= (setGv $goal $value)
-   (if (not (existsIn &self $goal))
+(: setGv (-> Symbol Number Grounded (->)))
+(= (setGv $goal $value $space)
+   (if (goalExists $goal $space)
+          (match $space (Goal $goal $oldGv $oldDgv) (update-atom $space (Goal $goal $oldGv $oldDgv) (Goal $goal $value $oldDgv)))
           (Invalid Goal Id)
-          (let (Goal $oldGv $oldDgv) (get-type $goal) 
-              (update-atom &self (: $goal (Goal $oldGv $oldDgv)) (: $goal (Goal $value $oldDgv)))
-              )
     )
    )
 
-(: setDgv (-> Symbol Number (->)))
-(= (setDgv $goal $value)
-   (if (not (existsIn &self $goal))
+(: setDgv (-> Symbol Number Grounded (->)))
+(= (setDgv $goal $value $space)
+   (if (goalExists $goal $space)
+          (match $space (Goal $goal $oldGv $oldDgv) (update-atom $space (Goal $goal $oldGv $oldDgv) (Goal $goal $oldGv $value))) 
           (Invalid Goal Id)
-          (let (Goal $oldGv $oldDgv) (get-type $goal) 
-              (update-atom &self (: $goal (Goal $oldGv $oldDgv)) (: $goal (Goal $oldGv $value)))
-              )
     )
    )
 
+(= (goalExists $goal $space) (not (== (collapse (match $space (Goal $goal $value $dgv) $goal)) ())))
 
 ;For each AndLink, get all ImplicationLink atoms pointing to it.
 ;Filter these to keep only valid PSI rules using the isRule predicate function.
@@ -270,10 +267,15 @@
 
 
 
-(: goal-value (-> Symbol Number))
-(= (goal-value $goal)
-    (let (Goal $value $dgv) (get-type $goal) $value)
+(: goal-value (-> Symbol Grounded Number))
+(= (goal-value $goal $space)
+    (match $space (Goal $goal $value $dgv) $value)
 )
+
+(: desired-goal-value (-> Symbol Grounded Number))
+(= (desired-goal-value $goal $space)
+   (match $space (Goal $goal $value $dgv) $dgv)
+   )
 
 
 
@@ -302,6 +304,7 @@
 (= (isSatisfiable $rule $satisfiableChecker)
     (== (STV 1 1)  ($satisfiableChecker $rule))
 )
+
 ;; (= (checkSatisfiability))
 ;; !(foldl * 1 (1 2 3 4 5))
 ;; !(foldl min 1 (1 2 3 4 5))
