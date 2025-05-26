@@ -1,5 +1,4 @@
 !(register-module!  ../../hyperon-openpsi)
-!(import! &self hyperon-openpsi)
 !(import! &self hyperon-openpsi:main:demand-updater)
 !(import! &self hyperon-openpsi:utils:psi-utils)
 
@@ -21,7 +20,8 @@
 
 ; Test affiliation demand 
 (= (test_affiliation) (demand_updater affiliation 0 10 20 0.9 0.1 () 0 (50 100 150) 200))
-!(assertEqual (test_affiliation) (new-state (affiliation (calc_affiliation (50 100 150) 200) 9 18)))
+!(calc_affiliation (50 100 150) 200)
 
+!(assertEqual (test_affiliation) (new-state (affiliation (calc_affiliation (50 100 150) 200) 9 18)))
 (= (test_hunger_low)  (demand_updater hunger 5 10 20 0.9 0.1 () 0 () 0) )
 !(assertEqual  (test_hunger_low) (new-state (hunger (fuzzy_equal 5 10 150) 9 18)))
