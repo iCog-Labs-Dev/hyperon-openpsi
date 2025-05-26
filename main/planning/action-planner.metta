@@ -94,12 +94,7 @@
 (= (allTested $actions $tested)
    (if (== $actions ())
      $tested
-     (let ($head $tail) (decons-atom $actions)
-       (if (isMember $head $tested)
-         (allTested $tail $tested)
-         (allTested $tail (cons-atom $head $tested))
-         )
-      )
+     (let $res (union-atom $actions $tested) (unique-atom $res))
      )
    )
 
