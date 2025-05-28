@@ -132,29 +132,3 @@
 !(FuzzyLessThan (fuzzy_less_than 2.0 3.0 3))
 !(FuzzyGreaterThan (fuzzy_greater_than 2.0 3.0 3))
 ;; Test TVMean function with different truth value types
-!(BooleanTrue (TVMean (Bl True)))                 ;; Should return 1.0
-!(BooleanFalse (TVMean (Bl False)))              ;; Should return 0.0
-!(ProbabilityValue (TVMean (Pr 0.75)))           ;; Should return 0.75
-
-;; Test TVMean function with STV (Simple Truth Value)
-;; STV parameters are (strength, confidence)
-!(STVLowStrength (TVMean (STV 0.1 0.9)))         ;; Should return approximately 0.14
-!(STVMedStrength (TVMean (STV 0.5 0.5)))         ;; Should return approximately 0.5
-!(STVHighStrength (TVMean (STV 0.8 0.7)))        ;; Should return approximately 0.77
-!(STVZeroStrength (TVMean (STV 0.0 1.0)))        ;; Should return approximately 0.0
-!(STVFullStrength (TVMean (STV 1.0 1.0)))        ;; Should return approximately 1.0
-
-;; Compare TVMean with TVMode for STV
-!(STVMode (TVMode (STV 0.7 0.8)))                ;; Returns 0.7 (the strength parameter)
-!(STVMean (TVMean (STV 0.7 0.8)))                ;; Returns a value that considers both strength and confidence
-
-;; Test with extreme values
-!(STVZeroConfidence1 (TVMean (STV 0.0 0.0)))     ;; Very low confidence case
-!(STVZeroConfidence2 (TVMean (STV 1.0 0.0)))     ;; Very low confidence case
-!(STVZeroConfidence3 (TVMean (STV 0.5 0.0)))     ;; Very low confidence case
-
-
-
-
-;; ~~~[ TODO ]~~~
-;; 
