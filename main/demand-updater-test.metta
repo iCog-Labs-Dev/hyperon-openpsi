@@ -1,6 +1,6 @@
 !(register-module!  ../../hyperon-openpsi)
 !(import! &self hyperon-openpsi:main:demand-updater)
-!(import! &self hyperon-openpsi:utils:psi-utils)
+!(import! &self hyperon-openpsi:utils:psi_utils)
 
 
 ;  substitute all 0.2 by (random-float 0 1)
