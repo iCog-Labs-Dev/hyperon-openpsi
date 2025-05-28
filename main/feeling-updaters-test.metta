@@ -11,4 +11,3 @@
 !(assertEqual (angerFeelingUpdater) 0.22953216374269003)
 !(assertEqual (hateFeelingUpdater) 0.16823865409076727)
 !(assertEqual (gratitudeFeelingUpdater) 0.2575757575757577)
-

@@ -1,4 +1,15 @@
 !(bind! uniRand (py-atom numpy.random.uniform))
+; Fuzzy logic function: fuzzy_equal(x, t, a) = 1 / (1 + a * (x - t)^2)
+
+; Fuzzy logic function: fuzzy_new(ti, ts) = 2 / (1 + exp(0.002 * (ts - ti)))
+(= (fuzzy_new $ti $ts)
+   (/ 2 (+ 1 (pow-math 2.71828 (* 0.002 (- $ts $ti))))))
+
+; Fuzzy logic function: fuzzy_near(di, dmax) = 1 / (1 + 0.00015 * (di - dmax))
+(= (fuzzy_near $di $dmax)
+   (/ 1 (+ 1 (* 0.00015 (- $di $dmax)))))
+
+
 (= (fuzzy_equal $x $t $a)
    ( / 1 (+ 1 (* $a (* (- $x $t) (- $x $t)))))
 )
@@ -71,6 +82,9 @@
 (: Bl (-> Bool TruthValue))
 (: Pr (-> Number TruthValue))
 (: STV (-> Number Number TruthValue))
+
+
+
 
 ;; Convert count to confidence
 (: count->confidence (-> Number Number))
@@ -153,8 +167,3 @@
 !(STVZeroConfidence2 (TVMean (STV 1.0 0.0)))     ;; Very low confidence case
 !(STVZeroConfidence3 (TVMean (STV 0.5 0.0)))     ;; Very low confidence case
 
-
-
-
-;; ~~~[ TODO ]~~~
-;; 
