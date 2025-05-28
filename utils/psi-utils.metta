@@ -1,4 +1,4 @@
-;!(bind! uniRand (py-atom numpy.random.uniform))
+!(bind! uniRand (py-atom numpy.random.uniform))
 ; Fuzzy logic function: fuzzy_equal(x, t, a) = 1 / (1 + a * (x - t)^2)
 
 ; Fuzzy logic function: fuzzy_new(ti, ts) = 2 / (1 + exp(0.002 * (ts - ti)))

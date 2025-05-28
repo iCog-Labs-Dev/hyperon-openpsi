@@ -1,3 +1,4 @@
+;  substitute all 0.2 by (random-float 0 1)
 
 ; Demand satisfaction: Sd(L, min_l, max_l, a)
 (: satisfaction (-> Number Number Number Number Number))

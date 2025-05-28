@@ -1,6 +1,6 @@
 !(register-module!  ../../hyperon-openpsi)
-;!(register-module! ../utilities-module)
-;(import! &self utilities-module:utils)
+!(register-module! ../utilities-module)
+!(import! &self utilities-module:utils)
 !(import! &self hyperon-openpsi:utils:psi_utils)
 !(import! &self hyperon-openpsi:main:feeling-updaters)
 
@@ -11,4 +11,3 @@
 !(assertEqual (angerFeelingUpdater) 0.22953216374269003)
 !(assertEqual (hateFeelingUpdater) 0.16823865409076727)
 !(assertEqual (gratitudeFeelingUpdater) 0.2575757575757577)
-

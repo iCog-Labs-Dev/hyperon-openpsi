@@ -2,6 +2,9 @@
 !(import! &self hyperon-openpsi:main:demand-updater)
 !(import! &self hyperon-openpsi:utils:psi-utils)
 
+
+;  substitute all 0.2 by (random-float 0 1)
+
 ; Test physiological demand (e.g., hunger) when L > max_l 
 (= (test_hunger_high) (demand_updater hunger 25 10 20 0.9 0.1 () 0 () 0)) 
 !(assertEqual (test_hunger_high) (new-state (hunger 0.92 9.1 18.1)))
