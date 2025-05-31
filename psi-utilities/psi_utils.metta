@@ -5,12 +5,14 @@
 
 
 (= (fuzzy_within $x $min_val $max_val $a)
-    (if (< $x $max_val)
-                (fuzzy_equal $x $min_val $a)
-                (if (> $x $max_val)
-                        (+ 0.999 (* uniRand 0.001))
-                        (+ 0.99 (* uniRand 0.01))
+    (if (< $x $min_val)
+                (fuzzy_equal $x $min_val $a) ; x < min value
+                (let $rand (uniRand) 
+                    (if (> $x $max_val) 
+                        (+ 0.999 (* $rand 0.001)) ; x > max value
+                        (+ 0.99 (* $rand 0.01)) ; min value < x < max value
 
+                    )
                 )
         )
 )
@@ -129,6 +131,7 @@
 !(UniformRandom : uniRand)
 !(FuzzyEqual (fuzzy_equal 4 2.0 3))
 !(FuzzyWithin (fuzzy_within 2.0 1.0 3.0 3))
+!(FuzzyWithin (fuzzy_within 4.0 1.0 3.0 3))
+!(FuzzyWithin (fuzzy_within 0.5 1.0 3.0 3))
 !(FuzzyLessThan (fuzzy_less_than 2.0 3.0 3))
-
 !(FuzzyGreaterThan (fuzzy_greater_than 2.0 3.0 3))
