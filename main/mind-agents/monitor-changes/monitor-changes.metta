@@ -127,3 +127,28 @@
        )
    )
 )
+
+
+; Record the changes in the atomspace
+
+(= (record-changes-tv $space $changes-tv)
+  (if (== $changes-tv ())()
+    (let* 
+      (
+        (($head $tail) (decons-atom $changes-tv))
+        ($_ (add-atom $space (LIST_LINK $head)))
+        ($_ (add-atom $space (ReferenceLink ((Predicate change-with-tv) (LIST_LINK $head)))))
+      )
+        (record-changes-tv $space $tail)
+    )
+  )
+)
+
+(=(record-changes-arg $space $changes-arg)
+  (if (== () $changes-arg)()
+    (let $_ (add-atom $space (LIST_LINK $changes-arg))
+      (add-atom $space (ReferenceLink ((Predicate change-with-arg) (LIST_LINK $changes-arg))))
+    )
+  )
+)
+

@@ -30,3 +30,11 @@
 
 !(removePrevChanges &self REFERENCE_LINK) ;running this function should remove the REFERENCE_LINK added.
 !(assertEqual (match &self (REFERENCE_LINK $x) $x) (empty))
+
+
+
+!(bind! &z (new-space))
+!(record-changes-tv &z ((L1 A) (L2 A)))
+!(record-changes-arg &z (L1 L2 ))
+!(assertEqual (collapse (get-atoms &z))  
+((LIST_LINK (L1 A)) (LIST_LINK (L1 L2)) (LIST_LINK (L2 A)) (ReferenceLink ((Predicate change-with-tv) (LIST_LINK (L1 A)))) (ReferenceLink ((Predicate change-with-tv) (LIST_LINK (L2 A)))) (ReferenceLink ((Predicate change-with-arg) (LIST_LINK (L1 L2))))))
