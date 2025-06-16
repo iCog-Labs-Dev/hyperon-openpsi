@@ -6,13 +6,13 @@
 
 (= (PsiRules) &psiRules)
 
-(: addAndLink (-> Expression Action Expression))
-(= (addAndLink $context $action)
+(: addAndLink (->Grounded Expression Action Expression))
+(= (addAndLink $space $context $action)
    (let $res 
-        (collapse (match &self (AND_LINK ($context $action)) (AND_LINK ($context $action))))
+        (collapse (match $space (AND_LINK ($context $action)) (AND_LINK ($context $action))))
         (if (not (== $res ()))
           (car-atom $res)
-          (let () (add-atom &self (AND_LINK ($context $action))) (AND_LINK ($context $action)))
+          (let () (add-atom $space (AND_LINK ($context $action))) (AND_LINK ($context $action)))
         )
      )
 )
@@ -46,8 +46,8 @@
 (: addRule (-> Grounded Symbol Expression Expression Symbol Expression Expression))
 (= (addRule $space $ruleHandle $context $action $goal $tv)
     (let* (
-            ($andLink (addAndLink $context $action))
-            ($_ (addRuleLink $space $handle $goal $andLink))
+            ($andLink (addAndLink $space $context $action))
+            ($_ (addRuleLink $space $ruleHandle $goal $andLink))
             ($exists (existsIn &psiRules $ruleHandle))
           )
           (if $exists 

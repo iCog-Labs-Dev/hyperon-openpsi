@@ -5,11 +5,11 @@
 !(import! &self hyperon-openpsi:main:types)
 !(import! &self utilities-module:utils)
 
-!(assertEqual (addAndLink (a b) c) (AND_LINK ((a b) c)))
+!(assertEqual &self (addAndLink (a b) c) (AND_LINK ((a b) c)))
 
 ;add the same AND_LINK the second time, it should not be added again. It should 
 ;return the Already existing AND_LINK.
-!(assertEqual (addAndLink (a b) c) (AND_LINK ((a b) c)))
+!(assertEqual &self (addAndLink (a b) c) (AND_LINK ((a b) c)))
 
 ;if rule is added with the addRule function then the &psiRules index knows 
 ;about it
