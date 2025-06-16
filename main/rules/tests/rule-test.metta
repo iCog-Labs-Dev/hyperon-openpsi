@@ -5,22 +5,23 @@
 !(import! &self hyperon-openpsi:main:types)
 !(import! &self utilities-module:utils)
 
-!(assertEqual (addAndLink (a b) c) (AND_LINK ((a b) c)))
+!(assertEqual &self (addAndLink (a b) c) (AND_LINK ((a b) c)))
 
 ;add the same AND_LINK the second time, it should not be added again. It should 
 ;return the Already existing AND_LINK.
-!(assertEqual (addAndLink (a b) c) (AND_LINK ((a b) c)))
+!(assertEqual &self (addAndLink (a b) c) (AND_LINK ((a b) c)))
 
 ;if rule is added with the addRule function then the &psiRules index knows 
 ;about it
 (: z Goal)
 (: y Action)
 
-!(addRule x (x1 x2) y z (TTV 1 (STV 11.0 11.0)))
+!(addRule &self x (x1 x2) y z (TTV 1 (STV 11.0 11.0)))
 !(assertEqual (getContext x) (x1 x2))
 !(assertEqual (getAction x) y)
 !(assertEqual (getGoal x) z)
 !(assertEqual (getTV x &self) (TTV 1 (STV 11.0 11.0)))
+!(assertEqual (getImplication x &self) ((IMPLICATION_LINK (AND_LINK ((x1 x2) y)) z)))
 
 !(addRule x (x1 x2) y z (TTV 1 (STV 11.0 11.0)))
 
