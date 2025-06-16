@@ -17,20 +17,20 @@
      )
 )
 
-;(: addRuleLink (-> Symbol Goal Expression Expression))
-(= (addRuleLink $handle $goal $andLink)
+;(: addRuleLink (-> Grounded Symbol Goal Expression Expression))
+(= (addRuleLink $space $handle $goal $andLink)
    (let*
      (
-      ($rule (collapse (get-type $handle)))
+      ($rule (collapse (get-type-space $space $handle)))
       )
       (if (not (== $rule (%Undefined%))) 
             () 
             (
               let* (
                     ($newRule (: $handle (IMPLICATION_LINK $andLink $goal)))
-                    ($_ (add-atom &self $newRule))
-                    ($_ (add-atom &self (: $handle (TTV 0 (STV 0.0 0.0)))))
-                    ($_ (add-atom &self (isExecuted $handle (DEFAULT_TV)))) ;TODO: define DEFAULT_TV
+                    ($_ (add-atom $space $newRule))
+                    ($_ (add-atom $space (: $handle (TTV 0 (STV 0.0 0.0)))))
+                    ($_ (add-atom $space (isExecuted $handle (DEFAULT_TV))))
                   )
                   ()
             )
@@ -47,7 +47,7 @@
 (= (addRule $space $ruleHandle $context $action $goal $tv)
     (let* (
             ($andLink (addAndLink $context $action))
-            ($_ (addRuleLink $ruleHandle $goal $andLink))
+            ($_ (addRuleLink $space $handle $goal $andLink))
             ($exists (existsIn &psiRules $ruleHandle))
           )
           (if $exists 
