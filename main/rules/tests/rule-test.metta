@@ -21,6 +21,7 @@
 !(assertEqual (getAction x) y)
 !(assertEqual (getGoal x) z)
 !(assertEqual (getTV x &self) (TTV 1 (STV 11.0 11.0)))
+!(assertEqual (getImplication x &self) (IMPLICATION_LINK (AND_LINK ((x1 x2) y)) z) )
 
 !(addRule x (x1 x2) y z (TTV 1 (STV 11.0 11.0)))
 

@@ -111,6 +111,26 @@
     )
 )
 
+(: getImplication (-> Symbol Grounded Expression))
+(= (getImplication $id $space) 
+   (
+    case (getRuleType $id $space)
+    (
+      ; Case where TTV is first and Implication is second
+      (((TTV $timestamp $stv) (IMPLICATION_LINK (AND_LINK ($context $action)) $goal)) 
+        (IMPLICATION_LINK (AND_LINK ($context $action)) $goal))
+        
+      ; Case where Implication is first and TTV is second
+      (((IMPLICATION_LINK (AND_LINK ($context $action)) $goal) (TTV $timestamp $stv)) 
+        (IMPLICATION_LINK (AND_LINK ($context $action)) $goal))
+        
+      ; Case where only the Implication exists without TTV
+      (((IMPLICATION_LINK (AND_LINK ($context $action)) $goal)) 
+        (IMPLICATION_LINK (AND_LINK ($context $action)) $goal)
+        
+      ($_ %Undefined%)
+   )
+)))
 
 (= (getRuleType $id $space) (collapse (get-type-space $space $id)))
 
