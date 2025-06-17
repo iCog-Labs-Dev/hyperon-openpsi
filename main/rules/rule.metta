@@ -127,6 +127,19 @@
   )
 )
 
+(: getImplication  (-> Symbol Grounded Expression))
+(= (getImplication $rule $space)
+   (
+    case (getRuleType $rule $space) 
+      (
+        (((TTV $timestamp $stv) (IMPLICATION_LINK (AND_LINK ($context $action)) $goal)) (IMPLICATION (AND_LINK ($context $action)) $goal))
+        (((IMPLICATION_LINK (AND_LINK ($context $action)) $goal) (TTV $timestamp $stv)) (IMPLICATION (AND_LINK ($context $action)) $goal))
+        (((IMPLICATION_LINK (AND_LINK ($context $action)) $goal)) (IMPLICATION (AND_LINK ($context $action)) $goal) )
+        ($_ %Undefined%)
+      )
+
+    )
+)
 
 ;(: x (Goal $value $dgv))
 (: addGoalHelper (-> Symbol Number Number Grounded Atom))
