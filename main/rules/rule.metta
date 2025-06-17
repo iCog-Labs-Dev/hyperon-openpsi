@@ -1,10 +1,20 @@
 !(bind! &psiRules (new-space))
 !(bind! &categoryIndex (new-space))
-
+(: update-atom (-> Grounded Atom Atom (->)))
+(= (update-atom $space $oatom $natom) (let $_ (remove-atom $space $oatom) (add-atom $space $natom)))
 (= (FALSE_TV) (False (STV 0.0 1.0))) ;False, with Maximum confidence
 (= (TRUE_TV) (True (STV 1.0 1.0))) ;True, with Maximum confidence
 
 (= (PsiRules) &psiRules)
+(: existsIn (-> Grounded Atom Bool))
+(= (existsIn $space $atom)
+   (not (== (collapse (match $space $atom True)) ()))
+)
+(: isMember (-> $a $aa Bool))
+(= (isMember $x $list)
+    (not (== (collapse (intersection (superpose ($x)) (superpose $list))) ()))
+)
+
 
 (: addAndLink (-> Expression Action Expression))
 (= (addAndLink $context $action)
@@ -157,6 +167,7 @@
       (addGoalHelper $name $value $dgv $space)
     )
    )
+(= (goalExists $goal $space) (not (== (collapse (match $space (Goal $goal $value $dgv) $goal)) ())))
 
 (: setGv (-> Symbol Number Grounded (->)))
 (= (setGv $goal $value $space)
@@ -174,7 +185,6 @@
     )
    )
 
-(= (goalExists $goal $space) (not (== (collapse (match $space (Goal $goal $value $dgv) $goal)) ())))
 
 ;For each AndLink, get all ImplicationLink atoms pointing to it.
 ;Filter these to keep only valid PSI rules using the isRule predicate function.

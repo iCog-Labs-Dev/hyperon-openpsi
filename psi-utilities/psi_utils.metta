@@ -16,6 +16,18 @@
                 )
         )
 )
+; changed fuzzy_within
+(= (fuzzy_within $x $min_val $max_val $a)
+   (collapse
+      (case $x
+         (
+           ((< $min_val) (fuzzy_equal $x $min_val $a))
+           ((and (<= $min_val) (<= $max_val)) (let $rand (uniRand) (+ 0.99 (* $rand 0.01))))
+           ((> $max_val) (let $rand (uniRand) (+ 0.999 (* $rand 0.001))))
+         ))
+)
+)
+
 
 (= (fuzzy_less_than $x $t $a)
     (if (> $x $t)
