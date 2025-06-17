@@ -22,10 +22,9 @@
 !(assertEqual (getAction  &r x) y)
 !(assertEqual (getGoal  &r x) z)
 !(assertEqual (getTV x &r) (TTV 1 (STV 1.0 1.0)))
-
+!(assertEqual (getImplication x &r) (IMPLICATION (AND_LINK ((x1 x2) y)) z))
 
 !(addRule  &r w (x3 x2) y z (TTV 1 (STV 1.0 1.0)))
-
 ; ;if rule is not added with the addRule function then the &psiRules index does not know
 ; about it
 ; but we can get context, action and goal of the rule
@@ -36,6 +35,7 @@
 !(assertEqual (getContext &r rule1) (c1 c2))
 !(assertEqual (getGoal &r rule1) goal)
 !(assertEqual (getAction &r rule1) action)
+!(assertEqual (getImplication rule1 &r) (IMPLICATION (AND_LINK ((c1 c2) action)) goal))
 
 
 !(assertEqual (existsIn &psiRules rule1) False)
