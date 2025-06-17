@@ -10,48 +10,54 @@
 (: neutral Concept)
 (: pinged Concept)
 (: ball Concept)
-(: state-var Atom)  ; Use Atom instead of Variable to avoid type issues
+(: state-var Variable)  ; Use Variable for pattern matching
 
 ;; Set initial ball state
 !(add-atom &self (State ball neutral))
 
 ;; Define ping goal
 !(addGoal ping 0.0 1.0 &self)  ; Goal 'ping' with initial value 0.0 and desired value 1.0
-!(setGv ping 0.0 &self)
+!(setGv ping 1.0 &self)        ; Set urge to 1.0 to trigger the action
 
 ;; Define ping action
-(: ping-action (-> Atom))  ; Renamed to avoid confusion with :ping type
+(: ping-action (-> Atom))
 (= (ping-action)
-  (let ()
-    (add-atom &self (State ball pinged))
-    (setGv ping 0.0 &self)
-  )) 
-!(ping-action)  ; Register the ping action
+  (let* (($result (State ball pinged))
+         ($add-result (add-atom &self $result))
+         ($set-ping (setGv ping 0.0 &self)))  ; Reset urge after action
+    (trace! "Just pinged" $result)))  ; Output confirmation
+
 ;; Define ping context
 (: ping-context (-> Expression))
 (= (ping-context)
   (addAndLink
     (State ball state-var)
     (Equal state-var neutral)))
-!(ping-context)
+
 ;; Add ping rule
-!(addRule ping-rule (ping-context) (ping-action) ping (STV 1.0 1.0))  ; Use ping-action as the action
+!(addRule ping-rule (ping-context) (ping-action) ping (STV 1.0 1.0))
 
 ;; Add ping component
 !(addCategory ping-component)
 !(addToCategory ping-rule ping-component)
 
-
 ;; Simulate running the ping component
-(= (run-component )
+(: run-component (-> Symbol Atom))
+(= (run-component $component)
   (let* (($context (ping-context))
-        ($result (collapse (match &self $context $context)))
-      )  ; Explicitly capture match result
-    (if (not (== $result ()))
-        (ping-action)
-        ("No match found")
-    )
-  )
-)
+         ($match-result (collapse (match &self $context $context))))
+    (if (not (== $match-result ()))
+      (ping-action)
+      (trace! "No match found" ()))))
+
+;; Define run-loop with a limited number of iterations
+(: run-loop (-> Number Atom))
+(= (run-loop $iteration)
+  (if (< $iteration 1)  ; Run once for ping
+    (let $result (run-component ping-component)
+      (run-loop (+ $iteration 1)))
+    (trace! "Ping simulation complete" ())))
+
 ;; Start the ping simulation
-!(run-component)
+!(trace! "Starting ping simulation..." ())
+!(run-loop 0)
