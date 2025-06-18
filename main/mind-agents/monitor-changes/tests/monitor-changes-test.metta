@@ -58,6 +58,6 @@
 !(add-reduct &test-space (kb))
 !(add-atom &test-space (tv_delta 0.1)) ;add the minimum threshold value for acceptable tv change
 
-;!(monitor-changes &test-space)
-;!(let $res (match &test-space ((Predicate has-dramatic-change) $tv) $tv) (assertEqual $res (STV 1.0 1.0)))
-;!(let $res (collapse (match &test-space (REFERENCE_LINK $change) $change)) (assertEqual (((Predicate change-with-tv) (LIST_LINK (b b)))) $res))
+!(monitor-changes &test-space)
+!(let $res (match &test-space ((Predicate has-dramatic-change) $tv) $tv) (assertEqual $res (STV 1.0 1.0)))
+!(let $res (collapse (match &test-space (REFERENCE_LINK $change) $change)) (assertEqual (((Predicate change-with-tv) (LIST_LINK (b b)))) $res))
