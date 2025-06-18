@@ -1,8 +1,6 @@
-(= (extractTvFromRule $rule)
-    (let  (: $handle ((TTV $time (STV $bel $conf)) (IMPLICATION_LINK (AND_LINK ($context $action)) $goal))) $rule 
-        (STV $bel $conf)
-    )
-)
+(= (extractTvFromRule $rule $space)
+   (let (TTV $ts $tv) (getTV $rule $space) $tv)
+   )
 
 (: symmetricDifference (-> Expression Expression Expression))
 (= (symmetricDifference $exp1 $exp2)
@@ -19,3 +17,15 @@
 	(let (: $handle ((TTV $time (STV $bel $conf))  (IMPLICATION_LINK (AND_LINK ($context $action)) $goal))) $rule 
 	  	(: $handle ((TTV $time (STV $x $y)) (IMPLICATION_LINK (AND_LINK ($context $action)) $goal))))
 )
+
+(= (extract-timestamp (TimeValue $time-stamp $atom)) $time-stamp)
+
+(= (get-timevals $prev_times) 
+   (collapse (let $x (superpose $prev_times) (extract-timestamp $x)))
+   )
+
+(= (get-previous-times $space) 
+   (collapse (match $space (TimeValue $time-stamp $atom) (TimeValue $time-stamp $atom)))
+  )
+
+

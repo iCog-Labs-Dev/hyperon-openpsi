@@ -1,19 +1,19 @@
 !(bind! rand (py-atom numpy.random.rand))
-(tv_delta 0.1)
 ;A function that takes the latestTime and a list of times
 ;and finds the appropriate position to set previous time pointer.
 ;
 ;returns: a tuple of previous time and latest time.
-(: setPreviousTime (-> Number Expression Expression))
-(= (setPreviousTime $latestTime $times)
+(: setPreviousTime (-> Expression Number))
+(= (setPreviousTime $times)
    (let* 
      (
-      ($min-change (match &self (tv_delta $val) $val))
       ($random-num (rand))
       ($interval (+ 5 (* 5 $random-num)))
-      ($prevTime (setPreviousTime' (sort' $times rvrs) $latestTime $interval)) ;rvrs signals the function to sort the list in reverse order.
+      ($times' (sort $times dec))
+      ($latestTime (car-atom $times'))
+      ($prevTime (setPreviousTime' $times' $latestTime $interval)) 
       )
-     ($prevTime $latestTime)
+     ($prevTime $latestTime) 
      )
    )
 
@@ -34,35 +34,29 @@
      )
    )
 
+(: addPredicatesHelper (-> Grounded Expression))
+(= (addPredicatesHelper $space) 
+  (let* 
+    (
+      ($pred-change-with-tv (Predicate change-with-tv))
+      ($pred-change-with-arg (Predicate change-with-arg))
+      ($pred-has-dramatic-changes (Predicate has-dramatic-change))
+      ($_ (collapse (let $x 
+                        (superpose ($pred-change-with-tv $pred-change-with-arg $pred-has-dramatic-changes))
+                        (addPredicate $x $space)
+                  )
+            )
+          )
+      )
+    ($pred-change-with-tv $pred-change-with-arg $pred-has-dramatic-changes)
+  )
+)
+
 ;a function that removes previous changes with tv and with args from 
 ;a provided space
-(: removePrevChanges (-> Grounded Symbol (->)))
-(= (removePrevChanges $space $type)
-   (let* (
-          ($pred-change-with-tv (Predicate change-with-tv))
-          ($pred-change-with-arg (Predicate change-with-arg))
-          ($pred-has-dramatic-changes (Predicate has-dramatic-change))
-          ($preds (collapse 
-                    (let $x 
-                      (superpose ($pred-change-with-tv $pred-change-with-arg $pred-has-dramatic-changes))
-                      (addPredicate $x $space)
-                    )
-                  )
-                )
-          ($old-changes-with-tv (get-incoming $pred-change-with-tv $space $type))
-          ($old-changes-with-arg (get-incoming $pred-change-with-arg $space $type))
-          ;(() (println! ($old-changes-with-tv $old-changes-with-arg)))
-          ($_ (removePrevChanges' $space $old-changes-with-tv))
-          ($_ (removePrevChanges' $space $old-changes-with-arg))
-          ($_ (update-drmtc-chng-tv $pred-has-dramatic-changes $space (STV 0.0 0.0)))
-        )
-     ()
-    )
-   )
 
-
-(: removePrevChanges' (-> Grounded Symbol (->)))
-(= (removePrevChanges' $space $atoms)
+(: removePrevChanges (-> Grounded Expression (->)))
+(= (removePrevChanges $space $atoms)
    (if (== $atoms ())
      ()
      (let* (
@@ -72,8 +66,8 @@
             )
         (if (== $h ())
           ()
-          (let $_ (let () (remove-atom $space $h) (remove-atom $space (car-atom $list-link))) 
-            (removePrevChanges' $space $t)
+          (let $_ (let () (remove-atom $space $list-link) (remove-atom $space $h)) 
+            (removePrevChanges $space $t)
             )
           )
        )
@@ -96,151 +90,152 @@
      )
    )
 
-;a generic sorting algorithm that is able to sort atoms in either increasing and decreasing order.
-;pass rvrs to sort in decreasing or () for increasing order
-(= (m () $right $cmp) $right)
-(= (m $left () $cmp) $left)
-
-(= (m $left $right $cmp)
-     (let* (
-            (($lh $lt) (decons-atom $left))
-            (($rh $rt) (decons-atom $right))
-            ($res1 (m $lt $right $cmp))
-            ($res2 (m $left $rt $cmp))
-            )
-       (if ($cmp $lh $rh)
-         (cons-atom $lh $res1)
-         (cons-atom $rh $res2)
-         )
-       )
-     )
-
-(= (sort' $list $key)
-   (if (<= (len $list) 1)
-       $list
-       (let* (
-               ($mid (floor-math (/ (len $list) 2)))
-               (($left $right) (splitAt $mid $list))
-               ($cmp (if (== rvrs $key) > <=))
-             )
-             (m (sort' $left $key) (sort' $right $key) $cmp)
-       )
-   )
-)
-
-
 ; Record the changes in the atomspace
-
 (= (record-changes-tv $space $changes-tv)
-  (if (== $changes-tv ())()
+  (if (== $changes-tv ())
+    ()
     (let* 
       (
         (($head $tail) (decons-atom $changes-tv))
         ($_ (add-atom $space (LIST_LINK $head)))
-        ($_ (add-atom $space (ReferenceLink ((Predicate change-with-tv) (LIST_LINK $head)))))
+        ($_ (add-atom $space (REFERENCE_LINK ((Predicate change-with-tv) (LIST_LINK $head)))))
       )
-        (record-changes-tv $space $tail)
+      (record-changes-tv $space $tail)
     )
   )
 )
 
-(=(record-changes-arg $space $changes-arg)
+(= (record-changes-arg $space $changes-arg)
   (if (== () $changes-arg)()
     (let $_ (add-atom $space (LIST_LINK $changes-arg))
-      (add-atom $space (ReferenceLink ((Predicate change-with-arg) (LIST_LINK $changes-arg))))
+      (add-atom $space (REFERENCE_LINK ((Predicate change-with-arg) (LIST_LINK $changes-arg))))
     )
   )
 )
+
 
 !(bind! &newSpace (new-space))
 !(bind! &sngSpace (new-space))
+
 ;; !(import! &self monitorChanges)
 (: NetDifference Type)
 (: netDiff (-> Number Expression NetDifference))
+
 !(get-type (netDiff 7 (a b c))) 
+
 (: compareChanges (-> hyperon::space::DynSpace hyperon::space::DynSpace Expression))
 (= (compareChanges $space1 $space2)
     (let* (
-        ($space_val_1 (collapse (get-atoms $space1)))
-
-        ($space_val_2 (collapse (get-atoms $space2)))
-        ($net (subtraction-atom $space_val_1 $space_val_2))
-    )
+            ($space_val_1 (collapse (get-atoms $space1)))
+            ($space_val_2 (collapse (get-atoms $space2)))
+            ($net (subtraction-atom $space_val_1 $space_val_2))
+          )
         ((size-atom $net) $net)
-        
-
     )
 )
 
 (: compareSpaceToList (-> hyperon::space::DynSpace Expression Expression))
 (= (compareSpaceToList $space $list)
 	(let* (
-		($space_val (collapse (get-atoms $space)))
-		($net (subtraction-atom $space_val $list))
-		)
-		((size-atom $net) $net)))
+          ($space_val (collapse (get-atoms $space)))
+          ($net (subtraction-atom $space_val $list))
+        )
+        ((size-atom $net) $net)
+    )
+  )
+
 ;; One option here could be to wrap the timer function
 ;; But do the logic using the meTTa language. 
-
-(= (getTV (constructor (STV $x $y))) (STV $x $y))
+;(= (getTV (constructor (STV $x $y))) (STV $x $y))
 ;; (: monitorChanges (-> hyperon::space::DynSpace Expression Expression))
 
-(: cogTvMean (-> Expression Number))
-(= (cogTvMean (STV $x $y)) (/ (+ $x $y) 2))
-(: detectChangesHelper (-> Expression Expression Number Expression Expression))
-(= (detectChangesHelper $time $previous_times $delta $accum)
+(: detectChangesHelper (-> Grounded Expression Expression Number Expression Expression))
+(= (detectChangesHelper $space $time $previous_times $delta $accum)
 	(if (== $previous_times ())
-	  	$accum
-		(let* (
-		       (($head $tail) (decons-atom $previous_times))
-		       ($timeTv (extractTvFromRule $time))
-		       ($latestTv (extractTvFromRule $head))
-				($prevTvMean (cogTvMean $timeTv))
-				($latestTvMean (cogTvMean $latestTv))
-				($diff (- $latestTvMean $prevTvMean))
+      $accum
+      (let ($head $tail) (decons-atom $previous_times)
+        (if (== (getImplication $head $space) (getImplication $time $space))
+          (let* (
+                  ($timeTv (extractTvFromRule $time $space))
+                  ($latestTv (extractTvFromRule $head $space))
+                  ($prevTvMean (cogTvMean $timeTv))
+                  ($latestTvMean (cogTvMean $latestTv))
+                  ($diff (- $latestTvMean $prevTvMean))
+                 )
+            (if (<= (abs-math $diff) $delta)
+              (let $accum' (union-atom $accum (($time $head)))
+                (detectChangesHelper $space $time $tail $delta $accum')
+                )	
+              (detectChangesHelper $space  $time $tail $delta $accum)
+            )
+           )
+          (detectChangesHelper $space $time $tail $delta $accum)
+        )
+      )
+    )
+)
 
-		)
-		  (if (< (abs-math $diff) $delta)
-		    (let $accum' (union-atom $accum (($time $head)))
-		      (detectChangesHelper $time $tail $delta $accum')
-		      )	
-		      (detectChangesHelper $time $tail $delta $accum)
-		  )
-	  )))
 ;;The following function is written for checking 
 ;; the state of the atomspace. This is between two consecutive time cycles.
-(: detectChanges (-> Expression Expression Number Expression Expression))
-(= (detectChanges $prev_times $latest_times $delta $accum)
+(: detectChanges (-> Grounded Expression Expression Number Expression Expression))
+(= (detectChanges $space $prev_times $latest_times $delta $accum)
 	(if (or (== $prev_times ()) (== $latest_times ()))
 		$accum
 		(let* (
-		       (($head $tail) (decons-atom $latest_times))
-			($accum' (detectChangesHelper $head $prev_times $delta $accum))
+          (($head $tail) (decons-atom $latest_times))
+          ($accum' (detectChangesHelper $space $head $prev_times $delta $accum))
+        )
+        (detectChanges $space $prev_times $tail $delta $accum')
 		)
-		  (detectChanges $prev_times $tail $delta $accum')
-		)
-		
 	)
 )
 
-
-
-
 ;;This function filps the truth-value of a rule and updates the atomspace.
-(: flipTruthValue (-> hyperon::space::DynSpace Expression Expression))
-(= (flipTruthValue &space $atom)
-   	(let* (
-		($_ (remove-atom $space $atom))
-		($newAtom (changeTruthValue $atom (STV 1 1)))
-
-	)
-	  	(add-atom $space $newAtom)
+(: flipTruthValue (-> hyperon::space::DynSpace Expression (->)))
+(= (flipTruthValue $space $atom)
+   (let* (
+          ($_ (remove-atom $space $atom))
+          ($newAtom (changeTruthValue $atom (STV 1 1)))
+        )
+        (add-atom $space $newAtom)
 	  )
 )
 
-!(detectChangesHelper (constructor (STV 0.3 0.5)) ((constructor (STV 0.3 0.5)) (constructor (STV 0.4 0.6))) 0.5 ()) 
+(: monitor-changes (-> Grounded (->)))
+(= (monitor-changes $space) 
+   (let $prev_times (get-previous-times $space)
+     (if (== () $prev_times)
+          ()
+          (let* (
+                ($prev_times' (get-timevals $prev_times))
+                (($previous_time $latest_time) (setPreviousTime $prev_times'))
+                
+                ($at_times_latest (get-incoming-by-type $space $latest_time TimeValue)) 
+                ($at_times_previous (get-incoming-by-type $space $previous_time TimeValue))
+                ;(() (println! ($at_times_previous $at_times_latest)))
 
-						
-				
-		
-!(detectChanges ((constructor (STV 0.1 0.1)) (constructor (STV 0.2 0.3)) (constructor (STV 0.3 0.5))) ((constructor (STV 0.3 0.5)) (constructor (STV 0.4 0.6))) 0.5 ())
+                ($delta (match $space (tv_delta $v) $v))
+                ($changes-with-tv (detectChanges $space $at_times_previous $at_times_latest $delta ()))
+                ;(() (println! $changes-with-tv))
+
+                (($pred-change-with-tv $pred-change-with-arg 
+                                      $pred-has-dramatic-changes) (addPredicatesHelper $space))
+
+                ($old-changes-with-tv (get-incoming-by-type $space $pred-change-with-tv REFERENCE_LINK))
+
+                ($_ (removePrevChanges $space $old-changes-with-tv))
+                ($_ (update-drmtc-chng-tv $pred-has-dramatic-changes $space (STV 0.0 0.0)))
+
+                ($at_times_latest' (get-incoming-by-type $space $latest_time TimeValue)) 
+                ($at_times_previous' (get-incoming-by-type $space $previous_time TimeValue))
+                ($_ (record-changes-tv $space $changes-with-tv))
+                ($remainingChanges (detectChanges $space $at_times_previous' $at_times_latest' $delta ()))
+              )
+              (if (== $remainingChanges ())
+                ()
+                (update-drmtc-chng-tv $pred-has-dramatic-changes $space (STV 1.0 1.0))
+              )
+          )
+       )
+     )
+)
