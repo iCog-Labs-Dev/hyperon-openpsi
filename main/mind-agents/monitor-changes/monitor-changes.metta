@@ -1,4 +1,7 @@
 !(bind! rand (py-atom numpy.random.rand))
+!(bind! &newSpace (new-space))
+!(bind! &sngSpace (new-space))
+
 ;A function that takes the latestTime and a list of times
 ;and finds the appropriate position to set previous time pointer.
 ;
@@ -113,11 +116,6 @@
   )
 )
 
-
-!(bind! &newSpace (new-space))
-!(bind! &sngSpace (new-space))
-
-;; !(import! &self monitorChanges)
 (: NetDifference Type)
 (: netDiff (-> Number Expression NetDifference))
 
@@ -143,11 +141,6 @@
         ((size-atom $net) $net)
     )
   )
-
-;; One option here could be to wrap the timer function
-;; But do the logic using the meTTa language. 
-;(= (getTV (constructor (STV $x $y))) (STV $x $y))
-;; (: monitorChanges (-> hyperon::space::DynSpace Expression Expression))
 
 (: detectChangesHelper (-> Grounded Expression Expression Number Expression Expression))
 (= (detectChangesHelper $space $time $previous_times $delta $accum)
@@ -188,17 +181,6 @@
         (detectChanges $space $prev_times $tail $delta $accum')
 		)
 	)
-)
-
-;;This function filps the truth-value of a rule and updates the atomspace.
-(: flipTruthValue (-> hyperon::space::DynSpace Expression (->)))
-(= (flipTruthValue $space $atom)
-   (let* (
-          ($_ (remove-atom $space $atom))
-          ($newAtom (changeTruthValue $atom (STV 1 1)))
-        )
-        (add-atom $space $newAtom)
-	  )
 )
 
 (: monitor-changes (-> Grounded (->)))
