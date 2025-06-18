@@ -1,6 +1,7 @@
 !(register-module! ../../../hyperon-openpsi)
 !(import! &self hyperon-openpsi:main:rules:rule)
 !(import! &self hyperon-openpsi:psi-utilities:psi_utils)
+!(import &self hyperon-openpsi:use-cases:ping-pong:ping)
 
 ;; Define truth values
 (= (FALSE_TV) (False (STV 0.0 1.0)))  ; False, with maximum confidence
@@ -14,23 +15,23 @@
 (: state-var Variable)
 
 ;; Set initial ball state
-!(add-atom! &self (State ball neutral))
+!(add-atom! &psiRules (State ball neutral))
 
 ;; Define ping goal
-!(addGoal ping 0.0 1.0 &self)  ; Goal: ping, initial value: 0.0, desired value: 1.0
-!(setGv ping 0.0 &self)        ; Initialize ping urge to 0.0 to prevent premature trigger
+!(addGoal ping 0.0 1.0 &psiRules)  ; Goal: ping, initial value: 0.0, desired value: 1.0
+!(setGv ping 0.0 &psiRules)        ; Initialize ping urge to 0.0 to prevent premature trigger
 
 ;; Define pong goal
-!(addGoal pong 0.0 1.0 &self)  ; Goal: pong, initial value: 0.0, desired value: 1.0
-!(setGv pong 0.0 &self)
+!(addGoal pong 0.0 1.0 &psiRules)  ; Goal: pong, initial value: 0.0, desired value: 1.0
+!(setGv pong 0.0 &psiRules)
 
 ;; Define ping action
 (: ping-action (-> Atom))
 (= (ping-action)
   (let* (($result (State ball pinged))
-         ($add-result (add-atom! &self $result))
-         ($set-ping (setGv ping 0.0 &self))
-         ($set-pong (setGv pong (+ (goal-value pong &self) 0.2) &self)))  ; Increment pong urge
+         ($add-result (add-atom! &psirules $result))
+         ($set-ping (setGv ping 0.0 &psiRules))
+         ($set-pong (setGv pong (+ (goal-value pong &psiRules) 0.2) &psiRules)))  ; Increment pong urge
     (trace! "Just pinged" $result)))
 
 ;; Define ping context
@@ -49,10 +50,10 @@
 (: pong-action (-> Atom))
 (= (pong-action)
   (let* (($result (State ball ponged))
-         ($add-result (add-atom! &self $result))
-         ($set-pong (setGv pong 0.0 &self))
-         ($set-ping (setGv ping 1.0 &self))
-         ($reset-state (add-atom! &self (State ball neutral))))
+         ($add-result (add-atom! &psiRules $result))
+         ($set-pong (setGv pong 0.0 &psiRules))
+         ($set-ping (setGv ping 1.0 &psiRules))
+         ($reset-state (add-atom! &psiRules (State ball neutral))))
     (trace! "Just ponged" $result)))
 
 ;; Define pong context
@@ -65,16 +66,18 @@
 ;; Define pong stepper
 (: pong-step (-> Atom))
 (= (pong-step)
-  (let* (($urge (goal-value pong &self))
+  (let* (($urge (goal-value pong &psiRules))
           (trace! $urge ())
        )
     (if (< $urge 0.8)
       (let* (($result ())
              ($trace-result (trace! ("Not yet feeling like ponging the ball. Urge =" $urge) $result))
-             ($set-result (setGv pong (+ $urge 0.2) &self)))
+             ($set-result (setGv pong (+ $urge 0.2) &psiRules)))
         $result)
       (let* (($trace-result (trace! ("Feeling like ponging the ball. Urge =" $urge) ()))
-             ($result (pong-action)))
+             ($result (pong-action))
+             ($result-pinged (ping-action))
+             )
         $result))))
 
 ;; Add pong rule
@@ -87,20 +90,17 @@
 (= (run-component $component)
   (if (== $component ping-component)
     (let* (($context (ping-context))
-           ($match-result (if-error
-                            (collapse (match &self $context $context))
-                            ()
-                            (collapse (match &self $context $context)))))
+           ($match-result ((collapse (match &psiRules $context $context)))))
       (if (not (== $match-result ()))
         (ping-action)
         ()))
-    (pong-step )))
+    (pong-step)))
 
 ;; Define run-loop to alternate ping and pong
 (: run-loop (-> Number Atom))
 (= (run-loop $iteration)
-  (if (< $iteration 5)  ; Limit to 5 iterations
-    (let* (($ping-result (setGv ping 1.0 &self))  ; Trigger ping explicitly
+  (if (< $iteration 16)  ; Limit to 5 iterations
+    (let* (($ping-result (setGv ping 1.0 &psiRules))  ; Trigger ping explicitly
            ($pong-result (run-component pong-component))  ; Check pong urge
            (if (== $pong-result (State ball ponged))
            ($ping-action-result (run-component ping-component)))  ; Execute ping if context matches
