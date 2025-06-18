@@ -146,19 +146,28 @@
 (= (detectChangesHelper $space $time $previous_times $delta $accum)
 	(if (== $previous_times ())
       $accum
-      (let ($head $tail) (decons-atom $previous_times)
-        (if (== (getImplication $head $space) (getImplication $time $space))
+      (let* (
+             (($head $tail) (decons-atom $previous_times)) 
+             ($x (getImplication $head $space))
+             ($y (getImplication $time $space))
+          )
+        (if (== $x $y)
           (let* (
                   ($timeTv (extractTvFromRule $time $space))
                   ($latestTv (extractTvFromRule $head $space))
                   ($prevTvMean (cogTvMean $timeTv))
                   ($latestTvMean (cogTvMean $latestTv))
                   ($diff (- $latestTvMean $prevTvMean))
+                  ;(() (println! ($diff $accum)))
                  )
-            (if (<= (abs-math $diff) $delta)
-              (let $accum' (union-atom $accum (($time $head)))
+            (if (>= (abs-math $diff) $delta)
+              (let* 
+                (
+                 ($accum'  (union-atom $accum (($time $head))))
+                 ;(() (println! (accum $accum')))
+                 )
                 (detectChangesHelper $space $time $tail $delta $accum')
-                )	
+                )
               (detectChangesHelper $space  $time $tail $delta $accum)
             )
            )
@@ -194,11 +203,11 @@
                 
                 ($at_times_latest (get-incoming-by-type $space $latest_time TimeValue)) 
                 ($at_times_previous (get-incoming-by-type $space $previous_time TimeValue))
-                ;(() (println! ($at_times_previous $at_times_latest)))
+                ;(() (println! (prev $at_times_previous latest $at_times_latest)))
 
                 ($delta (match $space (tv_delta $v) $v))
                 ($changes-with-tv (detectChanges $space $at_times_previous $at_times_latest $delta ()))
-                ;(() (println! $changes-with-tv))
+                ;(() (println! (changes from dc $changes-with-tv)))
 
                 (($pred-change-with-tv $pred-change-with-arg 
                                       $pred-has-dramatic-changes) (addPredicatesHelper $space))

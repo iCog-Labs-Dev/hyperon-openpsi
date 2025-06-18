@@ -9,7 +9,7 @@
 
 !(import! &self utilities-module:utils)
 
-;;Test setPreviousTime function
+;Test setPreviousTime function
 !(assertEqual (setPreviousTime (10 15 20 40)) (20 40))
 
 ;;Test update-drmtc-chng-tv function that updates the predicate (Predicate has-dramatic-changes)
@@ -34,6 +34,7 @@
 !(bind! &test-space (new-space)) 
 !(addRule &test-space a (a1 a2) action g (TTV 10 (STV 0.1 0.1)))
 !(addRule &test-space b (b1 b2) action g (TTV 40 (STV 0.1 0.1)))
+!(addRule &test-space b' (b1 b2) action g (TTV 40 (STV 0.1 0.1)))
 !(addRule &test-space c (c1 c2) action g (TTV 20 (STV 0.1 0.1)))
 !(addRule &test-space d (d1 d2) action g (TTV 15 (STV 0.1 0.1)))
 !(addRule &test-space e (e1 e2) action g (TTV 13 (STV 0.1 0.1)))
@@ -48,7 +49,7 @@
 
             (TimeValue 15 a)
             (TimeValue 45 b)
-            (TimeValue 25 b)
+            (TimeValue 25 b')
             (TimeValue 20 d)
             (TimeValue 18 e)
           )
@@ -58,6 +59,24 @@
 !(add-reduct &test-space (kb))
 !(add-atom &test-space (tv_delta 0.1)) ;add the minimum threshold value for acceptable tv change
 
+;firt test case, there is not acceptable change in tv
 !(monitor-changes &test-space)
-!(let $res (match &test-space ((Predicate has-dramatic-change) $tv) $tv) (assertEqual $res (STV 1.0 1.0)))
-!(let $res (collapse (match &test-space (REFERENCE_LINK $change) $change)) (assertEqual (((Predicate change-with-tv) (LIST_LINK (b b)))) $res))
+!(let $res (collapse (match &test-space (REFERENCE_LINK $change) $change)) 
+   (assertEqual () $res)
+   )
+
+!(let $res (match &test-space ((Predicate has-dramatic-change) $tv) $tv) 
+   (assertEqual $res (STV 0.0 0.0))
+   )
+
+!(update-atom &test-space (: b' (TTV 40 (STV 0.1 0.1))) (: b' (TTV 40 (STV 0.5 0.5)))) ;update the tv change on b'
+
+;second test case, when there is change with tv for a rule 
+!(monitor-changes &test-space)
+!(let $res (match &test-space ((Predicate has-dramatic-change) $tv) $tv) 
+   (assertEqual $res (STV 1.0 1.0))
+   )
+
+!(let $res (collapse (match &test-space (REFERENCE_LINK $change) $change)) 
+   (assertEqual (((Predicate change-with-tv) (LIST_LINK (b b')))) $res)
+   )
