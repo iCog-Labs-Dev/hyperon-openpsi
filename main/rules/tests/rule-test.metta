@@ -5,38 +5,33 @@
 !(import! &self hyperon-openpsi:main:types)
 !(import! &self utilities-module:utils)
 
-!(bind! &r (new-space)) 
+!(assertEqual (addAndLink (a b) c) (AND_LINK ((a b) c)))
 
-!(assertEqual (addAndLink &r (a b) c) (AND_LINK ((a b) c)))
-
-; add the same AND_LINK the second time, it should not be added again. It should 
-; return the Already existing AND_LINK.
-!(assertEqual (addAndLink &r (a b) c) (AND_LINK ((a b) c)))
+;add the same AND_LINK the second time, it should not be added again. It should 
+;return the Already existing AND_LINK.
+!(assertEqual (addAndLink (a b) c) (AND_LINK ((a b) c)))
 
 ;if rule is added with the addRule function then the &psiRules index knows 
 ;about it
+(: z Goal)
+(: y Action)
 
+!(addRule x (x1 x2) y z (TTV 1 (STV 11.0 11.0)))
+!(assertEqual (getContext x) (x1 x2))
+!(assertEqual (getAction x) y)
+!(assertEqual (getGoal x) z)
+!(assertEqual (getTV x &self) (TTV 1 (STV 11.0 11.0)))
 
-!(addRule  &r x (x1 x2) y z (TTV 1 (STV 1.0 1.0)))
-!(assertEqual (getContext  &r x) (x1 x2))
-!(assertEqual (getAction  &r x) y)
-!(assertEqual (getGoal  &r x) z)
-!(assertEqual (getTV x &r) (TTV 1 (STV 1.0 1.0)))
-!(assertEqual (getImplication x &r) (IMPLICATION (AND_LINK ((x1 x2) y)) z))
+!(addRule x (x1 x2) y z (TTV 1 (STV 11.0 11.0)))
 
-!(addRule  &r w (x3 x2) y z (TTV 1 (STV 1.0 1.0)))
-; ;if rule is not added with the addRule function then the &psiRules index does not know
-; about it
-; but we can get context, action and goal of the rule
-
-!(add-atom &r (: rule1 (IMPLICATION_LINK 
-                            (AND_LINK ((c1 c2) action))
-                            goal )))
-!(assertEqual (getContext &r rule1) (c1 c2))
-!(assertEqual (getGoal &r rule1) goal)
-!(assertEqual (getAction &r rule1) action)
-!(assertEqual (getImplication rule1 &r) (IMPLICATION (AND_LINK ((c1 c2) action)) goal))
-
+;if rule is not added with the addRule function then the &psiRules index does not 
+;know about it
+!(add-atom &self (: rule1 (IMPLICATION_LINK 
+                            (AND_LINK (c1 c2) action)
+                            goal)))
+!(assertEqual (getContext rule1) %Undefined%)
+!(assertEqual (getGoal rule1) %Undefined%)
+!(assertEqual (getAction rule1) %Undefined%)
 
 !(assertEqual (existsIn &psiRules rule1) False)
 
@@ -49,7 +44,8 @@
 !(assertEqual (addGoal run 1 () &self) run)
 
 
-!(assertEqual (relatedGoals &r y) (z))
+!(assertEqual (relatedGoals y) (z))
+
 
 ;Category tests
 !(assertEqual (addCategory testI) testI)
