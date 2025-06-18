@@ -59,7 +59,7 @@
 ;Category tests
 !(assertEqual (addCategory testI) testI)
 
-; !(assertEqual (addToCategory x testII) x)
+!(assertEqual (addToCategory x testII) x)
 !(assertEqual (addToCategory x testII )(addToCategory: Rule x Already Exists in testII))
 
 !(assertEqual (len (getCategories)) 2)
