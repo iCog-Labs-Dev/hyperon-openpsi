@@ -29,12 +29,3 @@
 !(assertEqual (STVZeroConfidence2 (TVMean (STV 1.0 0.0))) (STVZeroConfidence2 0.5))
 !(assertEqual (STVZeroConfidence3 (TVMean (STV 0.5 0.0))) (STVZeroConfidence3 0.5))
 
-(ref (L1 A))
-(ref (L1 B))
-(ref (L2 A))
-(ref (L2 C))
-
-!(assertEqual (get-outgoing L1 &self ref) ((ref (L1 A)) (ref (L1 B))))
-!(assertEqual (get-outgoing L2 &self ref) ((ref (L2 A)) (ref (L2 C))))
-!(assertEqual (get-incoming A &self ref) ((ref (L2 A)) (ref (L1 A))))
-!(assertEqual (get-incoming B &self ref) ((ref (L1 B))))

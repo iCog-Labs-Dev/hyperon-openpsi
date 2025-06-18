@@ -133,23 +133,40 @@
 
 !(FuzzyGreaterThan (fuzzy_greater_than 2.0 3.0 3))
 
+;(type (a c))
+;(type (a b))
+;(type (d a))
+
 (= (get-outgoing $atom $space $type)
-   (collapse (match $space ($type ($atom $target)) ($type ($atom $target))))
+   (collapse 
+     (match $space ($type ($source $atom)) (match $space ($type ($atom $source)) ($type ($atom $source))))
+     )
    )
 
 (= (get-outgoing $atom $space)
-   (collapse (match $space ($type ($atom $target)) ($type ($atom $target))))
+   (collapse 
+     (match $space ($type ($source $atom)) (match $space ($type ($atom $source))))
+     )
    )
 
-(= (out ($type ($s $t)))
+(= (out ($type $s $t))
    $t
    )
 
-(= (get-incoming $atom $space $type)
+(= (get-incoming-by-type $space $atom $type)
    (collapse 
      (union 
-      (match $space ($type ($source $atom)) ($type ($source $atom)))
-      (match $space ($type ($atom $source)) ($type ($atom $source)))
+      (match $space ($type $atom $target) $target)
+      (match $space ($type $source $atom) $source)
+      )
+    )
+   )
+
+(= (get-incoming $atom $space)
+   (collapse 
+     (union 
+      (match $space ($type $atom $target) ($type $atom $target))
+      (match $space ($type $source $atom) ($type $source $atom))
       )
      )
    )
