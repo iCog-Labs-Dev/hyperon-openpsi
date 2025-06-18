@@ -66,13 +66,14 @@
 (: pong-step (-> Atom))
 (= (pong-step)
   (let* (($urge (goal-value pong &self))
-         ($formatted-urge (/ (round-math (* $urge 1000000.0)) 1000000.0)))
+          (trace! $urge ())
+       )
     (if (< $urge 0.8)
       (let* (($result ())
-             ($trace-result (trace! (Not yet feeling like ponging the ball. Urge = $formatted-urge) $result))
+             ($trace-result (trace! ("Not yet feeling like ponging the ball. Urge =" $urge) $result))
              ($set-result (setGv pong (+ $urge 0.2) &self)))
         $result)
-      (let* (($trace-result (trace! (Feeling like ponging the ball. Urge = $formatted-urge) ()))
+      (let* (($trace-result (trace! ("Feeling like ponging the ball. Urge =" $urge) ()))
              ($result (pong-action)))
         $result))))
 
@@ -93,7 +94,7 @@
       (if (not (== $match-result ()))
         (ping-action)
         ()))
-    (pong-step)))
+    (pong-step )))
 
 ;; Define run-loop to alternate ping and pong
 (: run-loop (-> Number Atom))
@@ -101,7 +102,9 @@
   (if (< $iteration 5)  ; Limit to 5 iterations
     (let* (($ping-result (setGv ping 1.0 &self))  ; Trigger ping explicitly
            ($pong-result (run-component pong-component))  ; Check pong urge
+           (if (== $pong-result (State ball ponged))
            ($ping-action-result (run-component ping-component)))  ; Execute ping if context matches
+            )
       (run-loop (+ $iteration 1)))
     (trace! "Simulation complete" ())))
 
