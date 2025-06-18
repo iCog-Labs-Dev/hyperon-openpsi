@@ -9,28 +9,29 @@
 (: addAndLink (-> Grounded Expression Expression Expression))
 (= (addAndLink $space $context $action)
    (let $res 
-        (collapse (match  $space (AND_LINK ($context $action)) (AND_LINK ($context $action))))
+        (collapse (match $space (AND_LINK ($context $action)) (AND_LINK ($context $action))))
         (if (not (== $res ()))
           (car-atom $res)
-          (let () (add-atom  $space (AND_LINK ($context $action))) (AND_LINK ($context $action)))
+          (let () (add-atom $space (AND_LINK ($context $action))) (AND_LINK ($context $action)))
         )
-     )
+    )
 )
+; ! (addAndLink &psiRules (a1,a2) b)
 
 (: addRuleLink (-> Grounded Symbol Expression Expression Expression))
-(= (addRuleLink  $space $handle $goal $andLink)
+(= (addRuleLink $space $handle $goal $andLink)
    (let*
      (
-      ($rule (collapse (get-type $handle)))
+      ($rule (collapse (get-type-space $space $handle)))
       )
       (if (not (== $rule (%Undefined%))) 
             () 
             (
               let* (
                     ($newRule (: $handle (IMPLICATION_LINK $andLink $goal)))
-                    ($_ (add-atom  $space $newRule))
-                    ($_ (add-atom  $space (: $handle (TTV 0 (STV 0.0 0.0)))))
-                    ($_ (add-atom  $space (isExecuted $handle (DEFAULT_TV)))) ;TODO: define DEFAULT_TV
+                    ($_ (add-atom $space $newRule))
+                    ($_ (add-atom $space (: $handle (TTV 0 (STV 0.0 0.0)))))
+                    ($_ (add-atom $space (isExecuted $handle (DEFAULT_TV))))
                   )
                   ()
             )
@@ -44,11 +45,10 @@
 )
 
 (: addRule (-> Grounded Symbol Expression Expression Symbol Expression Expression))
-;(: addRule (-> Symbol Expression Action Symbol Goal Expression))
 (= (addRule $space $ruleHandle $context $action $goal $tv)
     (let* (
             ($andLink (addAndLink $space $context $action))
-            ($_ (addRuleLink   $space $ruleHandle $goal $andLink))
+            ($_ (addRuleLink $space $ruleHandle $goal $andLink))
             ($exists (existsIn &psiRules $ruleHandle))
           )
           (if $exists 
@@ -56,7 +56,7 @@
               (let* 
                 (
                   ($res (getRuleType $ruleHandle $space))
-                  ($_ (if (== (len $res) 2) ; Important to avoid adding another $tv to $ruleHandle as type.
+                  ($_ (if (== (len $res) 2)
                           (update-atom $space (: $ruleHandle (TTV 0 (STV 0.0 0.0))) (: $ruleHandle $tv)) 
                           () ))
                   ($_ (update-atom $space (isExecuted $ruleHandle (DEFAULT_TV)) (isExecuted $ruleHandle (FALSE_TV))))
@@ -71,7 +71,21 @@
           )
     )
 )
- 
+
+
+
+(: getImplication (-> Grounded Symbol Expression))
+(= (getImplication $space $rule) 
+   (
+    case (getRuleType $rule $space) 
+      (
+        (((TTV $timestamp $stv) (IMPLICATION_LINK (AND_LINK ($context $action)) $goal)) (IMPLICATION_LINK (AND_LINK ($context $action)) $goal))
+        (((IMPLICATION_LINK (AND_LINK ($context $action)) $goal) (TTV $timestamp $stv)) (IMPLICATION_LINK (AND_LINK ($context $action)) $goal))
+        (((IMPLICATION_LINK (AND_LINK ($context $action)) $goal)) (IMPLICATION_LINK (AND_LINK ($context $action)) $goal))
+        ($_ %Undefined%)
+      )
+   )
+)
 (: getAction (-> Grounded Symbol Expression))
 (= (getAction $space $rule) 
    (
@@ -127,22 +141,8 @@
   )
 )
 
-(: getImplication  (-> Symbol Grounded Expression))
-(= (getImplication $rule $space)
-   (
-    case (getRuleType $rule $space) 
-      (
-        (((TTV $timestamp $stv) (IMPLICATION_LINK (AND_LINK ($context $action)) $goal)) (IMPLICATION (AND_LINK ($context $action)) $goal))
-        (((IMPLICATION_LINK (AND_LINK ($context $action)) $goal) (TTV $timestamp $stv)) (IMPLICATION (AND_LINK ($context $action)) $goal))
-        (((IMPLICATION_LINK (AND_LINK ($context $action)) $goal)) (IMPLICATION (AND_LINK ($context $action)) $goal) )
-        ($_ %Undefined%)
-      )
-
-    )
-)
-
-;(: x (Goal $value $dgv))
-(: addGoalHelper (-> Symbol Number Number Grounded Atom))
+; (: x (Goal $value $dgv))
+; (: addGoalHelper (-> Symbol Number Number Grounded Atom))
 (= (addGoalHelper $name $value $dgv $space)
    (if (and (isGvValid $value) (isGvValid $dgv)) 
       (if (goalExists $name $space)
