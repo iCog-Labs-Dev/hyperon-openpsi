@@ -52,13 +52,14 @@
 (: max-count (-> Number))
 (= (max-count) 1e9)
 
+; Define abs
+(: abs (-> $a $a))
+(= (abs $x) (if (< $x 0) (* -1 $x) $x))
+
 ;; Define approximately equal
 (: approxEq (-> $a $a $a Bool))
 (= (approxEq $x $y $epsilon) (<= (abs (- $x $y)) $epsilon))
 
-;; Define abs
-(: abs (-> $a $a))
-(= (abs $x) (if (< $x 0) (* -1 $x) $x))
 
 ;; Define <=
 (: <= (-> $a $a Bool))
