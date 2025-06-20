@@ -5,12 +5,14 @@
 
 
 (= (fuzzy_within $x $min_val $max_val $a)
-    (if (< $x $max_val)
-                (fuzzy_equal $x $min_val $a)
-                (if (> $x $max_val)
-                        (+ 0.999 (* uniRand 0.001))
-                        (+ 0.99 (* uniRand 0.01))
+    (if (< $x $min_val)
+                (fuzzy_equal $x $min_val $a) ; x < min value
+                (let $rand (uniRand) 
+                    (if (> $x $max_val) 
+                        (+ 0.999 (* $rand 0.001)) ; x > max value
+                        (+ 0.99 (* $rand 0.01)) ; min value < x < max value
 
+                    )
                 )
         )
 )
@@ -50,13 +52,14 @@
 (: max-count (-> Number))
 (= (max-count) 1e9)
 
+; Define abs
+(: abs (-> $a $a))
+(= (abs $x) (if (< $x 0) (* -1 $x) $x))
+
 ;; Define approximately equal
 (: approxEq (-> $a $a $a Bool))
 (= (approxEq $x $y $epsilon) (<= (abs (- $x $y)) $epsilon))
 
-;; Define abs
-(: abs (-> $a $a))
-(= (abs $x) (if (< $x 0) (* -1 $x) $x))
 
 ;; Define <=
 (: <= (-> $a $a Bool))
@@ -124,18 +127,6 @@
 
 
 
-
-;; I've used these tests to see if it actually outputs without any error.But I didn't compare the results with other implementations yet . 
-!(UniformRandom : uniRand)
-!(FuzzyEqual (fuzzy_equal 4 2.0 3))
-!(FuzzyWithin (fuzzy_within 2.0 1.0 3.0 3))
-!(FuzzyLessThan (fuzzy_less_than 2.0 3.0 3))
-
-!(FuzzyGreaterThan (fuzzy_greater_than 2.0 3.0 3))
-
-;(type (a c))
-;(type (a b))
-;(type (d a))
 
 (= (get-outgoing $atom $space $type)
    (collapse 
