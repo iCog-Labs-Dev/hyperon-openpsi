@@ -33,7 +33,6 @@ jobs:
         working-directory: ./
         run: |
           git submodule update --init --recursive
-          cd utilities-module/
           git checkout main
           git pull
           python3 test/run-tests.py
