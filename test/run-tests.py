@@ -45,7 +45,7 @@ def print_ascii_art(text):
 metta_run_command = "metta"
 
 
-root = pathlib.Path(".")
+root = pathlib.Path("./")
 
 testMettaFiles = root.rglob("*-test.metta")
 total_files = 0
@@ -57,18 +57,23 @@ print_ascii_art("Test Runner")
 
 for testFile in testMettaFiles:
     total_files += 1
-    try:
-        result = subprocess.run(
-            [metta_run_command, str(testFile)],  # Convert testFile to string
-            capture_output=True,
-            text=True,
-            check=True,
-        )
-        fails += result.returncode
-        results.append((result, testFile))  # Collect only stdout in the results list
-    except subprocess.CalledProcessError as e:
-        results.append(f"Error with {testFile}: {e.stderr}")
-        fails += 1
+    if "utilities-module" not in str(testFile):
+        try:
+            result = subprocess.run(
+                [metta_run_command, str(testFile)],  # Convert testFile to string
+                capture_output=True,
+                text=True,
+                check=True,
+            )
+            fails += result.returncode
+            results.append(
+                (result, testFile)
+            )  # Collect only stdout in the results list
+        except subprocess.CalledProcessError as e:
+            results.append(f"Error with {testFile}: {e.stderr}")
+            fails += 1
+    else:
+        continue
 
 # Output the results
 for idx, (result, path) in enumerate(results):

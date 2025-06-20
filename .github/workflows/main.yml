@@ -33,5 +33,7 @@ jobs:
         working-directory: ./
         run: |
           git submodule update --init --recursive
-          mv utilities-module/utils-test.metta utilities-module/utilsTest.metta
-          python3 test/run-tests.py
+          cd utilities-module/
+          git checkout main
+          git pull
+          cd ../ && python3 test/run-tests.py

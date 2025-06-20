@@ -61,4 +61,3 @@
 !(assertEqual (contextStv ((STV 0.5 0.4) (STV 0.6 0.8))) (STV 0.315 0.4))
 !(assertEqual (contextStv ((STV 1 1) (STV 1 1))) (STV 1.0 1.0))
 !(assertEqual (contextStv ((STV 0 0) (STV 0 0))) (STV 0 0))
-

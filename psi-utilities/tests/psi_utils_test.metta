@@ -97,3 +97,4 @@
 !(assertEqual (STVZeroConfidence1 (TVMean (STV 0.0 0.0))) (STVZeroConfidence1 0.5))
 !(assertEqual (STVZeroConfidence2 (TVMean (STV 1.0 0.0))) (STVZeroConfidence2 0.5))
 !(assertEqual (STVZeroConfidence3 (TVMean (STV 0.5 0.0))) (STVZeroConfidence3 0.5))
+
