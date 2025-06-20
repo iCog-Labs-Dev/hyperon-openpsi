@@ -36,5 +36,5 @@ jobs:
           cd utilities-module/
           git checkout main
           git pull
-          mv utilities-module/utils-test.metta utilities-module/utilsTest.metta
-          cd ../ && python3 test/run-tests.py
+          cd ../ && mv utilities-module/utils-test.metta utilities-module/utilsTest.metta
+          python3 test/run-tests.py
