@@ -319,6 +319,34 @@
     (== (STV 1 1)  ($satisfiableChecker $rule))
 )
 
+
+; urge related functions 
+(: urge-value (-> Symbol Grounded Number))
+(=(urge-value $goal $space)
+  (- (desired-goal-value $goal $space) (goal-value $goal $space))
+ )
+
+
+(= (increase-urge $goal $value $space)
+  (let*
+      (
+        ($urge (urge-value $goal $space))
+        ($u (- 1.0 (+ $urge $value)))
+      )
+     (setGv $goal $u $space)
+  )
+)
+
+(= (decrease-urge $goal $value $space)
+  (let*
+      (
+        ($urge (urge-value $goal $space))
+        ($u (- 1.0 (- $urge $value)))
+      )
+     (setGv $goal $u $space)
+  )
+)
+
 ;; (= (checkSatisfiability))
 ;; !(foldl * 1 (1 2 3 4 5))
 ;; !(foldl min 1 (1 2 3 4 5))
