@@ -57,6 +57,11 @@
     )
 )
 
+(=(reverse $list $acc)  
+    (if(== $list ()) $acc
+    (let ($head $tail ) (decons-atom $list) (reverse $tail (cons-atom $head $acc) ))
+    )
+)
 
 !(addGoal (ball is neutral) 0.0 1.0 &r)
 !(addGoal (ball is pinged) 0.0 1.0 &r)
@@ -86,7 +91,7 @@
 !(addRule &r r3 ((ball is ponged))  (quote (ping)) (ball is pinged) (TTV 0 (STV 1.0 1.0)))
 
 
-!(planner: (hillClimbingPlanner  (ball is neutral) (ball is ponged) (TestedActions) () &r))
+!(let $planner (hillClimbingPlanner  (ball is neutral) (ball is ponged) (TestedActions) () &r) (reverse $planner ()))
 
 
 ; to see the actions step
