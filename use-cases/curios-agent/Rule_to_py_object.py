@@ -37,12 +37,10 @@ def parse_sexp(sexpr: str) -> List[Schema]:
                 schemas.append(schema)
     return schemas
 #print(parse_sexp('(rule2 C3 A2 G2 (STV 0.7 0.6))'))
+#when querying it should be
+#!(match &psiRules (: $rule (IMPLICATION_LINK (AND_LINK ($context $action)) $goal)) ($rule $context $action $goal TV(0.0 1.0)))
+# i have added tv(0.0 1.0) because it is not clear how to handle the TV in the query but there iss a truth value when adding a rule   
 
-def main():
-    metta= MeTTa()
-    #when querying it should be
-    #!(match &psiRules (: $rule (IMPLICATION_LINK (AND_LINK ($context $action)) $goal)) ($rule $context $action $goal TV(0.0 1.0)))
-    # i have added tv(0.0 1.0) because it is not clear how to handle the TV in the query but there iss a truth value when adding a rule
+if __name__ == '__main__':
+
     print(parse_sexp('(rule1 (C1 C2) A G (TV 0.9 0.8))'))
-    
-main()
