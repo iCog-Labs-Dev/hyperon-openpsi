@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 from typing import List
 from hyperon import *
-
+metta = MeTTa()
 
 class Schema(BaseModel):
     handle: str
