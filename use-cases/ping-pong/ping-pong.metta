@@ -1,9 +1,13 @@
 !(register-module! ../../../hyperon-openpsi)
+!(register-module! ../../utilities-module)
+
 !(import! &self hyperon-openpsi:main:rules:rule)
 !(import! &self hyperon-openpsi:psi-utilities:psi_utils)
-!(import &self hyperon-openpsi:use-cases:ping-pong:ping)
 
+;;!(import! &self utilities-module:utils)
 ;; Define truth values
+
+
 (= (FALSE_TV) (False (STV 0.0 1.0)))  ; False, with maximum confidence
 (= (TRUE_TV) (True (STV 1.0 1.0)))    ; True, with maximum confidence
 
