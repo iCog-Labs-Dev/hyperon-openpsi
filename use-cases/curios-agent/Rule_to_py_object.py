@@ -4,6 +4,17 @@ from hyperon import *
 metta = MeTTa()
 
 class Schema(BaseModel):
+    """
+    A model representing a MeTTa rule schema.
+
+    Attributes:
+        handle (str): Identifier of the rule.
+        context (str): Context or condition of the rule as a string.
+        action (str): Action associated with the rule as a string.
+        goal (str): Goal or outcome of the rule as a string.
+        tv (str): Truth value of the rule as a string.
+        
+    """
     handle: str
     context: str
     action: str
@@ -11,6 +22,15 @@ class Schema(BaseModel):
     tv: str
 
 def parse_sexp(sexpr: str) -> List[Schema]:
+    """
+    This function parses a string containing MeTTa rules and parses them and change each rule into a schema object.
+    args:
+        a string containing a MeTTa rule for instance '(rule2 C3 A2 G2 (STV 0.7 0.6))'
+    returns:
+        a list of schema object containing the rule.
+    future improvement:
+        If Quering is done. str input should the rule found by the querying and does not need to parse it .
+    """
     atoms = metta.parse_all(sexpr)
     schemas = []
     for atom in atoms:
