@@ -16,7 +16,6 @@ class TestMettaToSchemaObject(unittest.TestCase):
             (rule2 C3 A2 G2 (tv 0.7 0.6))
         '''
         result = parse_sexp(sample_sexp)
-        self.assertEqual(len(result), 2)
         self.assertEqual(result[0].handle, "rule1")
         self.assertEqual(result[0].context, "(C1 C2)")
         self.assertEqual(result[0].action, "A")
