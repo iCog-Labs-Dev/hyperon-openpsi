@@ -1,0 +1,82 @@
+from typing import List
+from base import *
+import re
+import json
+    
+
+
+def parse_schema(schema: Schema) -> str:
+	"""A function that parses a cognitive Schema into represented in Python to MeTTas structure."""
+	return  f"""
+		(: {schema.handle} (IMPLICATION_LINK
+						(AND_LINK (({schema.context}) {schema.action})
+						{schema.goal})
+					)
+					{schema.tv if schema.tv else ''}
+		)
+		""" # I'm assuming that the tv attribute is opitional and is a string of the form (TTV {time} (STV {Strength} {Confidence}))
+
+def parse_state_params(state_params: str) -> StateParams:
+    """parses the string representation of MeTTa's state params and return a Python StateParam object."""
+    pass
+		
+def parse_action(actions: str) -> List[Action]:
+	"""a function that parses MeTTa's tuple of actions to a Python List of Actions. The MeTTa expression has the form -> (action1 action2 action3 ...)"""
+	pass
+def parse_sexp(sexpr: str) -> List[Schema]:
+	"""A function that parses an expression from MeTTa to Python."""
+	pass
+def parse_state_params(state_params: str) -> StateParams:
+    """
+    Parse the string representation of MeTTa's state parameters and return a Python StateParams object.
+
+    This function takes a string representation of state parameters from MeTTa and converts it
+    into a Python StateParams object for further processing or analysis.
+
+    Args:
+        state_params (str): A string representation of MeTTa's state parameters.
+
+    Returns:
+        StateParams: A Python object representing the parsed state parameters.
+
+    """
+	
+    # Assumes the inpute string(state_params) is a metta tuple of the form ((modulator name value) ...)
+    matches = re.findall(r'\(modulator\s+(\w+)\s+([\d.]+)\)', state_params)
+    if not matches:
+        return None
+    params_obj = {name:float(value) for name,value in matches}
+
+    return StateParams(**params_obj)
+
+
+def validateSyntax(rule: str) -> bool:
+    pattern = r"""
+    ^\(:\s+
+    (\w+)\s+
+    \(IMPLICATION_LINK\s+
+        \(AND_LINK\s+
+            \(\(\s*(\((?:\w+-?)+\)\s*)+\s*\)\s*
+            \(\w+-?\)\)\s+
+        \(\w+-?\)\s*
+    \)\s+
+    \(TTV\s+
+        (\d+)\s+
+        \(STV\s+([\d.]+)\s+([\d.]+)\)
+    \)\)\)$
+    """
+    return bool(re.match(pattern, rule, re.VERBOSE))
+def checkExistence(rule: Schema, ruleSpace: List[Schema]) -> bool:
+	pass
+
+def extract_rules_from_llm(raw_rules: str) -> List[Schema]: 
+    #Extracts the selected rules from the LLM response.
+	#Assumes the the raw_rules is a string representation of a list of rules in the form:
+	# "[(rule1), (rule2), ...]"
+    rules = raw_rules.strip().strip('[]').split(',')
+    rules = [rule.strip() for rule in rules]
+    return rules
+
+# string = "( (modulator activation 0.5) (modulator securing_threshold 0.7) (modulator pleasure 0.8) (modulator selection_threshold 0.6) )"
+# state_params = parse_state_params(string)
+# print(state_params)
