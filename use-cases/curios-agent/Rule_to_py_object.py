@@ -3,6 +3,7 @@ from typing import List
 from hyperon import *
 metta = MeTTa()
 
+
 class Schema(BaseModel):
     """
     A model representing a MeTTa rule schema.
@@ -61,6 +62,3 @@ def parse_sexp(sexpr: str) -> List[Schema]:
 #!(match &psiRules (: $rule (IMPLICATION_LINK (AND_LINK ($context $action)) $goal)) ($rule $context $action $goal TV(0.0 1.0)))
 # i have added tv(0.0 1.0) because it is not clear how to handle the TV in the query but there iss a truth value when adding a rule   
 
-if __name__ == '__main__':
-
-    print(parse_sexp('(rule1 (C1 C2) A G (TV 0.9 0.8))'))
