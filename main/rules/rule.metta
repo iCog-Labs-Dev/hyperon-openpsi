@@ -6,19 +6,19 @@
 
 (= (PsiRules) &psiRules)
 
-(: addAndLink (-> Grounded Expression Expression Expression))
-(= (addAndLink $space $context $action)
+(: addAndLink (-> Expression Action Expression))
+(= (addAndLink $context $action)
    (let $res 
-        (collapse (match  $space (AND_LINK ($context $action)) (AND_LINK ($context $action))))
+        (collapse (match &self (AND_LINK ($context $action)) (AND_LINK ($context $action))))
         (if (not (== $res ()))
           (car-atom $res)
-          (let () (add-atom  $space (AND_LINK ($context $action))) (AND_LINK ($context $action)))
+          (let () (add-atom &self (AND_LINK ($context $action))) (AND_LINK ($context $action)))
         )
      )
 )
 
-(: addRuleLink (-> Grounded Symbol Expression Expression Expression))
-(= (addRuleLink  $space $handle $goal $andLink)
+;(: addRuleLink (-> Symbol Goal Expression Expression))
+(= (addRuleLink $handle $goal $andLink)
    (let*
      (
       ($rule (collapse (get-type $handle)))
@@ -28,9 +28,9 @@
             (
               let* (
                     ($newRule (: $handle (IMPLICATION_LINK $andLink $goal)))
-                    ($_ (add-atom  $space $newRule))
-                    ($_ (add-atom  $space (: $handle (TTV 0 (STV 0.0 0.0)))))
-                    ($_ (add-atom  $space (isExecuted $handle (DEFAULT_TV)))) ;TODO: define DEFAULT_TV
+                    ($_ (add-atom &self $newRule))
+                    ($_ (add-atom &self (: $handle (TTV 0 (STV 0.0 0.0)))))
+                    ($_ (add-atom &self (isExecuted $handle (DEFAULT_TV)))) ;TODO: define DEFAULT_TV
                   )
                   ()
             )
@@ -43,23 +43,22 @@
    ( let $res (collapse (get-type-space $space $atom)) (not (== (%Undefined%) $res)) )
 )
 
-(: addRule (-> Grounded Symbol Expression Expression Symbol Expression Expression))
 ;(: addRule (-> Symbol Expression Action Symbol Goal Expression))
-(= (addRule $space $ruleHandle $context $action $goal $tv)
+(= (addRule $ruleHandle $context $action $goal $tv)
     (let* (
-            ($andLink (addAndLink $space $context $action))
-            ($_ (addRuleLink   $space $ruleHandle $goal $andLink))
+            ($andLink (addAndLink $context $action))
+            ($_ (addRuleLink $ruleHandle $goal $andLink))
             ($exists (existsIn &psiRules $ruleHandle))
           )
           (if $exists 
               $ruleHandle
               (let* 
                 (
-                  ($res (getRuleType $ruleHandle $space))
+                  ($res (getRuleType $ruleHandle &self))
                   ($_ (if (== (len $res) 2) ; Important to avoid adding another $tv to $ruleHandle as type.
-                          (update-atom $space (: $ruleHandle (TTV 0 (STV 0.0 0.0))) (: $ruleHandle $tv)) 
+                          (update-atom &self (: $ruleHandle (TTV 0 (STV 0.0 0.0))) (: $ruleHandle $tv)) 
                           () ))
-                  ($_ (update-atom $space (isExecuted $ruleHandle (DEFAULT_TV)) (isExecuted $ruleHandle (FALSE_TV))))
+                  ($_ (update-atom &self (isExecuted $ruleHandle (DEFAULT_TV)) (isExecuted $ruleHandle (FALSE_TV))))
                 )
                 (let () (if (== (len $context) 1)
                     (add-atom &psiRules (: $ruleHandle ($context $action $goal (car-atom $context))))
@@ -72,10 +71,10 @@
     )
 )
  
-(: getAction (-> Grounded Symbol Expression))
-(= (getAction $space $rule) 
+(: getAction (-> Symbol Expression))
+(= (getAction $rule) 
    (
-    case (getRuleType $rule $space) 
+    case (getRuleType $rule &self) 
       (
         (((TTV $timestamp $stv) (IMPLICATION_LINK (AND_LINK ($context $action)) $goal)) $action)
         (((IMPLICATION_LINK (AND_LINK ($context $action)) $goal) (TTV $timestamp $stv)) $action)
@@ -85,10 +84,10 @@
    )
 )
 
-(: getGoal (-> Grounded Symbol Expression))
-(= (getGoal $space $rule)  
+;(: getGoal (-> Symbol Expression))
+(= (getGoal $rule)  
   ( 
-   case (getRuleType $rule $space) 
+   case (getRuleType $rule &self) 
     (
       (((TTV $timestamp $stv) (IMPLICATION_LINK $andLink $goal)) $goal)
       (((IMPLICATION_LINK $andLink $goal) (TTV $timestamp $stv)) $goal)
@@ -98,10 +97,10 @@
    )
 )
 
-(: getContext (-> Grounded Symbol Expression))
-(= (getContext $space $rule)
+(: getContext (-> Symbol Expression))
+(= (getContext $rule)
    (
-    case (getRuleType $rule $space) 
+    case (getRuleType $rule &self) 
       (
         (((TTV $timestamp $stv) (IMPLICATION_LINK (AND_LINK ($context $action)) $goal)) $context)
         (((IMPLICATION_LINK (AND_LINK ($context $action)) $goal) (TTV $timestamp $stv)) $context)
@@ -127,19 +126,6 @@
   )
 )
 
-(: getImplication  (-> Symbol Grounded Expression))
-(= (getImplication $rule $space)
-   (
-    case (getRuleType $rule $space) 
-      (
-        (((TTV $timestamp $stv) (IMPLICATION_LINK (AND_LINK ($context $action)) $goal)) (IMPLICATION (AND_LINK ($context $action)) $goal))
-        (((IMPLICATION_LINK (AND_LINK ($context $action)) $goal) (TTV $timestamp $stv)) (IMPLICATION (AND_LINK ($context $action)) $goal))
-        (((IMPLICATION_LINK (AND_LINK ($context $action)) $goal)) (IMPLICATION (AND_LINK ($context $action)) $goal) )
-        ($_ %Undefined%)
-      )
-
-    )
-)
 
 ;(: x (Goal $value $dgv))
 (: addGoalHelper (-> Symbol Number Number Grounded Atom))
@@ -196,14 +182,14 @@
 ;arg2: an accumulator
 ;return: a tuple of valid psiRules
 
-(= (filterPsiRules $space $andLinks $acc)
+(= (filterPsiRules $andLinks $acc)
    (if (== $andLinks ())
       $acc
       (let* (
               (($head $tail) (decons-atom $andLinks))
-              ($handles (collapse (match $space (: $handle (IMPLICATION_LINK $head $goal)) $handle)))
+              ($handles (collapse (match &self (: $handle (IMPLICATION_LINK $head $goal)) $handle)))
               ($rulesList (concatTuple $handles $acc))
-              ($res (filterPsiRules $space $tail $rulesList))
+              ($res (filterPsiRules $tail $rulesList))
             )
         (if (== $head ())
           $acc
@@ -221,11 +207,11 @@
 ;arg: action
 ;returns: a tuple of goals
 
-(= (relatedGoals $space $action)
+(= (relatedGoals $action)
    (let* (
-          ($andLinks (collapse (match $space (AND_LINK ($context $action)) (AND_LINK ($context $action)))))
-          ($rules (filterPsiRules $space $andLinks ()))
-          ($goals (collapse (getGoal $space (superpose $rules))))
+          ($andLinks (collapse (match &self (AND_LINK ($context $action)) (AND_LINK ($context $action)))))
+          ($rules (filterPsiRules $andLinks ()))
+          ($goals (collapse (getGoal (superpose $rules))))
           ($res (collapse (unique (superpose $goals)))) ; remove duplicate goals
         )
         $res
