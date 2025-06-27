@@ -52,13 +52,14 @@
 (: max-count (-> Number))
 (= (max-count) 1e9)
 
+; Define abs
+(: abs (-> $a $a))
+(= (abs $x) (if (< $x 0) (* -1 $x) $x))
+
 ;; Define approximately equal
 (: approxEq (-> $a $a $a Bool))
 (= (approxEq $x $y $epsilon) (<= (abs (- $x $y)) $epsilon))
 
-;; Define abs
-(: abs (-> $a $a))
-(= (abs $x) (if (< $x 0) (* -1 $x) $x))
 
 ;; Define <=
 (: <= (-> $a $a Bool))
@@ -127,11 +128,36 @@
 
 
 
-;; I've used these tests to see if it actually outputs without any error.But I didn't compare the results with other implementations yet . 
-!(UniformRandom : uniRand)
-!(FuzzyEqual (fuzzy_equal 4 2.0 3))
-!(FuzzyWithin (fuzzy_within 2.0 1.0 3.0 3))
-!(FuzzyWithin (fuzzy_within 4.0 1.0 3.0 3))
-!(FuzzyWithin (fuzzy_within 0.5 1.0 3.0 3))
-!(FuzzyLessThan (fuzzy_less_than 2.0 3.0 3))
-!(FuzzyGreaterThan (fuzzy_greater_than 2.0 3.0 3))
+(= (get-outgoing $atom $space $type)
+   (collapse 
+     (match $space ($type ($source $atom)) (match $space ($type ($atom $source)) ($type ($atom $source))))
+     )
+   )
+
+(= (get-outgoing $atom $space)
+   (collapse 
+     (match $space ($type ($source $atom)) (match $space ($type ($atom $source))))
+     )
+   )
+
+(= (out ($type $s $t))
+   $t
+   )
+
+(= (get-incoming-by-type $space $atom $type)
+   (collapse 
+     (union 
+      (match $space ($type $atom $target) $target)
+      (match $space ($type $source $atom) $source)
+      )
+    )
+   )
+
+(= (get-incoming $atom $space)
+   (collapse 
+     (union 
+      (match $space ($type $atom $target) ($type $atom $target))
+      (match $space ($type $source $atom) ($type $source $atom))
+      )
+     )
+   )
