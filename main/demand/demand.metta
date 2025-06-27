@@ -66,8 +66,6 @@
 (= (setDemandValue $space $demandName $newValue)
     (let* (
         ((demand $demandName $oldValue ) (match $space (demand $demandName $oldValue) (demand $demandName $oldValue)))
-        ;((demand $demandName $oldValue ) (collapse (match $space (demand $demandName $oldValue) (demand $demandName $oldValue))))
-
         (() (remove-atom $space (demand $demandName $oldValue)))
         (() (add-atom $space (demand $demandName $newValue)))
     )

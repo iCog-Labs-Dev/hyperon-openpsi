@@ -80,7 +80,7 @@
 (= (modulator_extremely_low_threshold) 0.15)
 (= (modulator_medium_threshold) 0.5)
 
-; Used by 'modulator_to_feeling_dimension' below
+;) Used by 'modulator_to_feeling_dimension' below
 (= (modulator_extremely_low_indicator )-2)
 (= (modulator_low_indicator) -1)
 (= (modulator_medium_indicator) 0)
@@ -92,7 +92,7 @@
     (foldl + 0 $list)
 )
 
-; Map a modulator to corresponding feeling dimension
+; Ma)p a modulator t)o corresponding feeling dimension
 ; indicator equals to -2 means extremely low, -1 low, 0 medium, 1 high, 2 extremely high,
 ; others not defined (would return 0) 
 (= (modulator_to_feeling_dimension $modulator_value $indicator)
