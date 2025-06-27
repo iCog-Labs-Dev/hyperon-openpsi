@@ -16,18 +16,6 @@
                 )
         )
 )
-; changed fuzzy_within
-(= (fuzzy_within $x $min_val $max_val $a)
-   (collapse
-      (case $x
-         (
-           ((< $min_val) (fuzzy_equal $x $min_val $a))
-           ((and (<= $min_val) (<= $max_val)) (let $rand (uniRand) (+ 0.99 (* $rand 0.01))))
-           ((> $max_val) (let $rand (uniRand) (+ 0.999 (* $rand 0.001))))
-         ))
-)
-)
-
 
 (= (fuzzy_less_than $x $t $a)
     (if (> $x $t)
@@ -64,14 +52,13 @@
 (: max-count (-> Number))
 (= (max-count) 1e9)
 
-; Define abs
-(: abs (-> $a $a))
-(= (abs $x) (if (< $x 0) (* -1 $x) $x))
-
 ;; Define approximately equal
 (: approxEq (-> $a $a $a Bool))
 (= (approxEq $x $y $epsilon) (<= (abs (- $x $y)) $epsilon))
 
+;; Define abs
+(: abs (-> $a $a))
+(= (abs $x) (if (< $x 0) (* -1 $x) $x))
 
 ;; Define <=
 (: <= (-> $a $a Bool))
