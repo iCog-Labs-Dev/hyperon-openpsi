@@ -1,1 +1,4 @@
 *.log
+.pycache
+use-cases/curious-agent/.pycache
+use-cases/curious-agent/__pycache__
