@@ -2,20 +2,11 @@ from typing import List
 from base import *
 import re
 import json
-    
-
+from pydantic import ValidationError
 
 def parse_schema(schema: Schema) -> str:
-	"""A function that parses a cognitive Schema into represented in Python to MeTTas structure."""
-	return  f"""
-		(: {schema.handle} (IMPLICATION_LINK
-						(AND_LINK (({schema.context}) {schema.action})
-						{schema.goal})
-					)
-					{schema.tv if schema.tv else ''}
-		)
-		""" # I'm assuming that the tv attribute is opitional and is a string of the form (TTV {time} (STV {Strength} {Confidence}))
-
+    """A function that parses a cognitive Schema into represented in Python to MeTTa structure."""
+    return f"""(: {schema.handle} (IMPLICATION_LINK (AND_LINK ({schema.context}) {schema.action}) {schema.goal})) {schema.tv})"""
 def parse_state_params(state_params: str) -> StateParams:
     """parses the string representation of MeTTa's state params and return a Python StateParam object."""
     pass
@@ -47,7 +38,10 @@ def parse_state_params(state_params: str) -> StateParams:
         return None
     params_obj = {name:float(value) for name,value in matches}
 
-    return StateParams(**params_obj)
+    try:
+        return StateParams(**params_obj)
+    except ValidationError:
+        return None
 
 
 def validateSyntax(rule: str) -> bool:
@@ -74,9 +68,19 @@ def extract_rules_from_llm(raw_rules: str) -> List[Schema]:
 	#Assumes the the raw_rules is a string representation of a list of rules in the form:
 	# "[(rule1), (rule2), ...]"
     rules = raw_rules.strip().strip('[]').split(',')
-    rules = [rule.strip() for rule in rules]
+    stripped_rules = raw_rules.strip().strip('[]').strip() # Strip outer whitespace again after removing brackets
+
+    if not stripped_rules:
+        return []
+
+    # Now split and strip each rule
+    rules = [rule.strip() for rule in stripped_rules.split(',')]
+
     return rules
 
 # string = "( (modulator activation 0.5) (modulator securing_threshold 0.7) (modulator pleasure 0.8) (modulator selection_threshold 0.6) )"
 # state_params = parse_state_params(string)
 # print(state_params)
+
+
+# print(parse_schema(Schema(handle="test_schema", context="(Self Is Outside) (Self Has Key) (Self See Door)", action="(Go to Door)", goal="(Self at Door)", tv="(TTV 1 (STV 0.5 0.1))")))
