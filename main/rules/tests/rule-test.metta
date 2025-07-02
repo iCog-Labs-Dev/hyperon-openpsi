@@ -61,3 +61,17 @@
 !(assertEqual (contextStv ((STV 0.5 0.4) (STV 0.6 0.8))) (STV 0.315 0.4))
 !(assertEqual (contextStv ((STV 1 1) (STV 1 1))) (STV 1.0 1.0))
 !(assertEqual (contextStv ((STV 0 0) (STV 0 0))) (STV 0 0))
+
+;urge Tests 
+
+!(addGoal (pinged) 0.75 1.0 &self)
+!(assertEqual (goal-value  (pinged) &self) 0.75)
+!(assertEqual (urge-value  (pinged) &self) 0.25)
+
+!(increase-urge (pinged) 0.15 &self)
+!(assertEqual (urge-value  (pinged) &self) 0.4)
+!(increase-urge (pinged) 0.3 &self)
+!(assertEqual (urge-value  (pinged) &self) 0.7)
+
+!(decrease-urge (pinged) 0.45 &self)
+!(assertEqual (urge-value  (pinged) &self) 0.25)
