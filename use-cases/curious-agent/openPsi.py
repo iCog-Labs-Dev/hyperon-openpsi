@@ -1,0 +1,50 @@
+import base64
+import os
+import sys
+from google import genai
+from google.genai import types
+
+def correlate(conversation_summary: str, rules_list: list[str]) -> str:
+    client = genai.Client(
+        api_key="AIzaSyBCWD1mXOatWSAIlRTQfCX5iCUbohuMuXs",
+    )
+
+    model = "gemini-2.0-flash"
+    
+    prompt = f"""
+Your task is to select and sort cognitive schematic rules from the list provided as {rules_list} that correlate with the current chat conversation summary: {conversation_summary}.
+
+- Return only a single-line Python list of strings in the exact format: ['rule1', 'rule2', 'rule3'] where each rule represents the entire cogritive schematics of the form  (: R1 (IMPLICATION_LINK (AND_LINK ((Conversation-Started)) (Greet-Human)) (Initiate-Engagement)) (TTV 100 (STV-0.9-0.8))) .
+- The returned list must be a subset of the originally provided list of rules.
+- The list must be sorted by relevance to the conversation summary, with the most relevant rules first.
+- Do not include any explanations, comments, or additional text in your response.
+- Preserve the exact syntax format as specified.
+"""
+
+    contents = [
+        types.Content(
+            role="user",
+            parts=[
+                types.Part.from_text(text=prompt),
+            ],
+        ),
+    ]
+
+    generate_content_config = types.GenerateContentConfig(
+        response_mime_type="text/plain",
+    )
+
+    result = ""
+    response = client.models.generate_content(
+        model=model,
+        contents=contents,
+        config=generate_content_config,
+    )
+    
+    # Process the response directly instead of iterating over chunks
+    for candidate in response.candidates:
+        for part in candidate.content.parts:
+            if hasattr(part, 'text'):
+                result += part.text.strip()
+
+    return result
