@@ -75,4 +75,3 @@
 
 !(decrease-urge (pinged) 0.45 &self)
 !(assertEqual (urge-value  (pinged) &self) 0.25)
-
