@@ -12,9 +12,13 @@ def parse_state_params(state_params: str) -> StateParams:
     pass
 		
 def parse_action(actions: str) -> List[Action]:
-	"""a function that parses MeTTa's tuple of actions to a Python List of Actions. The MeTTa expression has the form -> (action1 action2 action3 ...)"""
-	pass
-def parse_sexp(sexpr: str) -> List[Schema]:
+    """a function that parses MeTTa's tuple of actions to a Python List of Actions. The MeTTa expression has the form -> (action1 action2 action3 ...)"""
+    pattern = r'\(\s*(\w+\s*\d+)\s*\)'
+    actions_list = re.findall(pattern, actions)
+    action_tuple = (Action(action_name=action) for action in actions_list )
+    return action_tuple
+	
+def parse_exp(sexpr: str) -> List[Schema]:
 	"""A function that parses an expression from MeTTa to Python."""
 	pass
 def parse_state_params(state_params: str) -> StateParams:
