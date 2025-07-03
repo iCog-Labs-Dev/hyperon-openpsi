@@ -164,3 +164,15 @@
 
 (: isInBetween (-> Number Number Number Bool))
 (= (isInBetween $val $a $b) (if (and (>= $val $a) (<= $val $b)) True False))
+
+(= (existsIn $space $atom)
+  (case (get-metatype $atom)
+  (
+    (Expression (let $matchedAtoms (collapse (match $space $atom $atom)) (
+      if (== $matchedAtoms ()) False True
+    )
+    ))
+    (Symbol  ( let $res (collapse (get-type-space $space $atom)) (not (== (%Undefined%) $res)) ))
+  )
+  )
+)
