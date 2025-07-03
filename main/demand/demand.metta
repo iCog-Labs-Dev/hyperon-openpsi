@@ -1,5 +1,3 @@
-!(bind! &demandspace (new-space))
-!(bind! &cacheSpace (new-space))
 
 (: Demand Type)
 (: SkipDemand Type)
@@ -9,31 +7,28 @@
 ; (: addDemand (-> hyperon::space::DynSpace Symbol Number Demand))
 (= (addDemand $space $name $value)
     (let* (
-        ($demand (demand $name $value))
-        ; ($duplicateDemandList  (match $space (demand $name $v) (demand $name $v)))
-      
-       
-
-        (() (add-atom $space $demand))
-    )
+            ($demand (demand $name $value))
+            ; ($duplicateDemandList  (match $space (demand $name $v) (demand $name $v)))
+            (() (add-atom $space $demand))
+        )
      ()
     )
     )
 
+(= (fetch-demand $space $name)
+    (match $space (demand $name $x) (demand $name $x))
+)
+
+(= (fetch-demand-val $space $name)
+    (let ($x $y $z) (fetch-demand $space $name) $z)
+)
 
 (= (getAllDemands $space)
     (collapse (match $space (demand $x $_) (demand $x $_)))
 )
 
-!(add-reduct &demandspace (superpose (
-        (demand energy 0.5)
-        (demand affiliation 0.5)
-        (demand competence 0.5)
-        
-    
-)))
 
-(= (skipDemand $space $demand ) 
+(= (skipDemand $space $demand) 
     (let* (
         ($skip (collapse (match $space (skip $demand) (skip $demand))))
         ( $isNotFound (== $skip ()))
@@ -44,11 +39,6 @@
     )
     )
 )
-
-
-; !(add-reduct &demandspace (superpose (
-;         (skip competence 0.5)
-; )))
 
 (= (getEnabledDemands $space)
     (let* (
@@ -73,20 +63,3 @@
     )
 
 )
-
-
-!(skipDemand energy)
-!(skipDemand affiliation)
-
-!(setDemandValue energy 0.6)
-
-
-!(getEnabledDemands)
-
-
-!(get-atoms &demandspace)
-
-
-
-
-
