@@ -1,8 +1,10 @@
 import base64
 import os
 import sys
+from typing import List
 from google import genai
 from google.genai import types
+from base import Schema
 
 def correlate(conversation_summary: str, rules_list: list[str]) -> str:
     client = genai.Client(
@@ -31,7 +33,8 @@ Your task is to select and sort cognitive schematic rules from the list provided
     ]
 
     generate_content_config = types.GenerateContentConfig(
-        response_mime_type="text/plain",
+       response_mime_type= "application/json",
+        response_schema= {"type": "array", "items": {"type": "string"}}
     )
 
     result = ""
@@ -39,6 +42,7 @@ Your task is to select and sort cognitive schematic rules from the list provided
         model=model,
         contents=contents,
         config=generate_content_config,
+    
     )
     
     # Process the response directly instead of iterating over chunks
@@ -47,4 +51,4 @@ Your task is to select and sort cognitive schematic rules from the list provided
             if hasattr(part, 'text'):
                 result += part.text.strip()
 
-    return result
+    return result.strip()
