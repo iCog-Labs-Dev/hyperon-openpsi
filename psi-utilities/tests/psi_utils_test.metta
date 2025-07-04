@@ -8,8 +8,8 @@
 !(assertEqual (prior-beta) 0.5)
 
 ;; Absolute Value always positive value
-!(assertEqual (abs 50) 50)      ;;Positive is also positive
-!(assertEqual (abs -70) 70)     ;;Negative should change to positive
+!(assertEqual (abs-math 50) 50)      ;;Positive is also positive
+!(assertEqual (abs-math -70) 70)     ;;Negative should change to positive
 
 
 ;; Show maximum Value between two number
