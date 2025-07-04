@@ -6,7 +6,7 @@ from google import genai
 from google.genai import types
 from base import Schema
 
-def correlate(conversation_summary: str, rules_list: list[str]) -> str:
+def correlate(conversation_summary: str, rules_list: str) -> str:
     client = genai.Client(
         api_key="AIzaSyBCWD1mXOatWSAIlRTQfCX5iCUbohuMuXs",
     )
@@ -45,10 +45,19 @@ Your task is to select and sort cognitive schematic rules from the list provided
     
     )
     
-    # Process the response directly instead of iterating over chunks
+
     for candidate in response.candidates:
         for part in candidate.content.parts:
             if hasattr(part, 'text'):
                 result += part.text.strip()
 
     return result.strip()
+
+
+def correlation_matcher(conversation_summary:str, rules_list:str) -> Schema:
+
+    # This function should take the conversation summary and the list of rules as input
+    # and validate the synthax and existence of the rules in the rule space
+    selected_rules = correlate(conversation_summary, rules_list).splitlines()
+    sorted_rules = sorted(selected_rules, key=lambda rule: rule.split(" (")[1].split(")")[0], reverse=True)
+    return [Schema(rule) for rule in sorted_rules]
