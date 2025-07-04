@@ -3,6 +3,9 @@ from base import *
 import re
 import json
 from pydantic import ValidationError
+from typing import List, Optional
+import google.generativeai as genai
+
 
 def parse_schema(schema: Schema) -> str:
     """A function that parses a cognitive Schema into represented in Python to MeTTa structure."""
@@ -88,3 +91,60 @@ def extract_rules_from_llm(raw_rules: str) -> List[Schema]:
 
 
 # print(parse_schema(Schema(handle="test_schema", context="(Self Is Outside) (Self Has Key) (Self See Door)", action="(Go to Door)", goal="(Self at Door)", tv="(TTV 1 (STV 0.5 0.1))")))
+
+
+# ========== Correlation Matcher ==========
+def match_rule(conversation_summary: str, rule_base: List[str]) -> Optional[str]:
+    try:
+        prompt = (
+            f"You are a rule selection engine.\n\n"
+            f"Given the following conversation summary:\n"
+            f"{conversation_summary}\n\n"
+            f"And this list of rules:\n"
+            f"{rule_base}\n\n"
+            f"Compare the summary to all rules. Select only the top 4 most relevant rules "
+            f"that closely match the conversation context. Return them in descending order "
+            f"of relevance — from most relevant to least relevant.\n\n"
+            f"Output Format Requirement:\n"
+            f"- Return only the full rule texts (no headings, no extra words, no explanations).\n"
+            f"- Do NOT include any unrelated rules or commentary.\n"
+            f"- Return exactly 4 rules or fewer if fewer match — clean output."
+        )
+
+        best_rule = run_gemini(prompt)
+        return best_rule
+    except Exception as e:
+        return f"[Matcher Error] {str(e)}"
+
+## ========== Gemini Setup ==========
+
+# genai.configure(api_key="here needs own api_key")
+
+def run_gemini(prompt: str, system_instruction: Optional[str] = None) -> str:
+    """Runs Gemini on a given prompt and returns output text only"""
+    try:
+        model = genai.GenerativeModel("gemini-1.5-flash")
+        generation_config = genai.types.GenerationConfig(
+            temperature=0.5,
+            top_p=1,
+            top_k=1,
+            max_output_tokens=1024,
+        )
+        if system_instruction:
+            response = model.generate_content(
+                prompt,
+                generation_config=generation_config,
+                system_instruction=system_instruction
+            )
+        else:
+            response = model.generate_content(
+                prompt,
+                generation_config=generation_config
+            )
+        return response.text.strip()
+    except Exception as e:
+        return f"[Gemini Error] {str(e)}"
+    
+    # Test Case 
+best_match = match_rule("summarized Text", "List of All Rule")
+print(best_match) 
