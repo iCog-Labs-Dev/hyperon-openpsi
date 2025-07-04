@@ -5,9 +5,7 @@
 ;; inspired by rocca it is going to receive time-stamped observations.
 ;; in every cycle, the cache space is expected to be updated when the environment
 ;; is updated. Hence once the the perception updater agent perceives the cache
-;; it is expected for its contents (atoms) to be deleted.
-;; The cache space in this scenario is used for optimizing the code. 
-;; since similarity checks for an s-expression or a list takes atleast O(N^2) 
+;; it is expected ft O(N^2) 
 ;; time complexity. Hence new dynamic enviroment is persisted in both
 ;; the envSpace and the cache. So using this rationale, we can say that
 ;; the cache holds new percepta which are about to be persisted in the 
@@ -117,3 +115,6 @@
 
 
 
+or its contents (atoms) to be deleted.
+;; The cache space in this scenario is used for optimizing the code. 
+;; since similarity checks for an s-expression or a list takes atleas
