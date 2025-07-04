@@ -46,7 +46,7 @@
 
 ;; Define max
 (: max (-> $a $a $a))
-(= (max $x $y) (if (> $x $y) $x $y))
+(= (max $x $y) (max-atom ($x $y)))
 
 ;; Maximum supported count
 (: max-count (-> Number))
