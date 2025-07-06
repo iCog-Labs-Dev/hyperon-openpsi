@@ -49,23 +49,26 @@ def parse_state_params(state_params: str) -> StateParams:
 
 
 def validateSyntax(rule: str) -> bool:
-    pattern = r"""
-    ^\(:\s+
-    (\w+)\s+
-    \(IMPLICATION_LINK\s+
-        \(AND_LINK\s+
-            \(\(\s*(\((?:\w+-?)+\)\s*)+\s*\)\s*
-            \(\w+-?\)\)\s+
-        \(\w+-?\)\s*
-    \)\s+
-    \(TTV\s+
-        (\d+)\s+
-        \(STV\s+([\d.]+)\s+([\d.]+)\)
-    \)\)\)$
-    """
+    pattern = r"""\(:\s+(\w+)\s+                             # (: R15
+                \(IMPLICATION_LINK\s+                        # (IMPLICATION_LINK
+                    \(AND_LINK\s+                            # (AND_LINK
+                        \(\(\s*(\w+(?:-\w+)*)\s*\)\)\s+      # ((Human-Provides-Ambiguous-Answer))
+                        \(\w+(?:-\w+)*\)\)                   # (Seek-Clarification)
+                    \s+\(\w+(?:-\w+)*\)\s*\)                 # (Resolve-Ambiguity)
+                \s+\(TTV\s+(\d+)\s+                          # (TTV 114
+                    \(STV\s+([\d.]+)\s+([\d.]+)\)\)\)$       # (STV 0.9 0.8)))
+            """
     return bool(re.match(pattern, rule, re.VERBOSE))
-def checkExistence(rule: Schema, ruleSpace: List[Schema]) -> bool:
-	pass
+
+
+
+def validateExistence(rule: str, ruleSpace: List[str]) -> bool:
+    """
+    Validates if a rule string exists within the ruleSpace string.
+    """
+    # This is a simple validation . It  assumes there is no discrepancy in the spacing within the rule strings.
+    
+    return rule in ruleSpace
 
 def extract_rules_from_llm(raw_rules: str) -> List[Schema]: 
     #Extracts the selected rules from the LLM response.
