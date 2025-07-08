@@ -7,10 +7,7 @@ from pydantic import ValidationError
 def parse_schema(schema: Schema) -> str:
     """A function that parses a cognitive Schema into represented in Python to MeTTa structure."""
     return f"""(: {schema.handle} (IMPLICATION_LINK (AND_LINK ({schema.context}) {schema.action}) {schema.goal})) {schema.tv})"""
-def parse_state_params(state_params: str) -> StateParams:
-    """parses the string representation of MeTTa's state params and return a Python StateParam object."""
-    pass
-		
+
 def parse_action(actions: str) -> List[Action]:
     """a function that parses MeTTa's tuple of actions to a Python List of Actions. The MeTTa expression has the form -> (action1 action2 action3 ...)"""
     pattern = r'\(\s*(\w+\s*\d+)\s*\)'
