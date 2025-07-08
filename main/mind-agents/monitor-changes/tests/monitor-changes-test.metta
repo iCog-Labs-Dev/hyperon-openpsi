@@ -10,7 +10,7 @@
 !(import! &self utilities-module:utils)
 
 ;Test setPreviousTime function
-!(assertEqual (setPreviousTime (10 15 20 40)) (20 40))
+!(assertEqual (setPreviousTime (10 20 30 4)) (20 30))
 
 ;;Test update-drmtc-chng-tv function that updates the predicate (Predicate has-dramatic-changes)
 !(bind! &t (new-space))
