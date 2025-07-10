@@ -12,14 +12,14 @@
 !(skipDemand &demandSpace competence)
 
 
-!(assertEqual (existsIn &demandSpace (demand energy 0.6)) True)
-!(assertEqual (existsIn &demandSpace (demand competence 0.2)) True)
+!(assertEqual (exists-In &demandSpace (demand energy 0.6)) True)
+!(assertEqual (exists-In &demandSpace (demand competence 0.2)) True)
 !(assertEqual (getAllDemands &demandSpace )  ((demand energy 0.6) (demand affiliation 0.5) (demand competence 0.2)))
-!(assertEqual (existsIn &demandSpace (skip competence)) True)
+!(assertEqual (exists-In &demandSpace (skip competence)) True)
 
 !(setDemandValue &demandSpace energy 0.8)
-!(assertEqual (existsIn &demandSpace (demand energy 0.6)) False)
-!(assertEqual (existsIn &demandSpace (demand energy 0.8)) True)
+!(assertEqual (exists-In &demandSpace (demand energy 0.6)) False)
+!(assertEqual (exists-In &demandSpace (demand energy 0.8)) True)
 
 !(assertEqual (fetch-demand &demandSpace energy)  (demand energy 0.8))
 !(assertEqual (fetch-demand-val &demandSpace energy) 0.8)
