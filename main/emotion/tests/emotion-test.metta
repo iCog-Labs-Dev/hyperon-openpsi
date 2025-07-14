@@ -11,3 +11,4 @@
 !(assertEqual (isAvailable? &test-space (emotion old-emotion 6)) False)
 !(assertEqual (isAvailable? &test-space (emotion new-emotion 5)) True)
 !(assertEqual (create-emotion &test-space old-emotion) (ERROR Wrong Format))
+
