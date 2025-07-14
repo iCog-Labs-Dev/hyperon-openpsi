@@ -32,7 +32,6 @@ jobs:
       - name: Run tests
         working-directory: ./
         run: |
-          git submodule add https://github.com/iCog-Labs-Dev/meTTa-utils.git utilities-module
           git submodule update --init --recursive
           cd utilities-module/
           git checkout main
