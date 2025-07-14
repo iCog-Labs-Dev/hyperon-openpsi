@@ -1,6 +1,7 @@
 import unittest
 from adapter import parse_schema, parse_state_params, validateSyntax, extract_rules_from_llm
 from base import Schema, StateParams
+from openPsi import *
 from typing import List
 
 class TestAdapter(unittest.TestCase):
@@ -99,7 +100,6 @@ class TestAdapter(unittest.TestCase):
         raw_rules_empty_rule = "[, (: R1 (IMPLICATION_LINK (AND_LINK (((Self at Door) (Self Has Key))) (Open Door)) ) (TTV 100 (STV 0.9 0.8))))]"
         expected_rules_empty_rule = ['', '(: R1 (IMPLICATION_LINK (AND_LINK (((Self at Door) (Self Has Key))) (Open Door)) ) (TTV 100 (STV 0.9 0.8))))']
         self.assertEqual(extract_rules_from_llm(raw_rules_empty_rule), expected_rules_empty_rule)
-
 
 if __name__ == '__main__':
     unittest.main()
