@@ -56,7 +56,7 @@
               (let* 
                 (
                   ($res (getRuleType $ruleHandle $space))
-                  ($_ (if (== (len $res) 2) ; Important to avoid adding another $tv to $ruleHandle as type.
+                  ($_ (if (== (size-atom $res) 2) ; Important to avoid adding another $tv to $ruleHandle as type.
                           (update-atom $space (: $ruleHandle (TTV 0 (STV 0.0 0.0))) (: $ruleHandle $tv)) 
                           () ))
                   ($_ (update-atom $space (isExecuted $ruleHandle (DEFAULT_TV)) (isExecuted $ruleHandle (FALSE_TV))))
@@ -183,7 +183,7 @@
 (: setDgv (-> Symbol Number Grounded (->)))
 (= (setDgv $goal $value $space)
    (if (goalExists $goal $space)
-          (match $space (Goal $goal $oldGv $oldDgv) (update-atom $space (Goal $goal $oldGv $oldDgv) (Goal $goal $oldGv $value))) 
+          (match $space (Goal $goal $oldGv $oldDgv) (update-atom $space (Goal $goal $oldGv $oldDgv) (Goal $goal $value $oldDgv)))
           (Invalid Goal Id)
     )
    )
@@ -301,16 +301,14 @@
   $conf
 )
 
-(= (min $head $tail) (if (< $head $tail) $head $tail))
-
 
 (= (contextStv $stvList)
     (let* (
       ($firDegree (collapse (cogTvMean (superpose $stvList))))
       ($secDegree (collapse (cogTvConfidence (superpose $stvList))))
-      ($firResult (foldr * 1 $firDegree))
-      ($secResult (foldr min 1 $secDegree))
-    
+      ($firResult (foldl-atom $firDegree 1 $acc $x (* $acc $x)))
+      ($secDegreeTuple (union-atom (1) $secDegree))  
+      ($secResult (min-atom $secDegreeTuple)) 
     )
       (STV $firResult $secResult)
     )

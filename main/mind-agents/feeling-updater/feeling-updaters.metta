@@ -89,8 +89,12 @@
 (= (modulator_undefined_indicator) 3)
 (= (get_pleasure_value) 0.5)
 (= (sum $list)
-    (foldl + 0 $list)
+    (let * 
+    ($acc (foldl-atom $list 0 $acc $x (+ $acc $x))) 
+    ($acc)
+    )
 )
+
 
 ; Ma)p a modulator t)o corresponding feeling dimension
 ; indicator equals to -2 means extremely low, -1 low, 0 medium, 1 high, 2 extremely high,

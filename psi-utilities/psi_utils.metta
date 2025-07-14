@@ -47,18 +47,17 @@
 ;; Define max
 (: max (-> $a $a $a))
 (= (max $x $y) (if (> $x $y) $x $y))
-
 ;; Maximum supported count
 (: max-count (-> Number))
 (= (max-count) 1e9)
 
 ; Define abs
-(: abs (-> $a $a))
-(= (abs $x) (if (< $x 0) (* -1 $x) $x))
+;(: abs (-> $a $a))
+;(= (abs $x) (if (< $x 0) (* -1 $x) $x))
 
 ;; Define approximately equal
 (: approxEq (-> $a $a $a Bool))
-(= (approxEq $x $y $epsilon) (<= (abs (- $x $y)) $epsilon))
+(= (approxEq $x $y $epsilon) (<= (abs-math (- $x $y)) $epsilon))
 
 
 ;; Define <=
