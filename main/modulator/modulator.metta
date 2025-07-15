@@ -5,11 +5,11 @@
 (= (insert-modulators $space) (add-reduct $space (superpose (
         (modulator arousal 0.5)
         (modulator positive-valence 0.5)
-        (modulator negative-valence 0.5)
+        ;;(modulator negative-valence 0.5)
         (modulator selection-threshold 0.5)
         (modulator securing-threshold 0.5)
         (modulator goal-directedness 0.5)
-    
+        (modulator resolution-level 0.5)
 ))))
 
 (: fetch-modulator (-> hyperon::space::DynSpace Symbol Expression))
