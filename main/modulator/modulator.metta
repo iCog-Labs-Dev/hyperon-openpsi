@@ -1,3 +1,4 @@
+!(bind! &modulator-space (new-space))
 (: Modulator Type)
 (: modulator (-> Symbol Number Modulator))
 
@@ -14,7 +15,7 @@
 
 (: fetch-modulator (-> hyperon::space::DynSpace Symbol Expression))
 (= (fetch-modulator $space $name)
-    (collapse (match $space (modulator $name $x) (modulator $name $x)))
+     (match $space (modulator $name $x) (modulator $name $x))
 )
 
 (: fetch-modulator-val (-> hyperon::space::DynSpace Symbol Number))
