@@ -11,7 +11,7 @@
 !(addDemand &demandSpace competence 0.2)
 !(skipDemand &demandSpace competence)
 
-
+!(assertEqual (getDemandByName &demandSpace energy) (demand energy 0.6))
 !(assertEqual (exists-In &demandSpace (demand energy 0.6)) True)
 !(assertEqual (exists-In &demandSpace (demand competence 0.2)) True)
 !(assertEqual (getAllDemands &demandSpace )  ((demand energy 0.6) (demand affiliation 0.5) (demand competence 0.2)))

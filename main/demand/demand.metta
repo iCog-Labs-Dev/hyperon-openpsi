@@ -63,3 +63,4 @@
     )
 
 )
+(= (getDemandByName $space $name) (match $space (demand $name $x) (demand $name $x)))
