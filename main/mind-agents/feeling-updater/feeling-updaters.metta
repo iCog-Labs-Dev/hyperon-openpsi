@@ -29,7 +29,6 @@
 ;    i.e. in the face of urgency, there will be less orientation. 
 ;    It also depends on the uncertainty in the current context.
 ;    An undetermined environment requires more orientation, i.e. lower securing threshold. 
-;
 ; 4. SelectionThreshold.
 ;    It is a bias added to the strength of the currently selected motive (Demand Goal). 
 ;    A higher selection threshold leads to "stubbornness", makes it harder to switch 
@@ -73,7 +72,14 @@
 ;; !(register-module! ../utilities-module)
 ;; !(import! &self utilities-module:utils)
 ;; !(import! &self hyperon-openpsi:utils:psi_utils)
-
+;;!(import! &self psi-utils)
+;; (: foldl (-> (-> $a $b $d) $b $c $d))
+;; (= (foldl $f $acc $tuple)
+;;    (if (== $tuple ())
+;;        $acc
+;;        (let $next (car-atom $tuple) (foldl $f ($f $next $acc) (cdr-atom $tuple)))
+;;    )
+;; )
 (= (modulator_high_threshold) 0.7)
 (= (modulator_extremely_high_threshold) 0.85)
 (= (modulator_low_threshold) 0.3)
@@ -88,14 +94,13 @@
 (= (modulator_extremely_high_indicator) 2)
 (= (modulator_undefined_indicator) 3)
 (= (get_pleasure_value) 0.5)
-(= (sum $list)
-    (let * 
-    ($acc (foldl-atom $list 0 $acc $x (+ $acc $x))) 
-    ($acc)
-    )
-)
-
-
+;; (= (sum $list)
+;;     (let* (
+;;         ($acc (foldl-atom $list 0 $acc $x (+ $acc $x))) 
+;;     )
+;;     $acc
+;;     )
+;; )
 ; Ma)p a modulator t)o corresponding feeling dimension
 ; indicator equals to -2 means extremely low, -1 low, 0 medium, 1 high, 2 extremely high,
 ; others not defined (would return 0) 
@@ -129,17 +134,29 @@
 ; ;5 indicator for Pleasure
 ; ;6 the number of modulators used during calculation 
 
-(= (feeling_calculator $activation_indicator 
+(= (feeling_calculator $modulator_space 
+                       $activation_indicator 
                        $resolution_indicator 
                        $securing_threshold_indicator 
                        $selection_threshold_indicator 
                        $pleasure_indicator 
                        $number_of_used_modulators)
     (let* (
-        ($activation-value 0.3)
-        ($resolution-value 0.4)
-        ($securing-value 0.7)
-        ($selection-value 0.4)
+	((modulator arousal $activation-value) (fetch-modulator $modulator_space arousal))
+    
+    
+	((modulator securing-threshold $securing-value) (fetch-modulator $modulator_space securing-threshold))
+    
+    
+	((modulator selection-threshold $selection-value) (fetch-modulator $modulator_space selection-threshold))
+    
+	((modulator resolution-level $resolution-value) (fetch-modulator $modulator_space resolution-level))
+    
+    
+        ;($activation-value 0.3)
+        ;($resolution-value 0.4)
+        ;($securing-value 0.7)
+        ;($selection-value 0.4)
         ($feeling-activation (modulator_to_feeling_dimension $activation-value $activation_indicator))
         ($feeling-resolution (modulator_to_feeling_dimension
               $resolution-value 
@@ -168,8 +185,9 @@
 )
 
 ; Feeling updaters    
-(= (happinessFeelingUpdater) 
-    (feeling_calculator (modulator_high_indicator)
+(= (happinessFeelingUpdater $modulator_space) 
+    (feeling_calculator $modulator_space 
+                        (modulator_high_indicator)
                         (modulator_low_indicator)
                         (modulator_undefined_indicator) 
                         (modulator_high_indicator)
@@ -178,8 +196,8 @@
     )
 )    
 
-(= (sadnessFeelingUpdater) 
-    (feeling_calculator (modulator_low_indicator)
+(= (sadnessFeelingUpdater $modulator_space) 
+    (feeling_calculator $modulator_space (modulator_low_indicator)
                         (modulator_high_indicator)
                         (modulator_undefined_indicator)
                         (modulator_extremely_low_indicator)
@@ -188,8 +206,9 @@
     )
 )    
 
-(=(angerFeelingUpdater)
-    (feeling_calculator (modulator_high_indicator)
+(=(angerFeelingUpdater $modulator_space)
+    (feeling_calculator $modulator_space 
+                        (modulator_high_indicator)
                         (modulator_low_indicator)
                         (modulator_undefined_indicator)
                         (modulator_low_indicator)
@@ -198,8 +217,9 @@
     )
 )
 
-(= (fearFeelingUpdater) 
-    (feeling_calculator (modulator_extremely_low_indicator)
+(= (fearFeelingUpdater $modulator_space) 
+    (feeling_calculator $modulator_space 
+                        (modulator_extremely_low_indicator)
                         (modulator_extremely_high_indicator)
                         (modulator_low_indicator)
                         (modulator_undefined_indicator)
@@ -208,8 +228,9 @@
     )
 )
 
-(= (excitementFeelingUpdater) 
-    (max (feeling_calculator (modulator_high_indicator)
+(= (excitementFeelingUpdater $modulator_space) 
+    (max (feeling_calculator $modulator_space 
+                             (modulator_high_indicator)
                              (modulator_low_indicator)
                              (modulator_undefined_indicator)
                              (modulator_low_indicator)
@@ -217,7 +238,8 @@
                              4
          )
 
-         (feeling_calculator (modulator_high_indicator)
+         (feeling_calculator $modulator_space 
+                             (modulator_high_indicator)
                              (modulator_low_indicator)
                              (modulator_undefined_indicator)
                              (modulator_low_indicator)
@@ -227,8 +249,8 @@
     )
 )
 
-(= (prideFeelingUpdater) 
-    (feeling_calculator (modulator_undefined_indicator)
+(= (prideFeelingUpdater $modulator_space) 
+    (feeling_calculator $modulator_space (modulator_undefined_indicator)
                         (modulator_low_indicator)
                         (modulator_high_indicator)
                         (modulator_high_indicator)
@@ -237,8 +259,8 @@
     )
 )
 
-(= (loveFeelingUpdater) 
-    (feeling_calculator (modulator_undefined_indicator)
+(= (loveFeelingUpdater $modulator_space) 
+    (feeling_calculator $modulator_space (modulator_undefined_indicator)
                         (modulator_extremely_low_indicator)
                         (modulator_extremely_high_indicator)
                         (modulator_extremely_high_indicator)
@@ -247,8 +269,8 @@
     )
 )
 
-(= (hateFeelingUpdater) 
-    (feeling_calculator (modulator_extremely_high_indicator)
+(= (hateFeelingUpdater $modulator_space) 
+    (feeling_calculator $modulator_space (modulator_extremely_high_indicator)
                         (modulator_extremely_low_indicator)
                         (modulator_extremely_high_indicator)
                         (modulator_undefined_indicator)
@@ -257,8 +279,9 @@
     )
 )
 
-(= (gratitudeFeelingUpdater) 
-    (feeling_calculator (modulator_undefined_indicator)
+(= (gratitudeFeelingUpdater $modulator_space) 
+    (feeling_calculator $modulator_space 
+                        (modulator_undefined_indicator)
                         (modulator_undefined_indicator)
                         (modulator_undefined_indicator)
                         (modulator_high_indicator)
