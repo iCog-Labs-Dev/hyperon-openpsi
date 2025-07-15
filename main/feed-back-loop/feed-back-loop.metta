@@ -1,5 +1,5 @@
 
-
+!(bind! &kb (new-space))
 (: psi-agent-loop (-> Symbol hyperon::space::DynSpace Expression)) 
 (= (psi-agent-loop $state $kb)
 	(let* (
