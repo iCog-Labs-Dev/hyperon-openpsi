@@ -120,7 +120,7 @@
 		)
 	  	
 	)))
-
+;; A helper function that checks if the goal is met from a set of rules.
 (:isGoalMet' (-> Expression Goal Bool))
 (= (isGoalMet' $rules $goal)
    	(if (== $rules ())
