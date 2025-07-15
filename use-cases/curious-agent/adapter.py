@@ -51,15 +51,7 @@ def parse_state_params(state_params: str) -> StateParams:
 
 
 def validateSyntax(rule: str) -> bool:
-    pattern = r"""\(:\s+(\w+)\s+                             # (: R15
-                \(IMPLICATION_LINK\s+                        # (IMPLICATION_LINK
-                    \(AND_LINK\s+                            # (AND_LINK
-                        \(\(\s*(\w+(?:-\w+)*)\s*\)\)\s+      # ((Human-Provides-Ambiguous-Answer))
-                        \(\w+(?:-\w+)*\)\)                   # (Seek-Clarification)
-                    \s+\(\w+(?:-\w+)*\)\s*\)                 # (Resolve-Ambiguity)
-                \s+\(TTV\s+(\d+)\s+                          # (TTV 114
-                    \(STV\s+([\d.]+)\s+([\d.]+)\)\)\)$       # (STV 0.9 0.8)))
-            """
+    pattern = r"""\(\(:\s*(\w+)\s+\(\(TTV\s+\d+\.?\d*\s+\(STV\s+\d+\.?\d*\s+\d+\.?\d*\s*\)\)\s+\(IMPLICATION_LINK\s+\(\s*AND_LINK\s+\(\(\s*Goal\s+\w+\s+\d+\.?\d*\s+\d+\.?\d*\s*\)\s+\w+\s*\)\)\s+\(\s*Goal\s+\w+\s+\d+\.?\d*\s+\d+\.?\d*\s*\)\)\)\)\s+\d+\.?\d*\s*\)"""
     return bool(re.match(pattern, rule, re.VERBOSE))
 
 
@@ -96,3 +88,5 @@ def extract_rules_from_llm(raw_rules: str) -> List[Schema]:
 
 
 # print(parse_schema(Schema(handle="test_schema", context="(Self Is Outside) (Self Has Key) (Self See Door)", action="(Go to Door)", goal="(Self at Door)", tv="(TTV 1 (STV 0.5 0.1))")))
+
+
