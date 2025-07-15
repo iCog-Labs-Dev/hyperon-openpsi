@@ -120,3 +120,37 @@
 		)
 	  	
 	)))
+
+(:isGoalMet' (-> Expression Goal Bool))
+(= (isGoalMet' $rules $goal)
+   	(if (== $rules ())
+		False
+		(let* (
+			(($rule $tail) (decons-atom $rules))
+            ($_ (println! (isGoalMetInnerRule $rule tail $tail)))
+			($ruleGoal (extractGoalFromRule $rule))
+            ($_ (println! (this is the goal $ruleGoal)))
+		)
+		  (if (== $ruleGoal $goal)
+		    	True
+		    	(isGoalMet' $tail $goal)
+		  )
+		)
+	)
+)
+
+
+;; How would this function work? how can I check whether the goal is met?
+;; This function is used for a follow-up after the action-selection mind agent
+;; is applied.
+(: isGoalMet? (-> Expression Goal Bool))
+(= (isGoalMet? $actions $goal)
+	(let* (
+	       ($length (size-atom $actions))
+	       ($lastAction (index-atom $actions (- $length 1)))
+	       ($rules' (findRulesWithAction &ruleSpace $lastAction))
+           ($_ (println! (rulesinGoal $rules')))
+	)
+		 (isGoalMet' $rules' $goal)
+	)	
+)
