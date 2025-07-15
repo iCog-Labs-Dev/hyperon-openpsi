@@ -63,3 +63,60 @@
 	)
 )
 )
+
+;;(: applyActions (-> Expression Goal Expression Expression))
+(= (applyActions $actions $goal $demand) 
+   (if (== $actions ())
+     		()
+		(let $isGoalMet? (isGoalMet? $actions $goal)
+		  	(if $isGoalMet?
+                (let* (
+                       ($_ (println! (goalMet $isGoalMet?)))
+                       ((demand $demandName $demandValue) $demand)
+                )
+			  	    (setDemandValue &demandspace $demandName 1.0)
+                )
+				()
+			)
+		)))
+; A non-deterministic implementation of demand selection refer 
+;; OpenPsi: A Novel Computational Affective Model and its Application in Video Games by Goertzel,Ben et. al (2013)
+(: selectDemand (-> Expression Expression))
+(= (selectDemand $demands)
+   (let* (
+	  ($selectionVal (fetch-modulator-val (modulatorSpace) selection-threshold))
+	  ($randomVal (random-float $rng 0 1))
+	)
+     	(if (>= $selectionVal $randomVal)
+	  	(demandSelector $demands)
+		(let* (
+			($length (size-atom $demands))
+			($randIndex (random-int &rng 0 (- $length 1)))
+			($demand (index-atom $demands $randIndex))
+		)
+		  $demand))))
+;;What happens when actions are applied?
+;;How are we going to solve the problem?
+;;(: $handle ((TTV $time (STV $bel $conf)) (IMPLICATION_LINK (AND_LINK ($context $action)) $goal)))
+;; we  can write a function that selects rules based on actions, then we can take the function that has the biggest heuristic
+(: selectRuleByAction (-> hyperon::space::DynSpace Symbol Expression)) 
+(= (selectRuleByAction $ruleSpace $action)
+   	(collapse (match $ruleSpace ((:$handle ((TTV $time (STV $bel $conf)) (IMPLICATION_LINK (AND_LINK ($context $action)) $goal))) $val) ((: $handle ((TTV $time (STV $bel $conf)) (IMPLICATION_LINK (AND_LINK ($context $action)) $goal))) $val))))
+
+;; A temporary selector of rules which are selected based on having the same actions. 
+(: selectMaxRule (-> Expression Expression Expression))
+(= (selectMaxRule $rules $maxRule)
+   	(if (== $rules ())
+	  $maxRule
+	(let* (
+	       ((($rule $weight) $tail) (decons-atom $rules))
+		    (($maxRule' $maxWeight) $maxRule)
+	       )
+	  (if (>= $maxWeight $weight)
+		  	;;()
+			(selectMaxRule $tail $maxRule)
+			(selectMaxRule $tail $rule)
+
+		)
+	  	
+	)))
