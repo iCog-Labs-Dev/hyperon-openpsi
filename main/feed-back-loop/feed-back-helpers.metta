@@ -45,3 +45,21 @@
 	  	()	
 	)
 )
+;; (: demandSelector (-> Expression Demand))
+(= (demandSelector $demands)
+   	(if (== $demands ())
+	  	(Error "No Demands Available")
+		(demandSelector' $demands (car-atom $demands))))
+;
+;; A one to one relationship between a demand and a goal.
+;; This goal selector maps from the demand and applies the goal to it
+;; This function can be replaced with a semantic network it relates goal to demand.
+
+(= (goalSelector $demand)
+   (case $demand(
+		 ((demand affiliation $y) (Goal mission_complete 1.0 1.0))
+		((demand competence $x) (Goal mission_complete 1.0 1.0))
+        ((demand energy $x) (Goal mission_complete 1.0 1.0))
+	)
+)
+)
