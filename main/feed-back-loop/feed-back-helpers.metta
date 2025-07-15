@@ -6,7 +6,7 @@
             (($head $tail) (decons-atom $expression))
             ($_  (remove-atom $space $head))
            ($rem (collapse (get-atoms $space)))
-           ($_ (println! (remaining-atoms $rem)))
+           ;;($_ (println! (remaining-atoms $rem)))
         )
             (remove-atoms' $space $tail)
         )
@@ -153,4 +153,20 @@
 	)
 		 (isGoalMet' $rules' $goal)
 	)	
+)
+
+;; This function implements the kb-initializer for the open-psi loop to work
+(: kb-initializer (-> hyperon::space::DynSpace Expression))
+(= (kb-initializer $kb)
+   (let* (
+	  	($rules (collapse (get-atoms &rule-space)))
+		($modulators (collapse (get-atoms &modulator-space)))
+		($demands (collapse (get-atoms &demandspace)))
+		($partialKb (union-atom $rules $modulators))
+		($kbExp (union-atom $partialKb $demands))
+		($_ (collapse (add-atoms $kb $kbExp)))
+	)
+     		()
+    
+	)
 )
