@@ -1,10 +1,4 @@
-;; (= (fuzzy_equal $x $t $a)
-;;     (/ 1
-;;         (+ 1
-;;             (* $a (*(- $x $t) (- $x $t)))
-;;         )  
-;;     )     
-;; )
+
 (: ActivationHelper (-> Number Number Number Number))
 (= (ActivationHelper $competence $energy $stimulus)
     (+  (* 2 $stimulus)
@@ -34,8 +28,8 @@
 (= (modulatorUpdaterAgent $modulatorSpace $competence-demand $affiliation-demand $energy-demand)
 
 	(let* (
-	       	($stimulus (random-float &rng 0 1))
-		    ($integrity (random-float &rng 0 1))
+	       	($stimulus 0.5)
+		    ($integrity 0.5)
        		((demand competence $competenceValue) $competence-demand)
 		    ((demand affiliation $affiliationValue) $affiliation-demand)
 		    ((demand energy $energyValue) $energy-demand)
