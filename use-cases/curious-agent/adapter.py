@@ -5,13 +5,6 @@ import json
 from pydantic import ValidationError
 
 
-def _format_metta_expression(expression: str) -> str:
-    """Replaces spaces with hyphens within parentheses in a Metta expression string."""
-    # This regex finds content inside parentheses, excluding the parentheses themselves
-    # and then replaces spaces within that content with hyphens.
-    def replace_spaces(match):
-        return match.group(0).replace(' ', '-')
-    return re.sub(r'\([^)]+\)', replace_spaces, expression)
 
 def parse_schema(schema: Schema) -> str:
     """A function that parses a cognitive Schema into represented in Python to MeTTa structure."""
