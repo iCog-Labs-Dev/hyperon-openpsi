@@ -5,9 +5,18 @@ import json
 from pydantic import ValidationError
 
 
+def _format_metta_expression(expression: str) -> str:
+    """Replaces spaces with hyphens within parentheses in a Metta expression string."""
+    # This regex finds content inside parentheses, excluding the parentheses themselves
+    # and then replaces spaces within that content with hyphens.
+    def replace_spaces(match):
+        return match.group(0).replace(' ', '-')
+    return re.sub(r'\([^)]+\)', replace_spaces, expression)
+
 def parse_schema(schema: Schema) -> str:
     """A function that parses a cognitive Schema into represented in Python to MeTTa structure."""
-    return f"""(: {schema.handle} (IMPLICATION_LINK (AND_LINK ({schema.context}) {schema.action}) {schema.goal})) {schema.tv})"""
+    # Assuming context, action, and goal are already in the correct Metta format
+    return f"""((: {schema.handle} ({schema.tv} (IMPLICATION_LINK (AND_LINK ({schema.context} {schema.action})) {schema.goal}))) {schema.weight})"""
 
 
 def parse_action(actions: str) -> List[Action]:
@@ -51,7 +60,14 @@ def parse_state_params(state_params: str) -> StateParams:
 
 
 def validateSyntax(rule: str) -> bool:
-    pattern = r"""\(\(:\s*(\w+)\s+\(\(TTV\s+\d+\.?\d*\s+\(STV\s+\d+\.?\d*\s+\d+\.?\d*\s*\)\)\s+\(IMPLICATION_LINK\s+\(\s*AND_LINK\s+\(\(\s*Goal\s+\w+\s+\d+\.?\d*\s+\d+\.?\d*\s*\)\s+\w+\s*\)\)\s+\(\s*Goal\s+\w+\s+\d+\.?\d*\s+\d+\.?\d*\s*\)\)\)\)\s+\d+\.?\d*\s*\)"""
+    pattern = r"""\(:\s+(\w+)\s+                             # (: R15
+                \(IMPLICATION_LINK\s+                        # (IMPLICATION_LINK
+                    \(AND_LINK\s+                            # (AND_LINK
+                        \(\(\s*(\w+(?:-\w+)*)\s*\)\)\s+      # ((Human-Provides-Ambiguous-Answer))
+                        \(\w+(?:-\w+)*\)\)                   # (Seek-Clarification)
+                    \s+\(\w+(?:-\w+)*\)\s*\)                 # (Resolve-Ambiguity)
+                    \s+\d+\)$                                # Mean_stv as a Number 
+            """
     return bool(re.match(pattern, rule, re.VERBOSE))
 
 
@@ -88,5 +104,3 @@ def extract_rules_from_llm(raw_rules: str) -> List[Schema]:
 
 
 # print(parse_schema(Schema(handle="test_schema", context="(Self Is Outside) (Self Has Key) (Self See Door)", action="(Go to Door)", goal="(Self at Door)", tv="(TTV 1 (STV 0.5 0.1))")))
-
-

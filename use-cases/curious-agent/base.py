@@ -5,6 +5,7 @@ class Schema(BaseModel):
 	context: str
 	action: str
 	goal: str
+	weight: float | str =0
 	tv: str | None = None
 class Action(BaseModel):
 	action_name: str

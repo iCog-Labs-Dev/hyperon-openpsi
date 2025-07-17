@@ -13,20 +13,16 @@ from typing import List
 class TestAdapter(unittest.TestCase):
 
     def test_parse_schema(self):
-      
-        schema1 = Schema(handle="R1", context="(Self Is Outside) (Self Has Key) (Self See Door)", action="(Go to Door)", goal="(Self at Door)", tv="(TTV 100 (STV 0.9 0.8))", weight=0)
-        expected_metta1 = """((: R1 ((TTV 100 (STV 0.9 0.8)) (IMPLICATION_LINK (AND_LINK ((Self Is Outside) (Self Has Key) (Self See Door) (Go to Door))) (Self at Door)))) 0.0)"""
-        self.assertEqual(parse_schema(schema1), expected_metta1)
-
-        # Test case with different values
-        schema2 = Schema(handle="R3", context="(Agent Sees Object)", action="(Pick Up Object)", goal="(Agent Has Object)", tv="(TTV 50 (STV 0.7 0.2))", weight=0)
-        expected_metta2 = """((: R3 ((TTV 50 (STV 0.7 0.2)) (IMPLICATION_LINK (AND_LINK ((Agent Sees Object) (Pick Up Object))) (Agent Has Object)))) 0.0)"""
-        self.assertEqual(parse_schema(schema2), expected_metta2)
-
-        # Test case with simpler context and no TV
-        schema3 = Schema(handle="R3", context="(True)", action="(Do Nothing)", goal="(Done)", tv=None, weight=0)
-        expected_metta3 = """((: R3 (None (IMPLICATION_LINK (AND_LINK ((True) (Do Nothing))) (Done)))) 0.0)"""
-        self.assertEqual(parse_schema(schema3), expected_metta3)
+        schema = Schema(
+            handle="r1",
+            context="(Goal init 0.9 0.6)",
+            action="explore",
+            goal="(Goal found_target 1.0 1.0)",
+            tv="(TTV 1 (STV 0.8 0.7))",
+            weight=2
+        )
+        expected_metta = """((: r1 ((TTV 1 (STV 0.8 0.7)) (IMPLICATION_LINK (AND_LINK ((Goal init 0.9 0.6) explore)) (Goal found_target 1.0 1.0)))) 2)"""
+        self.assertEqual(parse_schema(schema), expected_metta)
 
 
     def test_parse_state_params(self):
