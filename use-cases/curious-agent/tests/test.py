@@ -21,7 +21,7 @@ class TestAdapter(unittest.TestCase):
             tv="(TTV 1 (STV 0.8 0.7))",
             weight=2
         )
-        expected_metta = """((: r1 ((TTV 1 (STV 0.8 0.7)) (IMPLICATION_LINK (AND_LINK ((Goal init 0.9 0.6) explore)) (Goal found_target 1.0 1.0)))) 2)"""
+        expected_metta = """((: r1 ((TTV 1 (STV 0.8 0.7)) (IMPLICATION_LINK (AND_LINK ((Goal init 0.9 0.6) explore)) (Goal found_target 1.0 1.0)))) 2.0)"""
         self.assertEqual(parse_schema(schema), expected_metta)
 
 
@@ -42,13 +42,13 @@ class TestAdapter(unittest.TestCase):
         valid_rule = """((: r1 ((TTV 1 (STV 0.8 0.7)) 
         (IMPLICATION_LINK 
           (AND_LINK ((Goal init 0.9 0.6) explore)) 
-          (Goal found_target 1.0 1.0)))) 2)"""
+          (Goal found_target 1.0 1.0)))) 2.0)"""
         self.assertFalse(validateSyntax(valid_rule))
 
         invalid_rule = """(: r1 ((TTV 1 (STV 0.8 0.7)) 
         (IMPLICATION_LINK 
           (AND_LINK ((Goal init 0.9 0.6) explore)) 
-          (Goal found_target 1.0 1.0)))) 2)"""
+          (Goal found_target 1.0 1.0)))) 3.2)"""
         self.assertFalse(validateSyntax(invalid_rule))
 
     def test_extract_rules_from_llm(self):

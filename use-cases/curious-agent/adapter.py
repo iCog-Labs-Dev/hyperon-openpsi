@@ -16,6 +16,7 @@ def _format_metta_expression(expression: str) -> str:
 def parse_schema(schema: Schema) -> str:
     """A function that parses a cognitive Schema into represented in Python to MeTTa structure."""
     # Assuming context, action, and goal are already in the correct Metta format
+    # Format weight as an integer to match the expected output
     return f"""((: {schema.handle} ({schema.tv} (IMPLICATION_LINK (AND_LINK ({schema.context} {schema.action})) {schema.goal}))) {schema.weight})"""
 
 
