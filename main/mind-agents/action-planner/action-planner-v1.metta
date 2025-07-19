@@ -13,7 +13,9 @@
 
 
 (= (addRulesToSpace $space)
-    (add-reduct $space (superpose (
+    (add-reduct $space (superpose 
+        
+(
             
 ((: r1 ((TTV 1 (STV 0.8 0.7)) 
         (IMPLICATION_LINK 
