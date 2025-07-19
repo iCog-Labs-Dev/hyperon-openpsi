@@ -54,14 +54,21 @@ def parse_state_params(state_params: str) -> StateParams:
 
 
 def validateSyntax(rule: str) -> bool:
-    pattern = r"""\(:\s+(\w+)\s+                             # (: R15
-                \(IMPLICATION_LINK\s+                        # (IMPLICATION_LINK
-                    \(AND_LINK\s+                            # (AND_LINK
-                        \(\(\s*(\w+(?:-\w+)*)\s*\)\)\s+      # ((Human-Provides-Ambiguous-Answer))
-                        \(\w+(?:-\w+)*\)\)                   # (Seek-Clarification)
-                    \s+\(\w+(?:-\w+)*\)\s*\)                 # (Resolve-Ambiguity)
-                    \s+\d+\)$                                # Mean_stv as a Number 
-            """
+    # The pattern is designed to match a specific MeTTa rule structure.
+    # It uses \s* to allow for zero or more whitespace characters, making the validation flexible with spacing.
+    pattern = r"""
+    \(\(:\s*                                    # Start of the outer expression with a colon
+    (\w+)\s*                                    # Capture the rule handle (e.g., r1)
+    \(\(TTV\s*\d\s*                             # Start of TTV with a single digit
+    \(STV\s*\d\.\d\s+\d\.\d\s*\)\)\s*             # STV with two single-digit decimal numbers
+    \(IMPLICATION_LINK\s*                       # IMPLICATION_LINK keyword
+    \(\s*AND_LINK\s*                            # AND_LINK keyword
+    \(\(\s*Goal\s+\w+\s+\d\.\d\s+\d\.\d\s*\)\s*    # Goal expression with a name and two single-digit decimal numbers
+    \w+\s*\)\)\s*                               # Action keyword
+    \(\s*Goal\s+\w+\s+\d\.\d\s+\d\.\d\s*\)       # Goal expression again
+    \)\)\)\s*                                   # Closing parentheses for the structure
+    ([0-1](\.\d)?|2(\.0)?)\s*\)                  # Final weight number (0-2) with one decimal place and closing parenthesis
+    """
     return bool(re.match(pattern, rule, re.VERBOSE))
 
 
