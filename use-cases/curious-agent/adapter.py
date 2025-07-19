@@ -22,8 +22,35 @@ def parse_action(actions: str) -> List[Action]:
 
 
 def parse_exp(sexpr: str) -> List[Schema]:
-    """A function that parses an expression from MeTTa to Python."""
-    pass
+    pattern = re.compile(r"""
+        \(                       # opening of the outermost tuple
+          \( :\s*(r\d+)\s*       # handle (e.g. r1)
+          \(                     # opening of the rule body
+            \( TTV\s*\d+\s*\( STV\s*([\d.]+)\s+([\d.]+)\) \)\s*    # STV values
+            \( IMPLICATION_LINK\s*
+              \( AND_LINK\s*
+                \( \( Goal\s+([a-zA-Z0-9_]+)\s+[\d.]+\s+[\d.]+ \)\s+([a-zA-Z0-9_]+) \)\s*  # context + action
+              \)\s*
+              \( Goal\s+([a-zA-Z0-9_]+)\s+[\d.]+\s+[\d.]+ \)       # goal
+            \)
+          \)\s*
+        (\d+(?:\.\d+)?)              # weight
+        \)
+    """, re.VERBOSE)
+
+    result = []
+    for match in pattern.finditer(sexpr):
+        handle, stv1, stv2, context, action, goal, weight = match.groups()
+        result.append(Schema(
+            handle=handle,
+            context=context,
+            action=action,
+            goal=goal,
+            weight=float(weight),
+            tv=f"(STV {stv1} {stv2})"
+        ))
+
+    return result
 
 
 def parse_state_params(state_params: str) -> StateParams:
