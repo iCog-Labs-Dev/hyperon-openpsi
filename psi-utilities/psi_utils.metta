@@ -176,3 +176,34 @@
   )
   )
 )
+
+; fuzzy logic  P(m, im)
+; P is a simple fuzzy logic function produces a number within [0, 1]
+; in terms of the modulator level m and its corresponding indicator im.
+; m - modulator value 
+; im - modulator indicator(H, L, U, EL, EH)
+(= (fuzzy-logic-p $m $im)
+    (if (== $im EL)  
+         (fuzzy_less_than $m 0.15 50 )
+
+        (if (== $im L)   
+            (fuzzy_less_than $m 0.30 50 )
+            
+            (if (== $im M)   
+                (fuzzy_equal $m 0.50 50 )
+
+                (if (== $im H)   
+                    (fuzzy_greater_than $m 0.70 50 )
+
+                    (if (== $im EH)   
+                        (fuzzy_greater_than $m 0.85 50 )
+                        (if (== $im U)   
+                            0
+                            (Error: Please input valid modulator indicator)
+                        )
+                    )
+                )
+            )   
+        )
+    )
+)
