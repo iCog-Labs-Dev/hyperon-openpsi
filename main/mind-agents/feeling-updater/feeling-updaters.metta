@@ -229,23 +229,26 @@
 )
 
 (= (excitementFeelingUpdater $modulator_space) 
-    (max (feeling_calculator $modulator_space 
+    (let* ( 
+        ($excitementExteme (feeling_calculator $modulator_space 
                              (modulator_high_indicator)
                              (modulator_low_indicator)
                              (modulator_undefined_indicator)
                              (modulator_low_indicator)
                              (modulator_extremely_high_indicator)
                              4
-         )
+         ))
 
-         (feeling_calculator $modulator_space 
+         ($excitementLow (feeling_calculator $modulator_space 
                              (modulator_high_indicator)
                              (modulator_low_indicator)
                              (modulator_undefined_indicator)
                              (modulator_low_indicator)
                              (modulator_extremely_low_indicator)
                              4
-         )
+         ))
+    )
+        (max-atom ($excitementExteme $excitementLow))
     )
 )
 

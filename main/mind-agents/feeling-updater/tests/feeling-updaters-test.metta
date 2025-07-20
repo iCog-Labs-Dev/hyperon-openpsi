@@ -14,4 +14,4 @@
 !(assertEqual (angerFeelingUpdater &modulator-space) 0.2017543859649123)
 !(assertEqual (hateFeelingUpdater &modulator-space) 0.10526315789473686)
 !(assertEqual (gratitudeFeelingUpdater &modulator-space) 0.3333333333333334)
-
+!(assertEqual (excitementFeelingUpdater &modulator-space) 0.2017543859649123)
