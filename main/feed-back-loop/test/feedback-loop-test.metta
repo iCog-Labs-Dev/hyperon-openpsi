@@ -13,7 +13,7 @@
 !(bind! &kb (new-space))
 !(addRulesToSpace &ruleSpace)
 !(insert-modulators &modulator-space)
-;; (= (update-atom $space $oatom $natom) (let $_ (remove-atom $space $oatom) (add-atom $space $natom)))
+
 
 
 (: remove-atoms' (-> hyperon::space::DynSpace Expression Expression))
@@ -86,9 +86,9 @@
 
 
 ;; a querying mechanism of the knowledge base.
-(= (query $space (: $handle ((TTV $time (STV $bel $conf)) (IMPLICATION_LINK (AND_LINK ((Goal $context $x $y) $action)) $goal))))
-   	(collapse (match $space (: $handle ((TTV $time (STV $bel $conf)) (IMPLICATION_LINK (AND_LINK ((Goal $context $x $y) $action)) $goal)))
-	       (: $handle ((TTV $time (STV $bel $conf)) (IMPLICATION_LINK (AND_LINK ((Goal $context $x $y) $action)) $goal))))
+(= (query $space ((: $handle ((TTV $time (STV $bel $conf)) (IMPLICATION_LINK (AND_LINK ((Goal $context $x $y) $action)) $goal))) $cumm-weight))
+   	(collapse (match $space ((: $handle ((TTV $time (STV $bel $conf)) (IMPLICATION_LINK (AND_LINK ((Goal $context $x $y) $action)) $goal))) $cumm-weight)
+	       ((: $handle ((TTV $time (STV $bel $conf)) (IMPLICATION_LINK (AND_LINK ((Goal $context $x $y) $action)) $goal))) $cumm-weight))
 
 	))
 (= (query $space (modulator $x $y)) (collapse (match $space (modulator $x $y) (modulator $x $y))))
@@ -101,7 +101,7 @@
 	       (modulator (query $space (modulator $x $y)))
 	       (perception (query $space (perception $x $y)))
 	       (demand (query $space (demand $x $y)))
-	       (rule (query $space (: $handle ((TTV $time (STV $bel $conf)) (IMPLICATION_LINK (AND_LINK ((Goal $context $x $y) $action)) $goal)))))
+	       (rule (query $space ((: $handle ((TTV $time (STV $bel $conf)) (IMPLICATION_LINK (AND_LINK ((Goal $context $x $y) $action)) $goal))) $cumm-weight)))
 	       ($_ (Error "This form doesn't exist in the atomspace"))
 	       )))
 
@@ -204,24 +204,7 @@
 	)))
 
 
-;(: extractGoalFromRule (-> Expression Goal))
-;(= (extractGoalFromRule $rule)
-;	(unify $rule (: $handle ((TTV $time (STV $bel $conf)) (IMPLICATION_LINK (AND_LINK ($context $action)) $goal))) $goal ()))
 
-;; This function is taken from the action planner in version 1. It will be removed
-;;(= (findRulesWithAction $space $action)
-;;   (collapse (match $space ((: $handle ((TTV $time (STV $bel $conf)) (IMPLICATION_LINK (AND_LINK ($context $action)) $goal))) $weight)      
-;;((: $handle ((TTV $time (STV $bel $conf)) (IMPLICATION_LINK (AND_LINK ($context $action)) $goal))) $weight)
-        
-;;)))
-;; This function extracts the STV from RULE.
-;; (: extractSTVFromRule (-> Expression Expression))
-;; (= (extractSTVFromRule $rule)
-;;   	(unify $rule (: $handle ((TTV $time (STV $bel $conf)) (IMPLICATION_LINK (AND_LINK ($context $action)) $goal)))
-;;	       (STV $bel $conf)
-;;	       ()
-;;	)
-;;)
 
 
 (:isGoalMet' (-> Expression Goal Bool))
@@ -271,17 +254,13 @@
 )
 
 
-;(: getDemandByName (-> hyperon::space::DynSpace Symbol Demand))
-;; (= (getDemandByName $space $name) (match $space (demand $name $x) (demand $name $x)))
-
 
 
 ;; This function implements the kb-initializer for the open-psi loop to work
 (: kb-initializer (-> hyperon::space::DynSpace Expression))
 (= (kb-initializer $kb)
    (let* (
-	  	;; ($rules (collapse (get-atoms &ruleSpace)))
-		($rules ())
+	  	 ($rules (collapse (get-atoms &ruleSpace)))
 		($modulators (collapse (get-atoms &modulator-space)))
 		($demands (collapse (get-atoms &demandspace)))
 		($partialKb (union-atom $rules $modulators))
@@ -324,7 +303,7 @@
 		($angerValue (angerFeelingUpdater &modulator-space))
         ;; ($_ (println! (angerVal $angerValue)))
 		($fearValue (fearFeelingUpdater &modulator-space))
-		;; ($excitementValue (excitementFeelingUpdater &modulator-space))
+		($excitementValue (excitementFeelingUpdater &modulator-space))
 		($loveValue (loveFeelingUpdater &modulator-space))
 		($hateValue (hateFeelingUpdater &modulator-space))
 		($gratitude (gratitudeFeelingUpdater &modulator-space))
@@ -339,12 +318,18 @@
 	)	
 
 )
+(= (isListEmpty $list)
+	(if (== (size-atom $list) 0) True False)
+)
+;;!(kb-initializer &kb)
+!(assertEqual (kb-initializer &kb) ())
+!(assertEqual (isListEmpty (queryAll &kb modulator)) False)
+!(assertEqual (isListEmpty (queryAll &kb rule)) False)
+!(assertEqual (isListEmpty (queryAll &kb demand)) False)
 
-!(kb-initializer &kb)
-;; !(assertEqual (kb-initializer &kb) ())
-!(psi-agent-loop init &kb)
-;; !(assertEqual )
-;; !(modulatorUpdaterAgent &modulator-space (demand competence 0.2) (demand affiliation 0.5) (demand energy 0.6))
+;; !(psi-agent-loop init &kb)
+
+
 ;; !(fearFeelingUpdater &modulator-space)
 ;; !(happinessFeelingUpdater &modulator-space)
 
