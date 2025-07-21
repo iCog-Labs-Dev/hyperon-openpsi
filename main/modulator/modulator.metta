@@ -20,7 +20,7 @@
 
 (: fetch-modulator-val (-> hyperon::space::DynSpace Symbol Number))
 (= (fetch-modulator-val $space $name)
-    (let (($x $y $z)) (fetch-modulator $space $name) $z)
+    (let ($x $y $z) (fetch-modulator $space $name) $z)
 )
 
 (: normalize-value (-> Number Number))
