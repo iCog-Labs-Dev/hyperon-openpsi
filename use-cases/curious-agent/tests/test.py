@@ -1,4 +1,10 @@
 import unittest
+import sys
+import os
+
+# Add the parent directory to the Python path to allow importing adapter and base
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 from adapter import parse_schema, parse_state_params, validateSyntax, extract_rules_from_llm
 from base import Schema, StateParams
 from openPsi import *
@@ -7,20 +13,16 @@ from typing import List
 class TestAdapter(unittest.TestCase):
 
     def test_parse_schema(self):
-      
-        schema1 = Schema(handle="R1", context="(Self Is Outside) (Self Has Key) (Self See Door)", action="(Go to Door)", goal="(Self at Door)", tv="(TTV 100 (STV 0.9 0.8))")
-        expected_metta1 = """(: R1 (IMPLICATION_LINK (AND_LINK ((Self Is Outside) (Self Has Key) (Self See Door)) (Go to Door)) (Self at Door))) (TTV 100 (STV 0.9 0.8)))"""
-        self.assertEqual(parse_schema(schema1), expected_metta1)
-
-        # Test case with different values
-        schema2 = Schema(handle="R3", context="(Agent Sees Object)", action="(Pick Up Object)", goal="(Agent Has Object)", tv="(TTV 50 (STV 0.7 0.2))")
-        expected_metta2 = """(: R3 (IMPLICATION_LINK (AND_LINK ((Agent Sees Object)) (Pick Up Object)) (Agent Has Object))) (TTV 50 (STV 0.7 0.2)))"""
-        self.assertEqual(parse_schema(schema2), expected_metta2)
-
-        # Test case with simpler context and no TV
-        schema3 = Schema(handle="R3", context="(True)", action="(Do Nothing)", goal="(Done)", tv=None)
-        expected_metta3 = """(: R3 (IMPLICATION_LINK (AND_LINK ((True)) (Do Nothing)) (Done))) None)"""
-        self.assertEqual(parse_schema(schema3), expected_metta3)
+        schema = Schema(
+            handle="r1",
+            context="(Goal init 0.9 0.6)",
+            action="explore",
+            goal="(Goal found_target 1.0 1.0)",
+            tv="(TTV 1 (STV 0.8 0.7))",
+            weight=2
+        )
+        expected_metta = """((: r1 ((TTV 1 (STV 0.8 0.7)) (IMPLICATION_LINK (AND_LINK ((Goal init 0.9 0.6) explore)) (Goal found_target 1.0 1.0)))) 2.0)"""
+        self.assertEqual(parse_schema(schema), expected_metta)
 
 
     def test_parse_state_params(self):
@@ -35,30 +37,101 @@ class TestAdapter(unittest.TestCase):
         state_params_str_invalid = "( (modulator activation 0.5) (modulator securing_threshold 0.7) (pleasure 0.8) (modulator selection_threshold 0.6) )"
         self.assertIsNone(parse_state_params(state_params_str_invalid))
 
+
     def test_validate_syntax(self):
-        valid_rule = """(: R1 (IMPLICATION_LINK
-						(AND_LINK (((Self Is Outside) (Self Has Key) (Self See Door)) (Go to Door))
-						(Open Door))
-					)
-					(TTV 100 (STV 0.9 0.8))
-		)"""
-        self.assertFalse(validateSyntax(valid_rule))
+        # Valid rule from the original test
+        valid_rule = """((: r1 ((TTV 1 (STV 0.8 0.7)) 
+            (IMPLICATION_LINK 
+            (AND_LINK ((Goal init 0.9 0.6) explore)) 
+            (Goal found_target 1.0 1.0)))) 2.0)"""
+        self.assertTrue(validateSyntax(valid_rule))
 
-        invalid_rule_no_tv = """(: R1 (IMPLICATION_LINK
-						(AND_LINK (((Self Is Outside) (Self Has Key) (Self See Door)) (Go to Door))
-						(Open Door))
-					)
-		)"""
-        self.assertFalse(validateSyntax(invalid_rule_no_tv))
+        # Valid rule with extra spaces
+        valid_rule_extra_spaces = """((: r1  ((TTV  1  (STV  0.8   0.7))  
+            (IMPLICATION_LINK   (AND_LINK  ((Goal  init  0.9  0.6)  explore))  
+            (Goal  found_target  1.0  1.0))))  2.0)"""
+        self.assertTrue(validateSyntax(valid_rule_extra_spaces))
 
-        valid_rule_with_tv = """(: R1 (IMPLICATION_LINK
-						(AND_LINK (((Self Is Outside) (Self Has Key) (Self See Door)) (Go to Door))
-						(Open Door))
-					)
-					(TTV 100 (STV 0.9 0.8))
-		)"""
-        self.assertFalse(validateSyntax(valid_rule_with_tv))
+        # Valid rule with minimal spaces
+        valid_rule_min_spaces = """((:r1((TTV 1(STV 0.8 0.7))(IMPLICATION_LINK(AND_LINK((Goal init 0.9 0.6)explore))(Goal found_target 1.0 1.0))))2.0)"""
+        self.assertTrue(validateSyntax(valid_rule_min_spaces))
 
+        # Valid rule with different identifiers and numbers
+        valid_rule_different = """((: rule2 ((TTV 0 (STV 0.5 0.9)) 
+            (IMPLICATION_LINK 
+            (AND_LINK ((Goal start 0.7 0.8) discover)) 
+            (Goal target_reached 1.0 0.9)))) 1.0)"""
+        self.assertTrue(validateSyntax(valid_rule_different))
+
+        # Invalid rule: incorrect final number (3.2 instead of 0-2 range)
+        invalid_rule_number = """((: r1 ((TTV 1 (STV 0.8 0.7)) 
+            (IMPLICATION_LINK 
+            (AND_LINK ((Goal init 0.9 0.6) explore)) 
+            (Goal found_target 1.0 1.0)))) 3.2)"""
+        self.assertFalse(validateSyntax(invalid_rule_number))
+
+        # Invalid rule: missing TTV keyword
+        invalid_rule_missing_ttv = """((: r1 (( 1 (STV 0.8 0.7)) 
+            (IMPLICATION_LINK 
+            (AND_LINK ((Goal init 0.9 0.6) explore)) 
+            (Goal found_target 1.0 1.0)))) 2.0)"""
+        self.assertFalse(validateSyntax(invalid_rule_missing_ttv))
+
+        # Invalid rule: malformed number (0.88 instead of single decimal)
+        invalid_rule_malformed_number = """((: r1 ((TTV 1 (STV 0.88 0.7)) 
+            (IMPLICATION_LINK 
+            (AND_LINK ((Goal init 0.9 0.6) explore)) 
+            (Goal found_target 1.0 1.0)))) 2.0)"""
+        self.assertFalse(validateSyntax(invalid_rule_malformed_number))
+
+        # Invalid rule: missing closing parenthesis
+        invalid_rule_missing_paren = """((: r1 ((TTV 1 (STV 0.8 0.7)) 
+            (IMPLICATION_LINK 
+            (AND_LINK ((Goal init 0.9 0.6) explore)) 
+            (Goal found_target 1.0 1.0))) 2.0)"""
+        self.assertFalse(validateSyntax(invalid_rule_missing_paren))
+
+        # Invalid rule: incorrect keyword (GOAL instead of Goal)
+        invalid_rule_wrong_keyword = """((: r1 ((TTV 1 (STV 0.8 0.7)) 
+            (IMPLICATION_LINK 
+            (AND_LINK ((GOAL init 0.9 0.6) explore)) 
+            (Goal found_target 1.0 1.0)))) 2.0)"""
+        self.assertFalse(validateSyntax(invalid_rule_wrong_keyword))
+
+        # Invalid rule: empty identifier
+        invalid_rule_empty_identifier = """((:  ((TTV 1 (STV 0.8 0.7)) 
+            (IMPLICATION_LINK 
+            (AND_LINK ((Goal init 0.9 0.6) explore)) 
+            (Goal found_target 1.0 1.0)))) 2.0)"""
+        self.assertFalse(validateSyntax(invalid_rule_empty_identifier))
+
+        # Valid rule with integer values
+        valid_rule_integers = """((: r1 ((TTV 1 (STV 1.0 0.0)) 
+            (IMPLICATION_LINK 
+            (AND_LINK ((Goal init 1.0 0.0) explore)) 
+            (Goal found_target 1.0 0.0)))) 2.0)"""
+        self.assertTrue(validateSyntax(valid_rule_integers))
+
+        # Valid rule with floating-point values
+        valid_rule_floats = """((: r1 ((TTV 1 (STV 0.1 0.2)) 
+            (IMPLICATION_LINK 
+            (AND_LINK ((Goal init 0.3 0.4) explore)) 
+            (Goal found_target 0.5 0.6)))) 1.0)"""
+        self.assertTrue(validateSyntax(valid_rule_floats))
+
+        # Invalid rule with a negative value
+        invalid_rule_negative_value = """((: r1 ((TTV 1 (STV -0.8 0.7)) 
+            (IMPLICATION_LINK 
+            (AND_LINK ((Goal init 0.9 0.6) explore)) 
+            (Goal found_target 1.0 1.0)))) 2.0)"""
+        self.assertFalse(validateSyntax(invalid_rule_negative_value))
+
+        # Invalid rule with an incorrect keyword
+        invalid_rule_bad_keyword = """((: r1 ((TTV 1 (STV 0.8 0.7)) 
+            (IMPLICATION_LINK 
+            (AND_LINK ((BadKeyword init 0.9 0.6) explore)) 
+            (Goal found_target 1.0 1.0)))) 2.0)"""
+        self.assertFalse(validateSyntax(invalid_rule_bad_keyword))
     def test_extract_rules_from_llm(self):
         raw_rules = """[
             (: R1 (IMPLICATION_LINK (AND_LINK (((Self at Door) (Self Has Key))) (Open Door)) ) (TTV 100 (STV 0.9 0.8))),
