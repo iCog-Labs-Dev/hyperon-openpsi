@@ -8,18 +8,18 @@ import random
 metta = MeTTa()
 
 metta.run("""
-!(register-module! ../../hyperon-openpsi)
-!(register-module! ../utilities-module)
+!(register-module! ../../../hyperon-openpsi)
+!(register-module! ../../utilities-module)
 !(import! &self utilities-module:utils)
 !(import! &self hyperon-openpsi:main:emotion:emotion)
 !(bind! &emotion-space (new-space))
 """)
 
-metta.run("""
+s = metta.run("""
 !(create-emotion &emotion-space (emotion happiness 0.3))
 !(create-emotion &emotion-space (emotion anger 0.7))
 """)
-
+print(s)
 def update_emotions():
     emotions = metta.run('!(get-emotions &emotion-space)')[0]
     for e in emotions[0].get_children():
