@@ -155,8 +155,9 @@
                 (let* (
                        ($_ (println! (goalMet $isGoalMet?)))
                        ((demand $demandName $demandValue) $demand)
+					   ($newDemValue (+ $demandValue (* (- 1 $demandValue) 0.5)))
                 )
-			  	    (setDemandValue &demandspace $demandName 1.0)
+			  	    (setDemandValue &demandspace $demandName $newDemValue)
                 )
 				()
 			)
@@ -166,7 +167,8 @@
 (: selectDemand (-> Expression Expression))
 (= (selectDemand $demands)
    (let* (
-	  ($selectionVal (fetch-modulator-val (modulatorSpace) selection-threshold))
+	  ($selectionVal (fetch-modulator-val &modulator-space selection-threshold))
+	  ($_ (println! (This is the selection thresholdvalue $selectionVal)))
 	  ($randomVal (random-float $rng 0 1))
 	)
      	(if (>= $selectionVal $randomVal)
@@ -313,7 +315,6 @@
         ($_ (update-all demand &demandspace $kb))
 
 	)
-	;;   (hateValue $hateValue happinessValue $happinessValue sadnessValue $sadnessValue angerValue $angerValue)
 	 (happinessValue $happinessValue sadnessValue $sadnessValue angerValue $angerValue fearValue $fearValue gratitudeValue $gratitude) 
 	)	
 
@@ -321,6 +322,9 @@
 (= (isListEmpty $list)
 	(if (== (size-atom $list) 0) True False)
 )
+
+;; The below function is going to be used to validate the result of the psi-main-loop output for emotion parameters.
+;; The result should be in the mentioned format with a strict order.
 
 (= (emotionChecker $emotion)
 	(unify $emotion (happinessValue $happinessValue sadnessValue $sadnessValue angerValue $angerValue fearValue $fearValue gratitudeValue $gratitude) True False)
@@ -333,6 +337,7 @@
 !(assertEqual (isGoalMet? (report) (Goal mission_complete 1.0 1.0)) True)
 !(assertEqual (isGoalMet? (analyze upload) (Goal analyze_data 1 1)) False)
 !(assertEqual (emotionChecker (psi-agent-loop init &kb)) True)
+!(assertEqual (demandSelector ((demand Affiliation 3) (demand Concept 4) (demand Car 8))) (demand Car 8))
 ;; !(psi-agent-loop init &kb)
 
 
