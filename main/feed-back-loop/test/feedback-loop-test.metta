@@ -321,12 +321,18 @@
 (= (isListEmpty $list)
 	(if (== (size-atom $list) 0) True False)
 )
+
+(= (emotionChecker $emotion)
+	(unify $emotion (happinessValue $happinessValue sadnessValue $sadnessValue angerValue $angerValue fearValue $fearValue gratitudeValue $gratitude) True False)
+)
 ;;!(kb-initializer &kb)
 !(assertEqual (kb-initializer &kb) ())
 !(assertEqual (isListEmpty (queryAll &kb modulator)) False)
 !(assertEqual (isListEmpty (queryAll &kb rule)) False)
 !(assertEqual (isListEmpty (queryAll &kb demand)) False)
-
+!(assertEqual (isGoalMet? (report) (Goal mission_complete 1.0 1.0)) True)
+!(assertEqual (isGoalMet? (analyze upload) (Goal analyze_data 1 1)) False)
+!(assertEqual (emotionChecker (psi-agent-loop init &kb)) True)
 ;; !(psi-agent-loop init &kb)
 
 
