@@ -56,5 +56,36 @@
 !(addRule &r r5 ((Fuel is low)) (Fill) (Fuel is high) (TTV 0 (STV 1.0 1.0)))
 
 ; Action Planner
-!(let $planner (hillClimbingPlanner (Paddle is right) (Ball is hit) (TestedActions) () &r) (reverse $planner ()))
-!(let $planner (hillClimbingPlanner (Fuel is low) (Fuel is high) (TestedActions) () &r) (reverse $planner ()))
+; !(let $planner (hillClimbingPlanner (Paddle is right) (Ball is hit) (TestedActions) () &r) (reverse $planner ()))
+; !(let $planner (hillClimbingPlanner (Fuel is low) (Fuel is high) (TestedActions) () &r) (reverse $planner ()))
+
+
+; experiment with modulators and demands
+; Plan Actions based on modulator and demand values
+
+; modulators
+!(insert-modulators &modulator-Space)
+
+; fetch modulator value and plan the actions
+; if selection-threshold is high, plan actions to hit the ball
+!(let $st (fetch-modulator-val  &modulator-Space selection-threshold) 
+        (if (>  $st 0.45) 
+            (let $planner (hillClimbingPlanner (Paddle is right) (Ball is hit) (TestedActions) () &r) (reverse $planner ()))
+            ()
+        )
+) 
+
+
+
+; demands 
+!(addDemand &demand-Space energy 0.3)
+
+; fetch demands value and plan the actions
+; if energy is low, plan actions to fill the fuel   
+!(let $energy (fetch-demand-val &demand-Space energy) 
+        (if (<  $energy 0.5) 
+            (let $planner (hillClimbingPlanner (Fuel is low) (Fuel is high) (TestedActions) () &r) (reverse $planner ()))
+            ()
+        )
+)
+
