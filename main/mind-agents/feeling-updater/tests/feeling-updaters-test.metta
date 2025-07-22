@@ -3,12 +3,15 @@
 !(import! &self utilities-module:utils)
 !(import! &self hyperon-openpsi:psi-utilities:psi_utils)
 !(import! &self hyperon-openpsi:main:mind-agents:feeling-updater:feeling-updaters)
+!(import! &self hyperon-openpsi:main:modulator:modulator)
 
+
+!(insert-modulators &modulator-space)
 !(assertEqual (modulator_to_feeling_dimension 0.85 1) 1)
-!(assertEqual (feeling_calculator 1 1 1 1 1 5) 0.3252525252525253)
-!(assertEqual (happinessFeelingUpdater) 0.15656565656565663)
-!(assertEqual (sadnessFeelingUpdater) 0.3456937799043062)
-!(assertEqual (angerFeelingUpdater) 0.22953216374269003)
-!(assertEqual (hateFeelingUpdater) 0.16823865409076727)
-!(assertEqual (gratitudeFeelingUpdater) 0.2575757575757577)
-
+!(assertEqual (feeling_calculator &modulator-space 1 1 1 1 1 5) 0.2666666666666667)
+!(assertEqual (happinessFeelingUpdater &modulator-space) 0.25000000000000006)
+!(assertEqual (sadnessFeelingUpdater &modulator-space) 0.15350877192982454)
+!(assertEqual (angerFeelingUpdater &modulator-space) 0.2017543859649123)
+!(assertEqual (hateFeelingUpdater &modulator-space) 0.10526315789473686)
+!(assertEqual (gratitudeFeelingUpdater &modulator-space) 0.3333333333333334)
+!(assertEqual (excitementFeelingUpdater &modulator-space) 0.2017543859649123)

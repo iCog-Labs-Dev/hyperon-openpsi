@@ -1,3 +1,4 @@
+!(bind! &modulator-space (new-space))
 (: Modulator Type)
 (: modulator (-> Symbol Number Modulator))
 
@@ -5,21 +6,21 @@
 (= (insert-modulators $space) (add-reduct $space (superpose (
         (modulator arousal 0.5)
         (modulator positive-valence 0.5)
-        (modulator negative-valence 0.5)
+        ;;(modulator negative-valence 0.5)
         (modulator selection-threshold 0.5)
         (modulator securing-threshold 0.5)
         (modulator goal-directedness 0.5)
-    
+        (modulator resolution-level 0.5)
 ))))
 
 (: fetch-modulator (-> hyperon::space::DynSpace Symbol Expression))
 (= (fetch-modulator $space $name)
-    (collapse (match $space (modulator $name $x) (modulator $name $x)))
+     (match $space (modulator $name $x) (modulator $name $x))
 )
 
 (: fetch-modulator-val (-> hyperon::space::DynSpace Symbol Number))
 (= (fetch-modulator-val $space $name)
-    (let (($x $y $z)) (fetch-modulator $space $name) $z)
+    (let ($x $y $z) (fetch-modulator $space $name) $z)
 )
 
 (: normalize-value (-> Number Number))
