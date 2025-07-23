@@ -13,12 +13,12 @@
 
 
 (= (addRulesToSpace $space)
-    (add-reduct $space (superpose 
+    (add-reduct $space (superpose     
         
-(
+    (
             
-((: r1 ((TTV 1 (STV 0.8 0.7)) 
-        (IMPLICATION_LINK 
+        ((: r1 ((TTV 1 (STV 0.8 0.7)) 
+            (IMPLICATION_LINK 
           (AND_LINK ((Goal init 0.9 0.6) explore)) 
           (Goal found_target 1.0 1.0)))) 2)
 
@@ -48,23 +48,23 @@
 
 ;; r6: Analyze after mission complete
 ((: r6 ((TTV 1 (STV 0.75 0.7)) 
-        (IMPLICATION_LINK 
+            (IMPLICATION_LINK 
           (AND_LINK ((Goal mission_complete 0.9 0.7) analyze)) 
           (Goal analyze_data 1.0 1.0)))) 4)
 
 ;; r7: Upload results after analysis
 ((: r7 ((TTV 1 (STV 0.7 0.7)) 
-        (IMPLICATION_LINK 
+            (IMPLICATION_LINK 
           (AND_LINK ((Goal analyze_data 0.85 0.7) upload)) 
           (Goal upload_results 1.0 1.0)))) 2)
 
 ;; r8: Reboot after upload
 ((: r8 ((TTV 1 (STV 0.9 0.8)) 
-        (IMPLICATION_LINK 
+            (IMPLICATION_LINK 
           (AND_LINK ((Goal upload_results 0.95 0.75) reboot)) 
           (Goal reset_system 1.0 1.0)))) 1)
 
-            )
+    )
         )
     )
 
@@ -219,6 +219,7 @@
         
         ($targetRules (findRulesWithGoal $ruleSpace $goal))
         ($_ (println! (targetRules $targetRules)))
+        ($targetRules (if (== $targetRules ()) (()) $targetRules))
         ($targetRule (car-atom $targetRules))
         ($target (getWeightFromRule $targetRule))
         ($_ (println! (targetRules $targetRules target $target)))

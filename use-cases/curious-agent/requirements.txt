@@ -1,2 +1,3 @@
 pydantic
-google-genai
+google-generativeai
+python-dotenv
