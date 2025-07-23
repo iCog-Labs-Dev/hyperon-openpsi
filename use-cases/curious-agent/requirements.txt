@@ -1,3 +1,6 @@
 pydantic
 google-generativeai
 python-dotenv
+langgraph
+langchain
+hyperon==0.2.3
