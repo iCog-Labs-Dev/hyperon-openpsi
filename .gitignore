@@ -4,3 +4,5 @@
 **/testting
 /venv
 /.env
+**/*.pl
+**/*.html
