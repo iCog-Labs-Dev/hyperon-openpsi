@@ -3,6 +3,8 @@ from typing import List
 from langchain_core.runnables import RunnableConfig
 # from google import genai
 
+from langgraph.checkpoint.memory import InMemorySaver
+
 # from google.genai import types
 # from ..base import Schema
 import json
@@ -128,7 +130,7 @@ class AgentState(TypedDict):
     rules_list: List[Schema]
 
 
-def call_model(state: AgentState):
+def call_model(state: AgentState, config: RunnableConfig):
     # Get the conversation summary from the state
     summary = state.get("summary", "No prior conversation history available.")
 
@@ -143,7 +145,7 @@ def call_model(state: AgentState):
 
     messages = [system_message] + state["messages"]
 
-    response = conversation_model.invoke(messages)
+    response = conversation_model.invoke(messages, config=config)
 
     return {"messages": [response]}
 
@@ -153,7 +155,7 @@ def should_continue(state):
 
     messages = state["messages"]
 
-    if len(messages) > 1:
+    if len(messages) > 6:
         return "summarize_conversation"
 
     return END
@@ -175,7 +177,7 @@ def summarize_conversation(state: AgentState) -> AgentState:
     messages = state["messages"] + [HumanMessage(content=summary_message)]
 
     response = summarization_model.invoke(messages)
-    print("CONTEXT: ", response.content)
+    # print("CONTEXT: ", response.content)
     delete_messages = [RemoveMessage(id=message.id) for message in messages[:-2]]
     return {"summary": response.content, "messages": delete_messages}
 
@@ -194,7 +196,9 @@ graph.add_conditional_edges(
 )
 
 graph.add_edge("summarize_conversation", END)
-agent = graph.compile()
+checkpointer = InMemorySaver()
+agent = graph.compile(checkpointer=checkpointer)
+config = {"configurable": {"thread_id": "1"}}
 # result = agent.invoke({"messages": [HumanMessage(content="Hi")], "summary": ""})
 # print(result["messages"][-1].content)
 
@@ -207,8 +211,9 @@ def getUserInput():
 
 
 def generateResponse(user_input: str) -> dict:
-    response = agent.invoke({"messages": [HumanMessage(content=user_input)]})
+    response = agent.invoke({"messages": [HumanMessage(content=user_input)]}, config)
     print("Gemini Chatbot: ", end="")
+    print(response["messages"][-1].content)
     # for chunk in response:
     #     print(chunk.text, end="", flush=True)
 
@@ -291,7 +296,7 @@ corr_agent = corr_graph.compile()
 def correlate(
     conversation_summary: str, rules_list: str, userResponse: str
 ) -> List[str]:
-    config = {"configurable": {"rules_list": rules_list}}
+    config = {"configurable": {"rules_list": rules_list, "thread_id": "1"}}
     response = corr_agent.invoke(
         {
             "messages": [HumanMessage(content=userResponse)],
@@ -351,30 +356,30 @@ def correlation_matcher(
     return ""
 
 
-res = correlation_matcher(
-    "The user introduced themselves as Sam",
-    """
-((: r1 ((TTV 1 (STV 0.8 0.7)) (IMPLICATION_LINK (AND_LINK ((Goal Conversation-Started 0.9 0.6) initiate-dialogue)) (Goal Send-Greeting 1.0 1.0)))) 4)
-((: r2 ((TTV 2 (STV 0.8 0.7)) (IMPLICATION_LINK (AND_LINK ((Goal Send-Greeting 0.9 0.6) elicit-response)) (Goal Receive-User-Response 1.0 1.0)))) 7)
-((: r3a ((TTV 3 (STV 0.8 0.7)) (IMPLICATION_LINK (AND_LINK ((Goal Receive-User-Response 0.9 0.6) interpret-mood)) (Goal Understand-Initial-Mood 1.0 1.0)))) 8)
-((: r3b ((TTV 3 (STV 0.8 0.7)) (IMPLICATION_LINK (AND_LINK ((Goal Receive-User-Response 0.9 0.6) interpret-context)) (Goal Understand-Initial-Context 1.0 1.0)))) 5)
-((: r4 ((TTV 4 (STV 0.8 0.7)) (IMPLICATION_LINK (AND_LINK ((Goal Understand-Initial-Mood 0.9 0.6) probe-mood)) (Goal Explore-Mood-Details 1.0 1.0)))) 6)
-((: r5 ((TTV 5 (STV 0.8 0.7)) (IMPLICATION_LINK (AND_LINK ((Goal Explore-Mood-Details 0.9 0.6) ask-activities)) (Goal Ask-Daily-Activities 1.0 1.0)))) 5)
-((: r6 ((TTV 6 (STV 0.8 0.7)) (IMPLICATION_LINK (AND_LINK ((Goal Understand-Initial-Context 0.9 0.6) request-activities)) (Goal Ask-Daily-Activities 1.0 1.0)))) 3)
-((: r7 ((TTV 7 (STV 0.8 0.7)) (IMPLICATION_LINK (AND_LINK ((Goal Ask-Daily-Activities 0.9 0.6) collect-activity-details)) (Goal Learn-Activity-Details 1.0 1.0)))) 2)
-((: r8a ((TTV 8 (STV 0.8 0.7)) (IMPLICATION_LINK (AND_LINK ((Goal Learn-Activity-Details 0.9 0.6) explore-hobbies)) (Goal Understand-Hobby-Preferences 1.0 1.0)))) 9)
-((: r8b ((TTV 8 (STV 0.8 0.7)) (IMPLICATION_LINK (AND_LINK ((Goal Learn-Activity-Details 0.9 0.6) explore-goals)) (Goal Understand-Future-Goals 1.0 1.0)))) 7)
-((: r9 ((TTV 9 (STV 0.8 0.7)) (IMPLICATION_LINK (AND_LINK ((Goal Understand-Hobby-Preferences 0.9 0.6) query-aspirations)) (Goal Summarize-User-Preferences 1.0 1.0)))) 4)
-((: r10 ((TTV 10 (STV 0.8 0.7)) (IMPLICATION_LINK (AND_LINK ((Goal Understand-Future-Goals 0.9 0.6) synthesize-preferences)) (Goal Summarize-User-Preferences 1.0 1.0)))) 6)
-((: r11 ((TTV 11 (STV 0.8 0.7)) (IMPLICATION_LINK (AND_LINK ((Goal Summarize-User-Preferences 0.9 0.6) finalize-understanding)) (Goal Understand-User-Interests 1.0 1.0)))) 10)
-((: d1 ((TTV 12 (STV 0.8 0.7)) (IMPLICATION_LINK (AND_LINK ((Goal Receive-User-Response 0.9 0.6) discuss-random-topic)) (Goal Off-Topic-Discussion 1.0 1.0)))) 10)
-((: d2 ((TTV 13 (STV 0.8 0.7)) (IMPLICATION_LINK (AND_LINK ((Goal Understand-Initial-Mood 0.9 0.6) share-joke)) (Goal Engage-User-Fun 1.0 1.0)))) 9)
-((: d3 ((TTV 14 (STV 0.8 0.7)) (IMPLICATION_LINK (AND_LINK ((Goal Ask-Daily-Activities 0.9 0.6) redirect-conversation)) (Goal Send-Greeting 1.0 1.0)))) 8)
-((: d4 ((TTV 15 (STV 0.8 0.7)) (IMPLICATION_LINK (AND_LINK ((Goal Learn-Activity-Details 0.9 0.6) offer-advice)) (Goal Provide-Feedback 1.0 1.0)))) 10)
-((: d5 ((TTV 16 (STV 0.8 0.7)) (IMPLICATION_LINK (AND_LINK ((Goal Understand-Hobby-Preferences 0.9 0.6) explore-unrelated-topics)) (Goal Off-Topic-Discussion 1.0 1.0)))) 7)
-((: d6 ((TTV 17 (STV 0.8 0.7)) (IMPLICATION_LINK (AND_LINK ((Goal Understand-Future-Goals 0.9 0.6) ask-irrelevant-question)) (Goal Irrelevant-Topic 1.0 1.0)))) 9)
-((: d7 ((TTV 18 (STV 0.8 0.7)) (IMPLICATION_LINK (AND_LINK ((Goal Explore-Mood-Details 0.9 0.6) share-story)) (Goal Engage-User-Story 1.0 1.0)))) 8)
-""",
-    "I want to learn a new hobby",
-)
-print(res)
+# res = correlation_matcher(
+#     "The user introduced themselves as Sam",
+#     """
+# ((: r1 ((TTV 1 (STV 0.8 0.7)) (IMPLICATION_LINK (AND_LINK ((Goal Conversation-Started 0.9 0.6) initiate-dialogue)) (Goal Send-Greeting 1.0 1.0)))) 4)
+# ((: r2 ((TTV 2 (STV 0.8 0.7)) (IMPLICATION_LINK (AND_LINK ((Goal Send-Greeting 0.9 0.6) elicit-response)) (Goal Receive-User-Response 1.0 1.0)))) 7)
+# ((: r3a ((TTV 3 (STV 0.8 0.7)) (IMPLICATION_LINK (AND_LINK ((Goal Receive-User-Response 0.9 0.6) interpret-mood)) (Goal Understand-Initial-Mood 1.0 1.0)))) 8)
+# ((: r3b ((TTV 3 (STV 0.8 0.7)) (IMPLICATION_LINK (AND_LINK ((Goal Receive-User-Response 0.9 0.6) interpret-context)) (Goal Understand-Initial-Context 1.0 1.0)))) 5)
+# ((: r4 ((TTV 4 (STV 0.8 0.7)) (IMPLICATION_LINK (AND_LINK ((Goal Understand-Initial-Mood 0.9 0.6) probe-mood)) (Goal Explore-Mood-Details 1.0 1.0)))) 6)
+# ((: r5 ((TTV 5 (STV 0.8 0.7)) (IMPLICATION_LINK (AND_LINK ((Goal Explore-Mood-Details 0.9 0.6) ask-activities)) (Goal Ask-Daily-Activities 1.0 1.0)))) 5)
+# ((: r6 ((TTV 6 (STV 0.8 0.7)) (IMPLICATION_LINK (AND_LINK ((Goal Understand-Initial-Context 0.9 0.6) request-activities)) (Goal Ask-Daily-Activities 1.0 1.0)))) 3)
+# ((: r7 ((TTV 7 (STV 0.8 0.7)) (IMPLICATION_LINK (AND_LINK ((Goal Ask-Daily-Activities 0.9 0.6) collect-activity-details)) (Goal Learn-Activity-Details 1.0 1.0)))) 2)
+# ((: r8a ((TTV 8 (STV 0.8 0.7)) (IMPLICATION_LINK (AND_LINK ((Goal Learn-Activity-Details 0.9 0.6) explore-hobbies)) (Goal Understand-Hobby-Preferences 1.0 1.0)))) 9)
+# ((: r8b ((TTV 8 (STV 0.8 0.7)) (IMPLICATION_LINK (AND_LINK ((Goal Learn-Activity-Details 0.9 0.6) explore-goals)) (Goal Understand-Future-Goals 1.0 1.0)))) 7)
+# ((: r9 ((TTV 9 (STV 0.8 0.7)) (IMPLICATION_LINK (AND_LINK ((Goal Understand-Hobby-Preferences 0.9 0.6) query-aspirations)) (Goal Summarize-User-Preferences 1.0 1.0)))) 4)
+# ((: r10 ((TTV 10 (STV 0.8 0.7)) (IMPLICATION_LINK (AND_LINK ((Goal Understand-Future-Goals 0.9 0.6) synthesize-preferences)) (Goal Summarize-User-Preferences 1.0 1.0)))) 6)
+# ((: r11 ((TTV 11 (STV 0.8 0.7)) (IMPLICATION_LINK (AND_LINK ((Goal Summarize-User-Preferences 0.9 0.6) finalize-understanding)) (Goal Understand-User-Interests 1.0 1.0)))) 10)
+# ((: d1 ((TTV 12 (STV 0.8 0.7)) (IMPLICATION_LINK (AND_LINK ((Goal Receive-User-Response 0.9 0.6) discuss-random-topic)) (Goal Off-Topic-Discussion 1.0 1.0)))) 10)
+# ((: d2 ((TTV 13 (STV 0.8 0.7)) (IMPLICATION_LINK (AND_LINK ((Goal Understand-Initial-Mood 0.9 0.6) share-joke)) (Goal Engage-User-Fun 1.0 1.0)))) 9)
+# ((: d3 ((TTV 14 (STV 0.8 0.7)) (IMPLICATION_LINK (AND_LINK ((Goal Ask-Daily-Activities 0.9 0.6) redirect-conversation)) (Goal Send-Greeting 1.0 1.0)))) 8)
+# ((: d4 ((TTV 15 (STV 0.8 0.7)) (IMPLICATION_LINK (AND_LINK ((Goal Learn-Activity-Details 0.9 0.6) offer-advice)) (Goal Provide-Feedback 1.0 1.0)))) 10)
+# ((: d5 ((TTV 16 (STV 0.8 0.7)) (IMPLICATION_LINK (AND_LINK ((Goal Understand-Hobby-Preferences 0.9 0.6) explore-unrelated-topics)) (Goal Off-Topic-Discussion 1.0 1.0)))) 7)
+# ((: d6 ((TTV 17 (STV 0.8 0.7)) (IMPLICATION_LINK (AND_LINK ((Goal Understand-Future-Goals 0.9 0.6) ask-irrelevant-question)) (Goal Irrelevant-Topic 1.0 1.0)))) 9)
+# ((: d7 ((TTV 18 (STV 0.8 0.7)) (IMPLICATION_LINK (AND_LINK ((Goal Explore-Mood-Details 0.9 0.6) share-story)) (Goal Engage-User-Story 1.0 1.0)))) 8)
+# """,
+#     "I want to learn a new hobby",
+# )
+# print(res)
