@@ -106,7 +106,8 @@
 	       )))
 
 
-
+;; The demands are represented based on their satifsaction, 
+;; a lower satisfation will require urgent response.
 (: demandSelector' (-> Expression Number Demand))
 (= (demandSelector' $demands $maxDemand)
    	(if (== $demands ()) 
@@ -115,7 +116,7 @@
 		       	((demand $maxName $maxVal) $maxDemand)
 		       	(((demand $currName $currVal) $tail) (decons-atom $demands))
 		       )
-		  	(if (>= $currVal $maxVal)
+		  	(if (<= $currVal $maxVal)
 			  	(demandSelector' $tail (demand $currName $currVal))
 				(demandSelector' $tail $maxDemand)
 			)
@@ -337,7 +338,7 @@
 !(assertEqual (isGoalMet? (report) (Goal mission_complete 1.0 1.0)) True)
 !(assertEqual (isGoalMet? (analyze upload) (Goal analyze_data 1 1)) False)
 !(assertEqual (emotionChecker (psi-agent-loop init &kb)) True)
-!(assertEqual (demandSelector ((demand Affiliation 3) (demand Concept 4) (demand Car 8))) (demand Car 8))
+!(assertEqual (demandSelector ((demand Affiliation 3) (demand Concept 4) (demand Car 8))) (demand Affiliation 3))
 ;; !(psi-agent-loop init &kb)
 
 
