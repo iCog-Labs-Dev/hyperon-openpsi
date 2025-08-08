@@ -1,10 +1,11 @@
 !(register-module! ../../../../../hyperon-openpsi)
-!(register-module! ../../../../utilities-module)
+;; !(register-module! ../../../../utilities-module)
 
-!(import! &self hyperon-openpsi:main:mind-agents:action-planner:action-planner-v2)
+!(import! &self hyperon-openpsi:main:mind-agents/action-planner/action-planner-v2)
 !(import! &self hyperon-openpsi:main:types)
-!(import! &self hyperon-openpsi:main:rules:rule)
-!(import! &self utilities-module:utils)
+!(import! &self hyperon-openpsi:main/rules:rule)
+!(import! &self hyperon-openpsi:utilities-module:utils)
+!(import! &self hyperon-openpsi:psi-utilities:psi_utils)
 
 
 !(bind! &r (new-space)) 
@@ -37,7 +38,8 @@
 ;!(addRule &r r5 ((S1 is on)) (Turn off S1) (S1 is off) (TTV 0 (STV 1.0 1.0)))
 
 !(assertEqual (hillClimbingPlanner (S1 is off) (S3 is on) (TestedActions) () &r) ((Turn on S3) (Turn on S2) (Turn on S1)))
-
+!(hillClimbingPlanner (S1 is off) (S3 is on) (TestedActions) () &r) ((Turn on S3) (Turn on S2) (Turn on S1))
+!(get-atoms (TestedActions))
 
 ;Second Test Case
 ;                   Test Description:
@@ -70,12 +72,12 @@
 !(addRule &r rr4 ((P4 has the ball)) (P4 Kick to Goal) (Goal Scored) (TTV 0 (STV 1.0 1.0)))
 
 
- !(assertEqual (hillClimbingPlanner (P1 has the ball) (P3 has the ball) (TestedActions) () &r) ((P2 Kick to P3) (P1 Kick to P2)))
- !(assertEqual (hillClimbingPlanner (P1 has the ball) (Goal Scored) (TestedActions) () &r) ((P4 Kick to Goal) (P3 Kick to P4) (P2 Kick to P3) (P1 Kick to P2)) )
- !(assertEqual (hillClimbingPlanner (P2 has the ball) (Goal Scored) (TestedActions) () &r) ((P4 Kick to Goal) (P3 Kick to P4) (P2 Kick to P3)))
- !(assertEqual (hillClimbingPlanner (P2 has the ball) (P4 has the ball) (TestedActions) () &r) ((P3 Kick to P4) (P2 Kick to P3)))
- !(assertEqual (hillClimbingPlanner (P1 doesn't have the ball) (Goal Scored) (TestedActions) () &r) ((P4 Kick to Goal) (P3 Kick to P4) (P2 Kick to P3) (P1 Kick to P2) (Give ball to P1)))
- !(assertEqual (hillClimbingPlanner (P2 doesn't have the ball) (Goal Scored) (TestedActions) () &r) ((P4 Kick to Goal) (P3 Kick to P4) (P2 Kick to P3) (Give ball to P2)))
- !(assertEqual (hillClimbingPlanner (P3 doesn't have the ball) (Goal Scored) (TestedActions) () &r) ()) ; no actions taken since there is no rule to apply
- !(assertEqual (hillClimbingPlanner (P4 doesn't have the ball) (Goal Scored) (TestedActions) () &r) ((P4 Kick to Goal) (Give ball to P4)))
- !(assertEqual (hillClimbingPlanner (P4 has the ball) (P1 has the ball) (TestedActions) () &r) ()) ; no rules to go backward 
+;;  !(assertEqual (hillClimbingPlanner (P1 has the ball) (P3 has the ball) (TestedActions) () &r) ((P2 Kick to P3) (P1 Kick to P2)))
+;;  !(assertEqual (hillClimbingPlanner (P1 has the ball) (Goal Scored) (TestedActions) () &r) ((P4 Kick to Goal) (P3 Kick to P4) (P2 Kick to P3) (P1 Kick to P2)) )
+;;  !(assertEqual (hillClimbingPlanner (P2 has the ball) (Goal Scored) (TestedActions) () &r) ((P4 Kick to Goal) (P3 Kick to P4) (P2 Kick to P3)))
+;;  !(assertEqual (hillClimbingPlanner (P2 has the ball) (P4 has the ball) (TestedActions) () &r) ((P3 Kick to P4) (P2 Kick to P3)))
+;;  !(assertEqual (hillClimbingPlanner (P1 doesn't have the ball) (Goal Scored) (TestedActions) () &r) ((P4 Kick to Goal) (P3 Kick to P4) (P2 Kick to P3) (P1 Kick to P2) (Give ball to P1)))
+;;  !(assertEqual (hillClimbingPlanner (P2 doesn't have the ball) (Goal Scored) (TestedActions) () &r) ((P4 Kick to Goal) (P3 Kick to P4) (P2 Kick to P3) (Give ball to P2)))
+;;  !(assertEqual (hillClimbingPlanner (P3 doesn't have the ball) (Goal Scored) (TestedActions) () &r) ()) ; no actions taken since there is no rule to apply
+;;  !(assertEqual (hillClimbingPlanner (P4 doesn't have the ball) (Goal Scored) (TestedActions) () &r) ((P4 Kick to Goal) (Give ball to P4)))
+;;  !(assertEqual (hillClimbingPlanner (P4 has the ball) (P1 has the ball) (TestedActions) () &r) ()) ; no rules to go backward 

@@ -1,4 +1,4 @@
-!(bind! np (py-atom numpy))
+;; !(bind! np (py-atom numpy))
 !(bind! &testedActions (new-space))
 
 (= (TestedActions) &testedActions)
@@ -12,7 +12,7 @@
                                                  (: $handle (IMPLICATION_LINK (AND_LINK (($initialState) $action)) $g))
                                                  $action))) ;get applicable actions and.
             ($untriedActions (filterUntriedRules $applicableActions $tested () )) ;Filter out the ones that already have been tested.
-            ;(() (println! ( tested --> $tested untried --> $untriedActions applicable --> $applicableActions plan --> $plan)))
+            (() (println! ( tested --> $tested untried --> $untriedActions applicable --> $applicableActions plan --> $plan)))
           )
        (if (== $untriedActions ()) ;No untested actions, return () to back
          ()

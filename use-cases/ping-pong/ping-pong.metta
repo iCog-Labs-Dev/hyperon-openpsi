@@ -1,10 +1,10 @@
 !(register-module! ../../../hyperon-openpsi)
-!(register-module! ../../utilities-module)
+;; !(register-module! ../../utilities-module)
 
-!(import! &self hyperon-openpsi:main:mind-agents:action-planner:action-planner-v2)
+!(import! &self hyperon-openpsi:main/mind-agents/action-planner/action-planner-v2)
 !(import! &self hyperon-openpsi:main:types)
-!(import! &self hyperon-openpsi:main:rules:rule)
-!(import! &self utilities-module:utils)
+!(import! &self hyperon-openpsi:main/rules:rule)
+!(import! &self hyperon-openpsi:utilities-module:utils)
 
 !(bind! &r (new-space)) 
 !(bind! sleep (py-atom time.sleep))
