@@ -5,7 +5,6 @@ import json
 from pydantic import ValidationError
 
 
-
 def parse_schema(schema: Schema) -> str:
     """A function that parses a cognitive Schema into represented in Python to MeTTa structure."""
     # Assuming context, action, and goal are already in the correct Metta format
@@ -22,7 +21,8 @@ def parse_action(actions: str) -> List[Action]:
 
 
 def parse_exp(sexpr: str) -> List[Schema]:
-    pattern = re.compile(r"""
+    pattern = re.compile(
+        r"""
         \(                       # opening of the outermost tuple
           \( :\s*(r\d+)\s*       # handle (e.g. r1)
           \(                     # opening of the rule body
@@ -36,19 +36,23 @@ def parse_exp(sexpr: str) -> List[Schema]:
           \)\s*
         (\d+(?:\.\d+)?)              # weight
         \)
-    """, re.VERBOSE)
+    """,
+        re.VERBOSE,
+    )
 
     result = []
     for match in pattern.finditer(sexpr):
         handle, stv1, stv2, context, action, goal, weight = match.groups()
-        result.append(Schema(
-            handle=handle,
-            context=context,
-            action=action,
-            goal=goal,
-            weight=float(weight),
-            tv=f"(STV {stv1} {stv2})"
-        ))
+        result.append(
+            Schema(
+                handle=handle,
+                context=context,
+                action=action,
+                goal=goal,
+                weight=float(weight),
+                tv=f"(STV {stv1} {stv2})",
+            )
+        )
 
     return result
 
@@ -124,6 +128,29 @@ def extract_rules_from_llm(raw_rules: str) -> List[Schema]:
     rules = [rule.strip() for rule in stripped_rules.split(",")]
 
     return rules
+
+
+def parse_to_dict(s):
+    # Remove surrounding parentheses and split into tokens
+    tokens = s.strip()[1:-1].split()
+
+    result = {}
+    for i in range(0, len(tokens), 2):
+        key = tokens[i]
+        value_str = tokens[i + 1]
+
+        # Convert to int if possible, else float
+        if value_str.isdigit():
+            value = int(value_str)
+        else:
+            try:
+                value = float(value_str)
+            except ValueError:
+                value = value_str  # fallback to string if not numeric
+
+        result[key] = value
+
+    return result
 
 
 # string = "( (modulator activation 0.5) (modulator securing_threshold 0.7) (modulator pleasure 0.8) (modulator selection_threshold 0.6) )"
