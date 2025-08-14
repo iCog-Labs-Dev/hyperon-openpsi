@@ -84,9 +84,9 @@
     )
 )
 ;; select single action from available rules. 
-(= (selectSingleActionHelper $space $rulesWithWeight $minValue $currAction $targetValue)
+(= (selectSingleActionHelper $rulesWithWeight $minValue $currAction $targetValue)
     (if (== $rulesWithWeight ())
-        (let $handleWithAction (findRulesWithAction $space $currAction) ;; a temporary solution
+        (let $handleWithAction (findRulesWithAction &ruleSpace $currAction) ;; a temporary solution
             ((car-atom $handleWithAction) $currAction)
 
         )
@@ -98,8 +98,8 @@
             ($range (- $targetValue $weight))
         )
             (if (< $range (- $targetValue $minValue))
-                (selectSingleActionHelper $space $tail $weight $ruleAction $targetValue)
-                (selectSingleActionHelper $space $tail $minValue $currAction $targetValue)
+                (selectSingleActionHelper $tail $weight $ruleAction $targetValue)
+                (selectSingleActionHelper $tail $minValue $currAction $targetValue)
             )
         )
 
@@ -109,7 +109,7 @@
 
 ;; This functions selects a single action from a list of rules
 ;; That are going to be implemented in relation to a target value.
-(= (selectSingleAction $space $rulesWithWeight $targetValue)
+(= (selectSingleAction $rulesWithWeight $targetValue)
     (if (or (== $rulesWithWeight ()) (== $rulesWithWeight (())))
         (() ())
         (let* (
@@ -117,7 +117,7 @@
             ($action (selectActionFromRule $head))
             ($weight (getWeightFromRule $head))
         )
-            (selectSingleActionHelper $space $rulesWithWeight $weight $action $targetValue)
+            (selectSingleActionHelper $rulesWithWeight $weight $action $targetValue)
         )
     )
 )
@@ -190,13 +190,13 @@
         (let* (
             ($relatedRules (findRulesWithContext $ruleSpace $initState))
             ($_ (println! (relatedRules $relatedRules)))
-            (($rule $currAction) (selectSingleAction $ruleSpace $relatedRules $target))
+            (($rule $currAction) (selectSingleAction $relatedRules $target))
             ($_ (println! (rule $rule action $currAction)))
             ($accum' (if (== $currAction ()) $accum (union-atom $accum ($currAction))))
             ($goals (collapse (extractGoalFromRule (superpose $relatedRules))))
             ($nextRules (findRulesForMultipleGoals $ruleSpace $goals ()))
             ($_ (println! (goals $goals nextRules $nextRules)))
-            (($currRule $action) (selectSingleAction $ruleSpace $nextRules $target))
+            (($currRule $action) (selectSingleAction $nextRules $target))
             ($_ (println! (currRule $currRule action $action)))
             
         )

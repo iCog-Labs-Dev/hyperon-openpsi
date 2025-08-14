@@ -77,13 +77,11 @@ def correlation_matcher(conversation_summary:str, rules_list:List[str],userRespo
     # print(type(raw_rules_string))
    
     for rule_string in raw_rules_string:
-      
+        print("validating synthax: ", validateSyntax(rule_string))
        
         if validateSyntax(rule_string):
            
             if validateExistence(rule_string, rules_list):
-                print("validating synthax: ", validateSyntax(rule_string))
-                print("Found valid rule: ", rule_string)
                 return rule_string
 
     # Return None if no valid rule is found after checking all selected rules

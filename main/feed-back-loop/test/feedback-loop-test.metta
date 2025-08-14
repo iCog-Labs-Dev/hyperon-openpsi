@@ -11,7 +11,7 @@
 !(import! &self hyperon-openpsi:main:mind-agents:action-planner:action-planner-v1)
 !(import! &self hyperon-openpsi:main:mind-agents:feeling-updater:feeling-updaters)
 !(bind! &kb (new-space))
-!(addRulesToSpace &ruleSpace) 
+!(addRulesToSpace &ruleSpace)
 !(insert-modulators &modulator-space)
 
 
