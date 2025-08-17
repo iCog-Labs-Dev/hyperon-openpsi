@@ -78,7 +78,7 @@
 ;;Tag based specification for atomspace updation
 (: update-all (-> Symbol hyperon::space::DynSpace hyperon::space::DynSpace Expression))
 (= (update-all $tag $updater $updated)
-   (case $tag(
+   (case $tag (
               (demand (update-atoms (demand $x $y) $updater $updated))
               (modulator (update-atoms (modulator $x $y) $updater $updated))
               )))
@@ -97,12 +97,12 @@
 
 (: queryAll (-> hyperon::space::DynSpace Symbol Expression))
 (= (queryAll $space $type)
-   (case $type(
+   (case $type (
 	       (modulator (query $space (modulator $x $y)))
 	       (perception (query $space (perception $x $y)))
 	       (demand (query $space (demand $x $y)))
 	       (rule (query $space ((: $handle ((TTV $time (STV $bel $conf)) (IMPLICATION_LINK (AND_LINK ((Goal $context $x $y) $action)) $goal))) $cumm-weight)))
-	       ($_ (Error "This form doesn't exist in the atomspace"))
+	       ;;($ (Error "This form doesn't exist in the atomspace"))
 	       )))
 
 
@@ -133,7 +133,7 @@
 ;; This goal selector maps from the demand and applies the goal to it
 ;; This is an unfinished function
 (= (goalSelector $demand)
-   (case $demand(
+   (case $demand (
 		 ((demand affiliation $y) (Goal mission_complete 1.0 1.0))
 		((demand competence $x) (Goal mission_complete 1.0 1.0))
         ((demand energy $x) (Goal mission_complete 1.0 1.0))
@@ -215,9 +215,9 @@
 		False
 		(let* (
 			(($rule $tail) (decons-atom $rules))
-            ($_ (println! (isGoalMetInnerRule $rule tail $tail)))
+            ;; ($_ (println! (isGoalMetInnerRule $rule tail $tail)))
 			($ruleGoal (extractGoalFromRule $rule))
-            ($_ (println! (this is the goal $ruleGoal)))
+            ;; ($_ (println! (this is the goal $ruleGoal)))
 		)
 		  (if (== $ruleGoal $goal)
 		    	True
@@ -237,7 +237,7 @@
 	       ($length (size-atom $actions))
 	       ($lastAction (index-atom $actions (- $length 1)))
 	       ($rules' (findRulesWithAction &ruleSpace $lastAction))
-           ($_ (println! (rulesinGoal $rules')))
+        ;;    ($_ (println! (rulesinGoal $rules')))
 	)
 		 (isGoalMet' $rules' $goal)
 	)	
@@ -249,7 +249,7 @@
 (= (update-modulator $modulatorName $modulatorValue)
 	(let* (
 	       ($modulator (fetch-modulator &modulator-space $modulatorName))
-	       ($_ (update-atom &modulator-space $modulator ($modulatorName $modulatorValue)))
+	       ($result (update-atom &modulator-space $modulator ($modulatorName $modulatorValue)))
 	)
 	  	()
 	)
@@ -279,27 +279,27 @@
 (= (psi-agent-loop $state $kb)
 	(let* (
 	    ($demands (queryAll $kb demand))
-        ($_ (println! (demands $demands)))
+        ($demand_println (println! (demands $demands)))
 		($currDemand (demandSelector $demands))
-        ($_ (println! (dmSelector $currDemand)))
+        ($dm_println (println! (dmSelector $currDemand)))
         ($goalObj (goalSelector $currDemand))
 		((Goal $goal $goalVal1 $goalVal2) $goalObj) 
-        ($_ (println! (goal-psi $goal)))
+        ($goal_println (println! (goal-psi $goal)))
 		($actions (planner &ruleSpace $state $goal))
-        ($_ (println! (actions-psi-to-apply $actions goal $goal demand $currDemand)))
+        ($actions_println (println! (actions-psi-to-apply $actions goal $goal demand $currDemand)))
 		($applyValue (applyActions $actions $goalObj $currDemand)) 
-        ($_ (println! (applyValue $applyValue)))
+        ($apply_value_println (println! (applyValue $applyValue)))
 		($competenceDemand (getDemandByName &demandspace competence)) 
-        ($_ (println! (competence-psi $competenceDemand)))
+        ($comptence_println (println! (competence-psi $competenceDemand)))
 		($affiliationDemand (getDemandByName &demandspace affiliation))
 		($energyDemand (getDemandByName &demandspace energy))
     
-        ($_ (println! (demandValues $competenceDemand $affiliationDemand $energyDemand)))
+        ($demand_values_println (println! (demandValues $competenceDemand $affiliationDemand $energyDemand)))
 		($modUpdate (modulatorUpdaterAgent &modulator-space $competenceDemand $affiliationDemand $energyDemand))
 
-        ($_ (println! (modUpdate $modUpdate modulatorValues (collapse (get-atoms &modulator-space))))) 
+        ($mod_update_println (println! (modUpdate $modUpdate modulatorValues (collapse (get-atoms &modulator-space))))) 
 		($happinessValue (happinessFeelingUpdater &modulator-space))
-        ($_ (println! (happinessVal $happinessValue)))
+        ($happinnes_println (println! (happinessVal $happinessValue)))
 		($sadnessValue (sadnessFeelingUpdater &modulator-space))
         ;; ($_ (println! (sadnessVal $sadnessValue)))
 		($angerValue (angerFeelingUpdater &modulator-space))
@@ -310,9 +310,9 @@
 		($hateValue (hateFeelingUpdater &modulator-space))
 		($gratitude (gratitudeFeelingUpdater &modulator-space))
         ;($_ (println! (happinessValue $happinessValue angerValue $angerValue sadnessValue $sadnessValue angerValue $angerValue fearValue $fearValue)))
- 	    ($_ (update-all modulator &modulator-space $kb))
+ 	    ($changed_mod (update-all modulator &modulator-space $kb))
 ;; ;        
-        ($_ (update-all demand &demandspace $kb))
+        ($changed_demand (update-all demand &demandspace $kb))
 
 	)
 	 (happinessValue $happinessValue sadnessValue $sadnessValue angerValue $angerValue fearValue $fearValue gratitudeValue $gratitude) 
@@ -339,7 +339,7 @@
 !(assertEqual (emotionChecker (psi-agent-loop init &kb)) True)
 !(assertEqual (demandSelector ((demand Affiliation 3) (demand Concept 4) (demand Car 8))) (demand Car 8))
 ;; !(psi-agent-loop init &kb)
-
+!(decons-atom (a b c d))
 
 ;; !(fearFeelingUpdater &modulator-space)
 ;; !(happinessFeelingUpdater &modulator-space)
