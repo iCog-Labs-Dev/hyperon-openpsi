@@ -1,13 +1,16 @@
 !(register-module! ../../../../../hyperon-openpsi)
 !(import! &self hyperon-openpsi:main:modulator:modulator)
 !(import! &self hyperon-openpsi:main:mind-agents:modulator-updater:modulator-updaters)
-!(import! &self hyperon-openpsi:main:feed-back-loop:feed-back-loop)
 !(import! &self hyperon-openpsi:main:mind-agents:modulator-updater:tests:modulator-updater-test-helpers)
+
 !(register-module! ../../../../utilities-module)
 !(import! &self utilities-module:utils)
 !(import! &self hyperon-openpsi:psi-utilities:psi_utils)
 !(import! &self hyperon-openpsi:main:demand:demand)
 !(import! &self hyperon-openpsi:psi-utilities:normalization)
+
+!(bind! &demandspace (new-space))
+!(bind! &modulator-space (new-space))
 
 !(addDemand &demandspace energy 0.6)
 !(addDemand &demandspace affiliation 0.5)

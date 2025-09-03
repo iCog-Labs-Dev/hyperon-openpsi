@@ -65,6 +65,6 @@
 
 !(addRulesToSpace &ruleSpace)
 
-!(get-atoms &ruleSpace)
+;!(get-atoms &ruleSpace)
 ;!(assertEqual (hillClimbingPlanner init mission_complete (TestedActions) () &ruleSpace) (explore approach interact report))
 ;!(assertEqual (hillClimbingPlanner init task_done (TestedActions) () &ruleSpace) (explore approach interact))
