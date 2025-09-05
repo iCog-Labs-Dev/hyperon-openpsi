@@ -360,10 +360,14 @@
         ($_ (println! (competence-psi $competenceDemand)))
 		($affiliationDemand (getDemandByName &demandspace affiliation))
 		($energyDemand (getDemandByName &demandspace energy))
-    
         ($_ (println! (demandValues $competenceDemand $affiliationDemand $energyDemand)))
-		($modUpdate (modulatorUpdaterAgent &modulator-space $competenceDemand $affiliationDemand $energyDemand))
-
+		
+		((demand $demandName $demandVal) $currDemand)
+		((demand $demandName $updatedDemandVal) (getDemandByName &demandspace $demandName))
+		($modUpdate (if (== $demandVal $updatedDemandVal)
+			()
+			(modulatorUpdaterAgent &modulator-space $competenceDemand $affiliationDemand $energyDemand)
+		))
         ($_ (println! (modUpdate $modUpdate modulatorValues (collapse (get-atoms &modulator-space))))) 
 		($happinessValue (happinessFeelingUpdater &modulator-space))
         ($_ (println! (happinessVal $happinessValue)))
