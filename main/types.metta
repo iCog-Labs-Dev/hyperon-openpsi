@@ -1,3 +1,3 @@
-(: Goal Type)
-(: Action Type)
-(: Emotion Type)
+;(: Goal Type)
+;(: Action Type)
+;(: Emotion Type)
