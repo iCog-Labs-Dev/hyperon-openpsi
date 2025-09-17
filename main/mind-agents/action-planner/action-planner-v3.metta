@@ -1,46 +1,53 @@
 !(bind! np (py-atom numpy))
 !(bind! &testedActions (new-space))
-!(bind! &priorityQueue (new-space)) ; Space for priority queue
+!(bind! &priorityQueue (new-space)) 
 
 
-(= (TestedActions) &testedActions)
+(= (append $l1 $l2)
+   (if (== $l1 ())
+       $l2
+       (let (($head $tail) (decons-atom $l1))
+            (cons-atom $head (append $tail $l2)))))
+;to ensure the system doesn’t fail if the rule space lacks specific Goal
+(= (goal-value $state $ruleSpace) 0) 
+(= (desired-goal-value $state $ruleSpace) 0) 
+
 ;Initializes a priority queue with the initial state, a cost of 0, and an empty plan.
 ;Uses a visited space to track explored states and avoid cycles.
-;In dijkstraLoop, it pops the state with the lowest cost from the priority queue.
+;In aStarLoop, it pops the state with the lowest cost from the priority queue.
 ;If the popped state is the goal, it returns the associated plan.
 ;If the state is unvisited, it:Marks the state as visited and tested.
 ;Retrieves applicable actions, filters out tested ones, and applies them to generate new states.
 ;For each new state, calculates a new cost (current cost + heuristic distance to goal) and adds it to the priority queue with the updated plan.
 ;Continues until the goal is found or the priority queue is empty (no path exists).
 
+more A* than pure Dijkstra due to heuristic in costs.
 
-Distance Function: Uses the same heuristic distance function as the hill-climbing planner for edge costs.
-(= (dijkstraPlanner $initialState $goal $testedActions $ruleSpace)
+(= (aStarPlanner $initialState $goal $testedActions $ruleSpace)
    (let* (
-          ($pq &priorityQueue) ; Priority queue to store (cost, state, plan) tuples
-          ($visited (new-space)) ; Space to track visited states
+          ($pq &priorityQueue) ; priority queue to store (cost, state, plan) tuples
+          ($visited (new-space))  
           (() (add-atom $pq (0 $initialState ()))) ; Initialize with (cost=0, initialState, empty plan)
          )
-     (dijkstraLoop $pq $goal $testedActions $visited $ruleSpace)
+     (aStarLoop $pq $goal $testedActions $visited $ruleSpace)
    )
 )
 
-(= (dijkstraLoop $pq $goal $testedActions $visited $ruleSpace)
-   (if (== (size $pq) 0) ; If priority queue is empty, no path found
+(= (aStarLoop $pq $goal $testedActions $visited $ruleSpace)
+   (if (== (size-atom $pq) 0) ; if priority queue is empty, no path found
      ()
      (let* (
-            (($cost $state $plan) (popMin $pq)) ; Get state with minimum cost
+            (($cost $state $plan) (popMin $pq)) ; get state with minimum cost
             ($isVisited (isMember $state $visited))
            )
        (if $isVisited
-         (dijkstraLoop $pq $goal $testedActions $visited $ruleSpace) ; Skip visited state
+         (aStarLoop $pq $goal $testedActions $visited $ruleSpace) 
          (let* (
-                (() (add-atom $visited $state)) ; Mark state as visited
-                (() (add-atom $testedActions $state)) ; Mark state as tested
+                (() (add-atom $visited $state)) ; mark state as visited
                 ($isGoal (== $state $goal))
                )
            (if $isGoal
-             $plan ; Return plan if goal reached
+             $plan ; return plan if goal reached
              (let* (
                     ($applicableActions (collapse (match $ruleSpace 
                                                   (: $handle (IMPLICATION_LINK (AND_LINK (($state) $action)) $g))
@@ -48,8 +55,8 @@ Distance Function: Uses the same heuristic distance function as the hill-climbin
                     ($untriedActions (filterUntriedRules $applicableActions (getTestedActions $state $testedActions) ()))
                     ($newStates (applyActions $untriedActions $state () $ruleSpace))
                    )
-               (addNewStates $newStates $cost $state $plan $pq $goal $ruleSpace)
-               (dijkstraLoop $pq $goal $testedActions $visited $ruleSpace)
+               (addNewStates $newStates $cost $plan $pq $goal $ruleSpace)
+               (aStarLoop $pq $goal $testedActions $visited $ruleSpace)
              )
            )
          )
@@ -58,30 +65,36 @@ Distance Function: Uses the same heuristic distance function as the hill-climbin
    )
 )
 
-(= (addNewStates $newStates $currentCost $currentState $currentPlan $pq $goal $ruleSpace)
+(= (addNewStates $newStates $currentCost $currentPlan $pq $goal $ruleSpace)
    (if (== $newStates ())
      ()
      (let* (
             (($action $state) $tail) (decons-atom $newStates))
-            ($newCost (+ $currentCost (distance $state $goal $ruleSpace))) ; Use distance as edge cost
+            ($newCost (+ $currentCost (distance $state $goal $ruleSpace))) ; use distance as edge cost
             ($newPlan (cons-atom $action $currentPlan))
            )
+       (add-atom &testedActions ($state $action))  
        (add-atom $pq ($newCost $state $newPlan))
-       (addNewStates $tail $currentCost $currentState $currentPlan $pq $goal $ruleSpace)
+       (addNewStates $tail $currentCost $currentPlan $pq $goal $ruleSpace)
      )
    )
 
 (= (popMin $pq)
    (let* (
           ($minEntry (findMinEntry $pq))
-          (() (remove-atom $pq $minEntry)) ; Remove minimum entry
+          (() (remove-atom $pq $minEntry)) ; remove minimum entry
          )
      $minEntry
    )
 )
 
 (= (findMinEntry $pq)
-   (collapse (match $pq ($cost $state $plan) (if (== $cost (minCost $pq)) ($cost $state $plan))))
+   (let* (
+          ($candidates (collapse (match $pq ($cost $state $plan) (if (== $cost (minCost $pq)) ($cost $state $plan) ()))))
+          (($head $tail) (decons-atom $candidates)) ; Take the first one
+         )
+     $head
+   )
 )
 
 (= (minCost $pq)
@@ -99,16 +112,16 @@ Distance Function: Uses the same heuristic distance function as the hill-climbin
    )
 )
 
-(= (applyActions $actions $goal $acc $ruleSpace)
+(= (applyActions $actions $state $acc $ruleSpace)
    (if (== $actions ())
      $acc
      (let* (
             (($head $tail) (decons-atom $actions))
-            ($res (collapse (match $ruleSpace (: $handle (IMPLICATION_LINK (AND_LINK (($goal) $head)) $g)) ($head $g))))
-            ($rest (applyActions $tail $goal (concatTuple $res $acc) $ruleSpace))
+            ($res (collapse (match $ruleSpace (: $handle (IMPLICATION_LINK (AND_LINK (($state) $head)) $g)) ($head $g))))
+            ($rest (applyActions $tail $state (append $res $acc) $ruleSpace)) ; Use append
            )
-       (if (== $head ())
-         (concatTuple $acc $res)
+       (if (== $res ()) ; Fixed to check $res, not $head; skip if empty
+         (applyActions $tail $state $acc $ruleSpace)
          $rest
        )
      )
@@ -132,15 +145,5 @@ Distance Function: Uses the same heuristic distance function as the hill-climbin
 )
 
 (= (isMember $item $space)
-   (not (== (collapse (match $space ($item $any) $item)) ()))
+   (not (== (collapse (match $space $item true)) ()))
 )
-;tests
-
-(= (pq) ((2 A plan1) (5 B plan2) (1 C plan3)))
-!(pq)
-;!(popMin pq)
-!(add-atom &priorityQueue (2 A plan1))
-!(add-atom &priorityQueue (5 B plan2))
-!(add-atom &priorityQueue (1 C plan3))
-
-!(popMin &priorityQueue)
