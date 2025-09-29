@@ -4,22 +4,22 @@
 !(import! &self hyperon-openpsi:main:mind-agents:action-planner:thompson-sampling:math)
 
 ;; A simple monster combat scenario using Thompson Sampling for action selection
-(: game-loop (-> Expression Expression hyperon::space::DynSpace Expression))
-(= (game-loop $context $goal $ruleSpace) (
+(: gameLoop (-> Expression Expression hyperon::space::DynSpace Expression))
+(= (gameLoop $context $goal $ruleSpace) (
     let* (
-        ($applicableGoals (match-goal $goal $ruleSpace))
-        ($applicableRules (match-contexts $applicableGoals $context $ruleSpace))
+        ($applicableGoals (matchGoal $goal $ruleSpace))
+        ($applicableRules (matchContexts $applicableGoals $context $ruleSpace))
         ($_ (println! ("Applicable rules: " $applicableRules)))
-        (($chosenActionId $score) (thompson-sample $applicableRules $ruleSpace))
-        ($result (perform-action $chosenActionId $context $ruleSpace))
+        (($chosenActionId $score) (thompsonSample $applicableRules $ruleSpace))
+        ($result (performAction $chosenActionId $context $ruleSpace))
         ($_ (println! (# $chosenActionId was chosen and executed and resulted in $result)))
-        ($updatedRule (update-rule $chosenActionId $result $ruleSpace))
+        ($updatedRule (updateRule $chosenActionId $result $ruleSpace))
     ) ()
 ))
 
 ;; Function to get a random context (CLOSE_RANGE, MID_RANGE, LONG_RANGE)
-(: get-random-context (-> Expression))
-(= (get-random-context) (
+(: getRandomContext (-> Expression))
+(= (getRandomContext) (
     let* (
         ($random (getRandomInt 1 3))
     ) (if (== $random 1)
@@ -39,9 +39,9 @@
     if (== $iter 0)
         ()
         (let* (
-            ($context (get-random-context))
+            ($context (getRandomContext))
             ($_ (println! (--- Iteration  $iter with context $context  ---)))
-            ($_ (game-loop $context (HIT) &rules))
+            ($_ (gameLoop $context (HIT) &rules))
             ($_ (println! (--- After iteration $iter ---)))
         ) (run (- $iter 1))
     )

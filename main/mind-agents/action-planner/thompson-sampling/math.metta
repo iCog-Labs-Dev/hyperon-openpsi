@@ -36,8 +36,8 @@
     (py-atom math.exp) $num
 ))
 
-(: sample-engine (-> Number Number Number Number Number Number))
-(= (sample-engine $alpha $beta $a $b $gamma) (
+(: sampleEngine (-> Number Number Number Number Number Number))
+(= (sampleEngine $alpha $beta $a $b $gamma) (
     let* (
         ($u1 (getRandom))
         ($u2 (getRandom))
@@ -48,15 +48,15 @@
         ($right (+ (log 4) (log (* (* $u1 $u1) $u2))))
     ) (if (>= $left $right)
         (round (/ $w (+ $b $w)) 4)
-        (sample-engine $alpha $beta $a $b $gamma)
+        (sampleEngine $alpha $beta $a $b $gamma)
     )
 ))
 
-(: beta-sample (-> Number Number Number))
-(= (beta-sample $a $b) (
+(: betaSample (-> Number Number Number))
+(= (betaSample $a $b) (
     let* (
         ($alpha (+ $a $b))
         ($beta (if (<= (min $a $b) 1) (max (/ 1 $a) (/ 1 $b)) (sqrt (/ (- $alpha 2) (- (* 2 (* $a $b)) $alpha))))) 
         ($gamma (/ (+ $a 1) $beta))
-    ) (sample-engine $alpha $beta $a $b $gamma)
+    ) (sampleEngine $alpha $beta $a $b $gamma)
 ))

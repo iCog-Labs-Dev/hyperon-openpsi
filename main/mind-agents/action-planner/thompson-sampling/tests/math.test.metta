@@ -15,4 +15,4 @@
 !(assertEqual (sqrt 4) 2)
 !(assertEqual (exp 0) 1)
 
-!(assertEqual (let $val (beta-sample 20.0 10.0) (isBetween $val 0 1)) True)
+!(assertEqual (let $val (betaSample 20.0 10.0) (isBetween $val 0 1)) True)
