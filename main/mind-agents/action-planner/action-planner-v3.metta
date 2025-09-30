@@ -55,7 +55,7 @@ more A* than pure Dijkstra due to heuristic in costs.
            (if $isGoal
              $plan ; return plan if goal reached
              (let* (
-                    ($applicableActions (collapse (match &ruleSpace (: $handle (IMPLICATION_LINK (AND_LINK $state $action) $g)) $action)))
+                    ($applicableActions (collapse (match $ruleSpace (: $handle (IMPLICATION_LINK (AND_LINK $state $action) $g)) $action)))
                     ($untriedActions (filterUntriedRulesList $applicableActions (getTestedActions $state $testedActions) ()))
                     ($newStates (applyActions $untriedActions $state () $ruleSpace))
                     ($holder (addNewStates $newStates $cost $plan $pq $goal $ruleSpace))
