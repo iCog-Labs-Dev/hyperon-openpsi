@@ -1,10 +1,10 @@
 !(bind! np (py-atom numpy))
 !(bind! &testedActions (new-space))
-!(bind! &priorityQueue (new-space)) 
+!(bind! &priorityQueue (new-space))
 
 
 ;get the goal value and desired goal value
-;get the goal value and desired goal value
+
 (= (goal-value (Goal $goal $value $dgv) $ruleSpace)
     $value
 )
@@ -29,60 +29,62 @@
 ;Continues until the goal is found or the priority queue is empty (no path exists).
 
 more A* than pure Dijkstra due to heuristic in costs.
-
 (= (aStarPlanner $initialState $goal $testedActions $ruleSpace)
    (let* (
           ($pq &priorityQueue) ; priority queue to store (cost, state, plan) tuples
           ($visited (new-space))  
-          (() (add-atom $pq (0 $initialState ()))) ; Initialize with (cost=0, initialState, empty plan)
+          (() (add-atom $pq (0.0 $initialState ()))) ; Initialize with (cost=0.0, initialState, empty plan)
          )
-     (aStarLoop $pq $goal $testedActions $visited $ruleSpace)
+      (aStarLoop $pq $goal $testedActions $visited $ruleSpace)
    )
 )
 (= (aStarLoop $pq $goal $testedActions $visited $ruleSpace)
-   (if (== (length (get-atoms $pq)) 0) ; if priority queue is empty, no path found
-     ()
-     (let* (
-            (($cost $state $plan) (popMin $pq)) ; get state with minimum cost
-            ($isVisited (isMember $state $visited))
-           )
-       (if $isVisited
-         (aStarLoop $pq $goal $testedActions $visited $ruleSpace) 
-         (let* (
-                ($dummyy (add-atom $visited $state)) ; mark state as visited
-                ($isGoal (== $state $goal))
-               ) 
-           (if $isGoal
-             $plan ; return plan if goal reached
-             (let* (
-                    ($applicableActions (collapse (match $ruleSpace (: $handle (IMPLICATION_LINK (AND_LINK $state $action) $g)) $action)))
-                    ($untriedActions (filterUntriedRulesList $applicableActions (getTestedActions $state $testedActions) ()))
-                    ($newStates (applyActions $untriedActions $state () $ruleSpace))
-                    ($holder (addNewStates $newStates $cost $plan $pq $goal $ruleSpace))
-                   ) 
-                 ;(addNewStates $newStates $cost $plan $pq $goal $ruleSpace)    
-                (aStarLoop $pq $goal $testedActions $visited $ruleSpace)
-             )
-           )
+   (if (== (collapse (get-atoms $pq)) ())
+       ()
+       (let* (
+         (($cost $state $plan) (popMin $pq))
+         ($isVisted (isMember $state $visited))
          )
+       (if $isVisted
+         (aStarLoop $pq $goal $testedActions $visited $ruleSpace)
+         (let* (
+            (() (add-atom $visited $state))
+            ($isGoal (== $state $goal))
+            )
+            (if $isGoal
+               $plan
+               (let* (
+                  ($applicableActions (collapse (match $ruleSpace (: $handle (IMPLICATION_LINK (AND_LINK $_ $action) $g)) $action)))
+                  ($untriedActions (filterUntriedRulesList $applicableActions (getTestedActions $state $testedActions) ()))
+                  ($newState (applyActions $untriedActions $state () $ruleSpace))
+                  (() (addNewStates $newState $cost $plan $pq $goal $ruleSpace))
+                  )
+                  (aStarLoop $pq $goal $testedActions $visited $ruleSpace)
+                )
+            )
+             
+         ) 
        )
-     )
-   )
-) 
+       
+       ) 
+       
+   ) 
+      
+)
+
 (= (addNewStates $newStates $currentCost $currentPlan $pq $goal $ruleSpace)
    (if (== $newStates ())
      ()
      (let* (
-            (($head $tail) (decons-atom $newStates))
-            (($action $state) (decons-atom $head)) ; Changed to expect ($action $state)
-            ($newCost (+ $currentCost (distance (car-atom $state) $goal $ruleSpace)))
-            ($newPlan (cons-atom $action $currentPlan))
-           )
-        (superpose (
-         (add-atom &testedActions ($state $action))
-         (add-atom $pq ($newCost $state $newPlan))
-         (addNewStates $tail $currentCost $currentPlan $pq $goal $ruleSpace)
-        ))
+            (($head $tail) (decons-atom $newStates)) ; returns [((explore (Goal found_target 1.0 1.0)) ())]
+            (($action $state) (decons-atom $head)) ; Changed to expect ($action $state) returns (explore ((Goal found_target 1.0 1.0)))
+            ($newCost (+ $currentCost (distance (car-atom $state) $goal $ruleSpace))) ;returns [0.0]
+            ($newPlan (cons-atom $action $currentPlan)) ; returns [(explore)]
+            (() (add-atom &testedActions ($state $action)))
+            (() (add-atom $pq ($newCost (car-atom $state) $newPlan)))
+           )  
+        (addNewStates $tail $currentCost $currentPlan $pq $goal $ruleSpace)   
+ 
      )
    )
 
@@ -90,7 +92,7 @@ more A* than pure Dijkstra due to heuristic in costs.
 (= (popMin $pq)
    (let* (
           ($minEntry (findMinEntry $pq))
-          ($dummy (remove-atom $pq $minEntry)) ; remove minimum entry
+          (() (remove-atom $pq $minEntry)) ; remove minimum entry
          )
          $minEntry
    )
@@ -148,10 +150,7 @@ more A* than pure Dijkstra due to heuristic in costs.
      (if (== $actions ())
        $acc
        (let* ((($head $tail) (decons-atom $actions)))
-         (if (listContains $head $tested)
-           (filterUntriedRulesList $tail $tested $acc)
-           (filterUntriedRulesList $tail $tested (cons-atom $head $acc))
-         )
+         ($head)
        )
      )
 )
