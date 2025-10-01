@@ -16,7 +16,7 @@
           ($x (- (goal-value $goal $ruleSpace) (goal-value $current $ruleSpace)))
           ($y (- (desired-goal-value $goal $ruleSpace) (desired-goal-value $current $ruleSpace)))
          )
-     (+ $x $y)
+     (abs-math (+ $x $y)) ; to make it heuristic
    )
 )
 ;Initializes a priority queue with the initial state, a cost of 0, and an empty plan.
@@ -147,12 +147,15 @@ more A* than pure Dijkstra due to heuristic in costs.
    )
 )
 (= (filterUntriedRulesList $actions $tested $acc)
-     (if (== $actions ())
-       $acc
-       (let* ((($head $tail) (decons-atom $actions)))
-         ($head)
+   (if (== $actions ())
+     $acc
+     (let* ((($head $tail) (decons-atom $actions)))
+       (if (listContains $head $tested)
+         (filterUntriedRulesList $tail $tested $acc)
+         (filterUntriedRulesList $tail $tested (cons-atom $head $acc))
        )
      )
+   )
 )
 (= (getTestedActions $key $space)
    (collapse (match $space (($key) $action) $action))
