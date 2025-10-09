@@ -4,8 +4,6 @@ from langchain_core.runnables import RunnableConfig
 
 from langgraph.checkpoint.memory import InMemorySaver
 
-
-# from adapter import *
 from hyperon import *
 from hyperon.ext import register_atoms
 from hyperon.atoms import (
@@ -32,7 +30,11 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 from pydantic import BaseModel
 
 import re
+# Import speech-to-text functionality
+import sys, os
+sys.path.append(os.path.dirname(os.path.dirname(__file__)))  # add parent dir to path
 
+from speech_to_text import create_stt_engine, create_interactive_stt
 
 def validateSyntax(rule: str) -> bool:
     rule = rule.strip()
@@ -242,6 +244,97 @@ def getUserInput():
     return user_input
 
 
+def getUserInputWithSTT():
+    """
+    Enhanced input function that supports both text and speech input.
+    """
+    try:
+                stt_engine = create_stt_engine(backend="google", language="en-US")
+                interactive_stt = InteractiveSTT(stt_engine)
+                text = interactive_stt.get_speech_input("Speak now:")
+                
+                if text:
+                    print(f" Heard: {text}")
+                    return text
+                else:
+                    print("No speech detected. Please try again.")
+                    text = input("You: ")
+                    return text
+                    
+    except Exception as e:
+                print(f" Speech recognition error: {e}")
+                print("Falling back to text input...")
+                text = input("You: ")
+                return text
+
+
+def startInteractiveSTT():
+    """
+    Start interactive speech-to-text mode that only captures speech and returns
+    transcribed text to the caller. The main loop is responsible for emotion
+    calculation and calling the Gemini response (same as text mode).
+    """
+    if not STT_AVAILABLE:
+        print("Speech-to-text not available. Please install required dependencies.")
+        print("Run: pip install speechrecognition pyaudio pydub openai-whisper")
+        return None
+
+    try:
+        interactive_stt = create_interactive_stt(backend="google", language="en-US")
+        print("\n🎤 Starting interactive speech mode...")
+        # Start interactive mode without directly calling Gemini; caller handles it
+        interactive_stt.start_interactive_mode(on_text=None)
+        return interactive_stt
+    except Exception as e:
+        print(f"Failed to start interactive STT: {e}")
+        return None
+
+
+def getSpeechInput(prompt: str = "Speak now:") -> str:
+    """
+    Get speech input from the user.
+    
+    Args:
+        prompt: Prompt to display to the user
+        
+    Returns:
+        Transcribed text or empty string if no speech detected
+    """
+    if not STT_AVAILABLE:
+        print("Speech-to-text not available. Please install required dependencies.")
+        return ""
+    
+    try:
+        stt_engine = create_stt_engine(backend="google", language="en-US")
+        interactive_stt = InteractiveSTT(stt_engine)
+        return interactive_stt.get_speech_input(prompt) or ""
+    except Exception as e:
+        print(f"Speech recognition error: {e}")
+        return ""
+
+
+def chooseInputMode() -> str:
+    """
+    Allow user to choose input mode (only 'text' or 'speech').
+    """
+    print("\nWelcome to the Curious Agent!")
+    print("\nChoose your preferred input mode:")
+    print("1. 'text'   - Traditional text input")
+    print("2. 'speech' - Speech-to-text input")
+    
+    while True:
+        mode = input("\nEnter your choice (text/speech): ").strip().lower()
+        
+        if mode in ["text", "speech"]:
+            print(f"\n Selected mode: {mode}")
+            if mode == "speech" and not STT_AVAILABLE:
+                print(" Speech-to-text not available. Falling back to text.")
+                return "text"
+            return mode
+        else:
+            print("Invalid choice. Please enter 'text' or 'speech'.")
+
+
 def generateResponse(user_input: str, emotion_vals: str):
     if user_input == "exit":
         return
@@ -434,3 +527,47 @@ def correlation_matcher(conversation_summary: str, rules: str, userResponse: str
 
     # Return None if no valid rule is found after checking all selected rules
     return ""
+
+import matplotlib
+matplotlib.use("Agg")  # Use a non-interactive backend for file output only
+
+import matplotlib.pyplot as plt
+from typing import Any
+
+# Import speech-to-text functionality
+try:
+    from speech_to_text import create_stt_engine, create_interactive_stt, InteractiveSTT
+    STT_AVAILABLE = True
+except ImportError as e:
+    print(f"Warning: Speech-to-text not available: {e}")
+    STT_AVAILABLE = False
+
+
+# Force a non-Tk backend (QtAgg or WebAgg are good options)
+# matplotlib.use("WebAgg")  # runs in browser
+# If you’re in Jupyter, just comment both and it auto-selects inline
+fig = None
+ax = None
+bars = None
+
+def emotion_value_pair(emotions):
+    emo_val = {}
+    for e in range(len(emotions) // 2):
+        emo_val[emotions[e * 2]] = float(emotions[e * 2 + 1])
+    return emo_val
+
+def visualizeEmotionValues(*emotions: Any, scale_min: float = 0.0, scale_max: float = 1.0):
+    """
+    Visualize emotion values as a static bar chart and save to file.
+    """
+    filtered_emotions = emotion_value_pair(emotions)
+    fig, ax = plt.subplots(figsize=(10, 5))
+    ax.set_xlabel('Emotions')
+    ax.set_ylabel('Values')
+    ax.set_title('Emotion Values')
+    bars = ax.bar(filtered_emotions.keys(), filtered_emotions.values(), color='skyblue')
+    ax.set_ylim(scale_min, scale_max)
+    plt.tight_layout()
+    plt.savefig("emotion_values.png")
+    plt.close(fig)
+    return "(Visualization Saved)"

@@ -58,3 +58,11 @@ typing_extensions==4.15.0
 urllib3==2.5.0
 xxhash==3.5.0
 zstandard==0.24.0
+matplotlib
+speechrecognition
+pyaudio
+pydub
+google-generativeai
+torch
+torchaudio
+openai-whisper

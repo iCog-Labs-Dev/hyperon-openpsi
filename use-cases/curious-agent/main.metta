@@ -43,13 +43,32 @@
    )
 
 (= (mainLoop $emotionVals)
-     (let $userInput (pyModule getUserInput ()) 
-            (if (== $userInput "exit") 
-              Goodbye! 
+     (let* (($userInput (pyModule getUserInputWithSTT ()))
+            ($_ (pyModuleX visualizeEmotionValues $emotionVals))   
+            )
+            (if (== $userInput "exit")
+              Goodbye!
               (let $updatedEmotionVals (computeEmotionVals $userInput $emotionVals) (mainLoop $updatedEmotionVals))
             )
       )
    )
+
+;; Alternative main loop for speech-only mode
+(= (mainLoopSpeech $emotionVals)
+     (let* (($userInput (pyModule getSpeechInput ("Speak your message:")))
+            ($_ (pyModuleX visualizeEmotionValues $emotionVals))   
+            )
+            (if (== $userInput "")
+              (mainLoopSpeech $emotionVals)  ;; Continue listening if no speech detected
+              (if (== $userInput "exit")
+                Goodbye!
+                (let $updatedEmotionVals (computeEmotionVals $userInput $emotionVals) (mainLoopSpeech $updatedEmotionVals))
+              )
+            )
+      )
+   )
+
+;; (interactive mode removed)
 
 (= (extractSummary $response) 
    (let* (
@@ -60,10 +79,26 @@
      )
    )
 
+;; Startup function to choose input mode
+(= (startCuriousAgent $emotionVals)
+   (let* (($mode (pyModule chooseInputMode ()))
+           (() (println! $mode))
+        )
+        (if (== $mode "text")
+          (mainLoop $emotionVals)
+          (if (== $mode "speech")
+            (mainLoopSpeech $emotionVals)
+            (mainLoop $emotionVals)  ;; default fallback
+          )
+        )
+   )
+)
+
 !(addDemandGoalRels &kb)
 !(populateRuleSpace &ruleSpace)
 !(populateDemandSpace &demandspace)
 !(insert-modulators &modulator-space)
 !(kb-initializer &kb)
 
-!(mainLoop (happinessValue 0.5 sadnessValue 0.039 angerValue 0.5 fearValue 0.04 gratitudeValue 0.6))
+;; Start the curious agent with input mode selection
+!(startCuriousAgent (happinessValue 0.5 sadnessValue 0.039 angerValue 0.5 fearValue 0.04 gratitudeValue 0.6))
