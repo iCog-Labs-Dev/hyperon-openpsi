@@ -4,24 +4,33 @@
 !(bind! &modulator-space (new-space))
 !(bind! &demandspace (new-space))
 
-(: remove-atoms' (-> Grounded Expression Expression))
-(= (remove-atoms' $space $expression)
-    (if (== $expression ())
-        ()
-        (let* (
-            (($head $tail) (decons-atom $expression))
-            ($_  (remove-atom $space $head))
-           ($rem (collapse (get-atoms $space)))
-           ;($_ (println! (remaining-atoms $rem)))
-        )
-            (remove-atoms' $space $tail)
-        )
-    )
+; (: remove-atoms' (-> Grounded Expression Expression))
+; (= (remove-atoms' $space $expression)
+;     (if (== $expression ())
+;         ()
+;         (let* (
+;             (($head $tail) (decons-atom $expression))
+;             ($_  (remove-atom $space $head))
+;            ($rem (collapse (get-atoms $space)))
+;            ;($_ (println! (remaining-atoms $rem)))
+;         )
+;             (remove-atoms' $space $tail)
+;         )
+;     )
+; )
+
+
+(= (remove-atoms' $space $expressions)
+	(let () (println! $expressions)
+        (remove-atom $space $expressions)
+    )  
 )
+
+
 ;; This function removes values from a given atomspace
 ;;(:remove-atoms (-> Grounded))
 (= (remove-atoms $space)
-    (let $atoms (collapse (get-atoms $space))
+    (let $atoms (get-atoms $space)
         (remove-atoms' $space $atoms)
     )
  )
@@ -31,7 +40,7 @@
 (: remove-occurrences (-> Grounded Expression Expression)) 
 (= (remove-occurrences $space $pattern)
    	(let* (
-            ($atoms (collapse (match $space $pattern $pattern)))
+            ($atoms (match $space $pattern $pattern))
             ;($_ (println! (atoms-to-remove $atoms)))
            ) 
 	  	(remove-atoms' $space $atoms)))
@@ -357,3 +366,47 @@
 ;; !(happinessFeelingUpdater &modulator-space)
 
 ;; !(get-atoms &modulator-space)
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; ;; TEST 1: remove-atoms'
+; !(bind! &test-space (new-space))
+; !(add-atoms &test-space ((demand energy 0.8) (perception light 1.0)))
+; !(assertEqual (isListEmpty (queryAll &test-space demand)) False)
+; !(remove-atoms' &test-space (superpose((demand energy 0.8))))
+; !(assertEqual (isListEmpty (queryAll &test-space demand)) True)
+
+
+; ;; TEST 2: remove-atoms
+; !(bind! &test-space2 (new-space))
+; !(add-atoms &test-space2 ((modulator happiness 0.9) (perception sound 1.0) (demand competence 0.7)))
+
+; ; Verify space is not empty initially
+; !(assertEqual (isListEmpty (queryAll &test-space2 modulator)) False)
+; !(assertEqual (isListEmpty (queryAll &test-space2 perception)) False)
+; !(assertEqual (isListEmpty (queryAll &test-space2 demand)) False)
+
+; ; Remove all atoms
+; !(remove-atoms &test-space2)
+
+; ; Verify all query types are now empty
+; !(assertEqual (isListEmpty (queryAll &test-space2 modulator)) True)
+; !(assertEqual (isListEmpty (queryAll &test-space2 perception)) True)
+; !(assertEqual (isListEmpty (queryAll &test-space2 demand)) True)
+
+
+; ;; TEST 3: remove-occurrences
+; !(bind! &test-space3 (new-space))
+; !(add-atoms &test-space3 ((demand energy 0.5) (demand energy 0.7) (demand competence 0.3)))
+
+; !(assertEqual (isListEmpty (queryAll &test-space3 demand)) False)
+; !(remove-occurrences &test-space3 (demand energy $x))
+; !(assertEqual 
+;   (isListEmpty (collapse (match &test-space3 (demand energy $x) (demand energy $x)))) 
+;   True)
+; !(assertEqual 
+;   (isListEmpty (collapse (match &test-space3 (demand competence $x) (demand competence $x)))) 
+;   False)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

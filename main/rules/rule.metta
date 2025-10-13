@@ -196,22 +196,35 @@
 ;arg2: an accumulator
 ;return: a tuple of valid psiRules
 
-(= (filterPsiRules $space $andLinks $acc)
-   (if (== $andLinks ())
-      $acc
-      (let* (
-              (($head $tail) (decons-atom $andLinks))
-              ($handles (collapse (match $space (: $handle (IMPLICATION_LINK $head $goal)) $handle)))
-              ($rulesList (concatTuple $handles $acc))
-              ($res (filterPsiRules $space $tail $rulesList))
-            )
-        (if (== $head ())
-          $acc
-          $res
-          )
+; (= (filterPsiRules $space $andLinks $acc)
+;    (if (== $andLinks ())
+;       $acc
+;       (let* (
+;               (($head $tail) (decons-atom $andLinks))
+;               ($handles (collapse (match $space (: $handle (IMPLICATION_LINK $head $goal)) $handle)))
+;               ($rulesList (concatTuple $handles $acc))
+;               ($res (filterPsiRules $space $tail $rulesList))
+;             )
+;         (if (== $head ())
+;           $acc
+;           $res
+;           )
+;         )
+;    )
+;   )
+
+; Simplified version without accumulator
+(= (filterPsiRules $space $andLinks)
+   (collapse (let* (
+          ($head (superpose $andLinks))
+          ($handles (match $space (: $handle (IMPLICATION_LINK $head $goal)) $handle))
+          ; (() (println! ("head" $head "|| Handles" $handles)))
         )
+     $handles
+     )
    )
-  )
+)
+
 
 (= (isRule $rule) (existsIn (PsiRules) $rule))
 
@@ -224,9 +237,10 @@
 (= (relatedGoals $space $action)
    (let* (
           ($andLinks (collapse (match $space (AND_LINK ($context $action)) (AND_LINK ($context $action)))))
-          ($rules (filterPsiRules $space $andLinks ()))
+          ($rules (filterPsiRules $space $andLinks))
           ($goals (collapse (getGoal $space (superpose $rules))))
           ($res (collapse (unique (superpose $goals)))) ; remove duplicate goals
+          ; (() (println! (" Rules || " $rules "|| Goals || " $goals "|| Res || " $res)))
         )
         $res
       )
