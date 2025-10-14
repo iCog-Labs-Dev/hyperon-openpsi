@@ -4,6 +4,22 @@
 !(import! &self hyperon-openpsi:main:mind-agents:feeling-updater:feeling-updaters)
 !(import! &self hyperon-openpsi:main:mind-agents:modulator-updater:modulator-updaters)
 !(import! &self hyperon-openpsi:main:mind-agents:action-planner:action-planner-v1)
+!(import! &self hyperon-openpsi:main:feed-back-loop:feed-back-loop)
+
+(: kb-initializer (-> Grounded Expression))
+(= (kb-initializer $kb)
+   (let* 
+     (
+      ($rules (collapse (get-atoms &ruleSpace)))
+      ($modulators (collapse (get-atoms &modulator-space)))
+      ($demands (collapse (get-atoms &demandspace)))
+      ($partialKb (union-atom $rules $modulators))
+      ($kbExp (union-atom $partialKb $demands))
+      ($_ (collapse (add-atoms $kb $kbExp)))
+    )
+    ()
+	)
+)
 
 (= (qwestorLoop $contextState)
    (let* (
