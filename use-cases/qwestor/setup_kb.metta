@@ -45,7 +45,7 @@
 )
 
 (= (addDemandGoalRels $space)
-    (superpose (
+    (add-reduct $space (superpose (
 
         ;; Social connection and collaboration
         (: affiliation (Goal Send-Greeting 1.0 1.0))
@@ -62,7 +62,7 @@
         ;; Ethical and cognitive consistency
         (: integrity (Goal Validate-Ethics 1.0 0.9))
     
-    ))
+    )))
 
 )
 

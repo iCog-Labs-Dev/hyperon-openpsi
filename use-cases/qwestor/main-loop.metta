@@ -5,6 +5,10 @@
 !(import! &self hyperon-openpsi:main:mind-agents:modulator-updater:modulator-updaters)
 !(import! &self hyperon-openpsi:main:mind-agents:action-planner:action-planner-v1)
 !(import! &self hyperon-openpsi:main:feed-back-loop:feed-back-loop)
+!(import! &self hyperon-openpsi:use-cases:qwestor:setup_kb)
+!(register-module! ../../utilities-module)
+!(import! &self utilities-module:utils)
+
 
 (: kb-initializer (-> Grounded Expression))
 (= (kb-initializer $kb)
@@ -21,11 +25,15 @@
 	)
 )
 
-(= (qwestorLoop $contextState)
+(= (qwestorLoop $contextState $kb)
    (let* (
-      ($demands (queryAll $kb demand))
+        ($demands (queryAll $kb demand))
+        ($_ (println! (demands $demands)))
 		($currDemand (demandSelector $demands))
-        ($goalObj (goalSelector $currDemand))
+         ((demand $demandName $demandVal) $currDemand)
+        ($_ (println! (currDemand $currDemand)))
+        ($goalObj (goal-selector $kb $demandName))
+        ($_ (println! (goalObj $goalObj)))
 		((Goal $goal $goalVal1 $goalVal2) $goalObj) 
 		($actions (planner &ruleSpace $contextState $goal))
 		($applyValue (applyActions $actions $goalObj $currDemand)) 
@@ -34,9 +42,18 @@
 		($energyDemand (getDemandByName &demandspace energy))
     
 		($modUpdate (modulatorUpdaterAgent &modulator-space $competenceDemand $affiliationDemand $energyDemand))
+        ($_ (update-all modulator &modulator-space $kb))
+        ($_ (update-all demand &demandspace $kb))
 
 
    )
     $actions
    ) 
 )
+!(addDemandGoalRels &kb)
+!(populateRuleSpace &ruleSpace)
+!(populateDemandSpace &demandspace)
+!(insert-modulators &modulator-space)
+!(kb-initializer &kb)
+!(qwestorLoop Conversation-Started &kb)
+
