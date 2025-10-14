@@ -1,3 +1,10 @@
+!(register-module! ../../../hyperon-openpsi)
+!(import! &self hyperon-openpsi:main:modulator:modulator)
+!(import! &self hyperon-openpsi:main:demand:demand)
+!(import! &self hyperon-openpsi:main:mind-agents:feeling-updater:feeling-updaters)
+!(import! &self hyperon-openpsi:main:mind-agents:modulator-updater:modulator-updaters)
+!(import! &self hyperon-openpsi:main:mind-agents:action-planner:action-planner-v1)
+
 (= (qwestorLoop $contextState)
    (let* (
       ($demands (queryAll $kb demand))
