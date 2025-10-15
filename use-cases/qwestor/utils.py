@@ -13,7 +13,7 @@ def preprocessRawOutput(data:str) -> List[str]:
 
     """
     dataList = data.strip().split('\n')
-    refinedResult = [i[1:-1] for i in dataList if not re.fullmatch(r'^\[(?:\(\))(?:,\(\))*\]$', i)]
+    refinedResult = [i[1:-1] for i in dataList if not re.match(r'^\s*\[\s*(?:\s*\(\)\s*(?:,\s*\(\)\s*)*)\s*\]\s*$', i)]
     return refinedResult
 
 def writeListToFile(outPutResult: List[str], fileName:str):
