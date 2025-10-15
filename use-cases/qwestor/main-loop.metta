@@ -27,23 +27,19 @@
 
 (= (qwestorLoop $contextState $kb)
    (let* (
-        ($demands (queryAll $kb demand))
-        ($_ (println! (demands $demands)))
+    ($demands (queryAll $kb demand))  
 		($currDemand (demandSelector $demands))
-         ((demand $demandName $demandVal) $currDemand)
-        ($_ (println! (currDemand $currDemand)))
-        ($goalObj (goal-selector $kb $demandName))
-        ($_ (println! (goalObj $goalObj)))
+    ((demand $demandName $demandVal) $currDemand)
+    ($goalObj (goal-selector $kb $demandName))
 		((Goal $goal $goalVal1 $goalVal2) $goalObj) 
 		($actions (planner &ruleSpace $contextState $goal))
 		($applyValue (applyActions $actions $goalObj $currDemand)) 
 		($competenceDemand (getDemandByName &demandspace competence)) 
 		($affiliationDemand (getDemandByName &demandspace affiliation))
 		($energyDemand (getDemandByName &demandspace energy))
-    
 		($modUpdate (modulatorUpdaterAgent &modulator-space $competenceDemand $affiliationDemand $energyDemand))
-        ($_ (update-all modulator &modulator-space $kb))
-        ($_ (update-all demand &demandspace $kb))
+    ($_ (update-all modulator &modulator-space $kb))
+    ($_ (update-all demand &demandspace $kb))
 
 
    )
