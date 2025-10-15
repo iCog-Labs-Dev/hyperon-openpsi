@@ -82,22 +82,6 @@
 
 
 
-; (: remove-atoms' (-> hyperon::space::DynSpace Expression Expression))
-; (= (remove-atoms' $space $expression)
-;     (if (== $expression ())
-;         ()
-;         (let* (
-;             (($head $tail) (decons-atom $expression))
-;             ($_  (remove-atom $space $head))
-;            ($rem (collapse (get-atoms $space)))
-;            ($_ (println! (remaining-atoms $rem)))
-;         )
-;             (remove-atoms' $space $tail)
-;         )
-;     )
-; )
-
-
 (= (remove-atoms' $space $expressions)
    (remove-atom $space $expressions)   
 )

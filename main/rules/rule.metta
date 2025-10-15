@@ -192,26 +192,9 @@
 
 ;For each AndLink, get all ImplicationLink atoms pointing to it.
 ;Filter these to keep only valid PSI rules using the isRule predicate function.
-;arg1: a tuple of andLinks
-;arg2: an accumulator
+;arg1:a space
+;arg2: a tuple of andLinks
 ;return: a tuple of valid psiRules
-
-; (= (filterPsiRules $space $andLinks $acc)
-;    (if (== $andLinks ())
-;       $acc
-;       (let* (
-;               (($head $tail) (decons-atom $andLinks))
-;               ($handles (collapse (match $space (: $handle (IMPLICATION_LINK $head $goal)) $handle)))
-;               ($rulesList (concatTuple $handles $acc))
-;               ($res (filterPsiRules $space $tail $rulesList))
-;             )
-;         (if (== $head ())
-;           $acc
-;           $res
-;           )
-;         )
-;    )
-;   )
 
 ; Simplified version without accumulator
 (= (filterPsiRules $space $andLinks)

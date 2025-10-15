@@ -4,22 +4,6 @@
 !(bind! &modulator-space (new-space))
 !(bind! &demandspace (new-space))
 
-; (: remove-atoms' (-> Grounded Expression Expression))
-; (= (remove-atoms' $space $expression)
-;     (if (== $expression ())
-;         ()
-;         (let* (
-;             (($head $tail) (decons-atom $expression))
-;             ($_  (remove-atom $space $head))
-;            ($rem (collapse (get-atoms $space)))
-;            ;($_ (println! (remaining-atoms $rem)))
-;         )
-;             (remove-atoms' $space $tail)
-;         )
-;     )
-; )
-
-
 (= (remove-atoms' $space $expressions)
 	(let () (println! $expressions)
         (remove-atom $space $expressions)
