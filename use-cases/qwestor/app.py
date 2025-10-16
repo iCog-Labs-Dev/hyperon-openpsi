@@ -16,7 +16,7 @@ app = FastAPI(title="Qwestor PoC")
 def root():
     return {"message": "Welcome to the PoC qwestor Motivation System"}
 @app.post("/plan")
-def plan(data: dict):
+def plan():
     result = subprocess.run("metta main-loop.metta", shell=True, capture_output=True, text=True).stdout.strip()
     persistAtomspaceResult(result)
     return result
