@@ -27,6 +27,16 @@ def persistAtomspaceResult(result):
     writeListToFile(refinedList,"out.metta")
 
 
+def changeSexpToList(sExp:str) -> List[str]:
+    '''
+        This function changes the result of an s-expression to a python list of possible actions.
+    '''
+    sExp = sExp.strip()
+    assert sExp.startswith("(")
+    assert sExp.endswith(")")
+    return sExp[1:-1].strip().split()
+
+
     
     
 

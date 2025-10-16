@@ -38,6 +38,8 @@
 		($affiliationDemand (getDemandByName &demandspace affiliation))
 		($energyDemand (getDemandByName &demandspace energy))
 		($modUpdate (modulatorUpdaterAgent &modulator-space $competenceDemand $affiliationDemand $energyDemand))
+    ($_ (println! ((demands ($affiliationDemand $competenceDemand $energyDemand)))))
+    ($_ (println! ((modulators (collapse (get-atoms &modulator-space))))))
     ($_ (update-all modulator &modulator-space $kb))
     ($_ (update-all demand &demandspace $kb))
 
