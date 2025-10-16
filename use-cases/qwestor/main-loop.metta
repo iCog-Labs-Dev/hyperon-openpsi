@@ -48,6 +48,7 @@
     ((demand $demandName $demandVal) $currDemand)
     ($goalObj (goal-selector $kb $demandName))
 		((Goal $goal $goalVal1 $goalVal2) $goalObj) 
+    ($_ (println! (goalObj $goalObj)))
 		($actions (planner &ruleSpace $contextState $goal))
 		($applyValue (applyActions $actions $goalObj $currDemand)) 
 		($competenceDemand (getDemandByName &demandspace competence)) 

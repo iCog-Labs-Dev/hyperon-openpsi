@@ -1,44 +1,60 @@
 (= (populateRuleSpace $ruleSpace) 
     (add-reduct $ruleSpace (superpose (
-        ((: r1
-            ((TTV 1 (STV 0.8 0.7))
-                (IMPLICATION_LINK
-                (AND_LINK ((Goal Conversation-Started 0.9 0.6) initiate-dialogue))
-                (Goal Send-Greeting 1.0 1.0))))
-         4)
-         ((: r2
-                ((TTV 1 (STV 0.9 0.8))
-                (IMPLICATION_LINK
-                (AND_LINK ((Goal Task-Assigned 1.0 1.0) (Belief Knowledge-Gap 0.9 0.7)))
-                (Goal Acquire-Information 1.0 0.9))))
-         5)
-        ((: r3
-        ((TTV 1 (STV 0.85 0.75))
-            (IMPLICATION_LINK
-            (AND_LINK ((Goal Execute-Task 1.0 1.0) (Belief Uncertain-Understanding 0.8 0.7)))
-            (Goal Clarify-Concepts 1.0 0.9))))
-        5)
+        ;; r1: initiate dialogue when conversation starts
+((: r1 
+    ((TTV 1 (STV 0.8 0.7)) 
+      (IMPLICATION_LINK 
+        (AND_LINK ((Goal Conversation-Started 0.9 0.6) initiate-dialogue)) 
+        (Goal Send-Greeting 1.0 1.0))))
+  3)
 
+;; r2: collect information after greeting
+((: r2 
+    ((TTV 1 (STV 0.75 0.65)) 
+      (IMPLICATION_LINK 
+        (AND_LINK ((Goal Send-Greeting 1.0 1.0) gather-information)) 
+        (Goal Information-Collected 1.0 1.0))))
+  4)
 
-        ((: r4
-        ((TTV 1 (STV 0.9 0.8))
-            (IMPLICATION_LINK
-            (Goal Completed-Research-Step 1.0 1.0)
-            (Goal Document-Reasoning 1.0 1.0))))
-            4)
-((: r5
-   ((TTV 1 (STV 0.95 0.9))
-    (IMPLICATION_LINK
-      (AND_LINK ((Goal Share-Result 1.0 1.0) (Belief Ethical-Concern 0.8 0.6)))
-      (Goal Validate-Ethics 1.0 0.9))))
- 6)
+;; r3: analyze after collecting information
+((: r3 
+    ((TTV 1 (STV 0.7 0.6)) 
+      (IMPLICATION_LINK 
+        (AND_LINK ((Goal Information-Collected 1.0 1.0) analyze-data)) 
+        (Goal Insights-Extracted 1.0 1.0))))
+  3)
 
-((: r6
-   ((TTV 1 (STV 0.85 0.8))
-    (IMPLICATION_LINK
-      (AND_LINK ((Goal Task-Completed 1.0 1.0) (Belief Performance-Suboptimal 0.8 0.6)))
-      (Goal Self-Improve 1.0 0.9))))
- 5)
+;; r4: generate summary after insights are extracted
+((: r4 
+    ((TTV 1 (STV 0.68 0.6)) 
+      (IMPLICATION_LINK 
+        (AND_LINK ((Goal Insights-Extracted 1.0 1.0) summarize-findings)) 
+        (Goal Summary-Ready 1.0 1.0))))
+  3)
+
+;; r5: prepare report after summary is ready
+((: r5 
+    ((TTV 1 (STV 0.7 0.65)) 
+      (IMPLICATION_LINK 
+        (AND_LINK ((Goal Summary-Ready 1.0 1.0) compile-report)) 
+        (Goal Report-Prepared 1.0 1.0))))
+  2)
+
+;; r6: send report after preparation
+((: r6 
+    ((TTV 1 (STV 0.8 0.7)) 
+      (IMPLICATION_LINK 
+        (AND_LINK ((Goal Report-Prepared 1.0 1.0) deliver-results)) 
+        (Goal Report-Sent 1.0 1.0))))
+  2)
+
+;; r7: reflect after sending report
+((: r7 
+    ((TTV 1 (STV 0.75 0.65)) 
+      (IMPLICATION_LINK 
+        (AND_LINK ((Goal Report-Sent 1.0 1.0) self-reflect)) 
+        (Goal Reflection-Complete 1.0 1.0))))
+  4)
 
         
     )))
@@ -47,20 +63,24 @@
 (= (addDemandGoalRels $space)
     (add-reduct $space (superpose (
 
-        ;; Social connection and collaboration
+        ;; Affiliation → initiating social engagement
         (: affiliation (Goal Send-Greeting 1.0 1.0))
 
-        ;; Renewal and optimization
-        (: energy (Goal Self-Improve 1.0 0.9))
+        ;; Competence → mastering the process of collecting and structuring knowledge
+        (: competence (Goal Information-Collected 1.0 1.0))
+        (: competence (Goal Summary-Ready 1.0 1.0))
 
-        ;; Mastery and learning
-        (: competence (Goal Acquire-Information 1.0 0.9))
+        ;; Certainty → ensuring understanding and extracting insights
+        (: certainty (Goal Insights-Extracted 1.0 1.0))
 
-        ;; Understanding and reducing uncertainty
-        (: certainty (Goal Clarify-Concepts 1.0 0.9))
+        ;; Integrity → ensuring that the work is documented and reported accurately
+        (: integrity (Goal Report-Prepared 1.0 1.0))
 
-        ;; Ethical and cognitive consistency
-        (: integrity (Goal Validate-Ethics 1.0 0.9))
+        ;; Affiliation again → sharing outcomes for social and collaborative connection
+        (: affiliation (Goal Report-Sent 1.0 1.0))
+
+        ;; Energy → reflection and rejuvenation after completing intellectual work
+        (: energy (Goal Reflection-Complete 1.0 1.0))
     
     )))
 
