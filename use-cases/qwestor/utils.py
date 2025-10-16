@@ -61,11 +61,7 @@ def preprocessMechanicsOutput(sExp: str,instanceType:str) -> List[Union[Demand,M
     elif instanceType == 'demand':
         return [changeDemandSExp(i) for i in sExpList]
 
-    
 
-
-
-print(preprocessMechanicsOutput("((demand affiliation 0.9375) (demand competence 0.9) (demand energy 0.9))","demand"))
 
 
 
