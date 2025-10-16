@@ -1,7 +1,7 @@
 import unittest
-from utils import preprocessRawOutput
+from utils import preprocessRawOutput, changeSexpToList
 
-class TestPreprocessRawOutput(unittest.TestCase):
+class UtilTests(unittest.TestCase):
     
     def test_empty_input(self):
         """Test empty input returns a list with an empty string."""
@@ -54,6 +54,46 @@ class TestPreprocessRawOutput(unittest.TestCase):
         input_data = '[]\n[g]\n[()]\n[h]'
         expected = ['', 'g', 'h']
         self.assertEqual(preprocessRawOutput(input_data), expected)
+
+    def test_sexp_empty(self):
+        """Test with empty s-expression"""
+        input_data = '()'
+        expected = []
+        return self.assertEqual(changeSexpToList(input_data),expected)
+    
+    def test_sexp_empty_with_spaces(self):
+        """Test with an empty s-expression that has middle spaces"""
+        input_data = '(   )'
+        expected = []
+        return self.assertEqual(changeSexpToList(input_data), expected)
+    
+    def test_sexp_with_instances(self):
+        """
+            Test with an s-expression that has multiple instances
+        """
+
+        input_data = '(exp1 exp2 exp3 exp4)'
+        expected = ['exp1','exp2','exp3','exp4']
+        return self.assertEqual(changeSexpToList(input_data), expected)
+    
+    def test_sexp_with_middle_spaces(self):
+        """
+            Test with an s-expression that has multiple instances but with middle spaces between the elements
+        """
+        input_data = '(exp1  exp2 exp3 exp4)'
+        expected = ['exp1','exp2','exp3','exp4']
+        return self.assertEqual(changeSexpToList(input_data),expected)
+    
+    def test_sexp_with_one(self):
+        """
+            Test with an s-expression that has only one instance.
+        """
+        input_data = '(exp1)'
+        expected = ['exp1']
+        return self.assertEqual(changeSexpToList(input_data),expected)
+
+
+    
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)
