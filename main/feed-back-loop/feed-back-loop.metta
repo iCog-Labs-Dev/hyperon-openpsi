@@ -21,13 +21,13 @@
 ;; Remove The remove occurrences function removes values based on a given 
 ;;pattern for instance a perception updater value can be stored as 
 ;;(perception value time)
-(: remove-occurrences (-> Grounded Expression Expression)) 
+(: remove-occurrences (-> hyperon::space::DynSpace Expression Expression)) 
 (= (remove-occurrences $space $pattern)
-   	(let* (
+   	(collapse(let* (
             ($atoms (match $space $pattern $pattern))
-            ;($_ (println! (atoms-to-remove $atoms)))
+            ($_ (println! (atoms-to-remove $atoms)))
            ) 
-	  	(remove-atoms' $space $atoms)))
+	  	(remove-atoms' $space $atoms))))
 
 
 (= (add-atoms $space $values)

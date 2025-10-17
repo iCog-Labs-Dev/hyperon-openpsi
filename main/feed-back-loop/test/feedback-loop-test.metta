@@ -98,11 +98,11 @@
 ;;(perception value time)
 (: remove-occurrences (-> hyperon::space::DynSpace Expression Expression)) 
 (= (remove-occurrences $space $pattern)
-   	(let* (
+   	(collapse(let* (
             ($atoms (match $space $pattern $pattern))
             ($_ (println! (atoms-to-remove $atoms)))
            ) 
-	  	(remove-atoms' $space $atoms)))
+	  	(remove-atoms' $space $atoms))))
 
 
 (= (add-atoms $space $values)

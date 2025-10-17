@@ -29,12 +29,13 @@
 ;;pattern for instance a perception updater value can be stored as 
 ;;(perception value time)
 ;;(: remove-occurrences (-> hyperon::space::DynSpace Expression Expression)) 
+(: remove-occurrences (-> hyperon::space::DynSpace Expression Expression)) 
 (= (remove-occurrences $space $pattern)
-   	(let* (
+   	(collapse(let* (
             ($atoms (match $space $pattern $pattern))
-            ;($_ (println! (atoms-to-remove $atoms)))
+            ($_ (println! (atoms-to-remove $atoms)))
            ) 
-	  	(remove-atoms' $space $atoms)))
+	  	(remove-atoms' $space $atoms))))
 
 ;;The below function is used to synchronize two atomspaces for having the same
 ;;Replicated value. The updater space belongs to the mind-agent while the atomspace to be synchronized is the 
