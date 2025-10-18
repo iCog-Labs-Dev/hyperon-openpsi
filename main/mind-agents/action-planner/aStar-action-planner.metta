@@ -32,11 +32,10 @@
 more A* than pure Dijkstra due to heuristic in costs.
 (= (aStarPlanner $initialState $goal $testedActions $ruleSpace)
    (let* (
-          ($pq &priorityQueue) ; priority queue to store (cost, state, plan) tuples
           ($visited (new-space))  
-          (() (add-atom $pq (0.0 $initialState ()))) ; Initialize with (cost=0.0, initialState, empty plan)
+          (() (add-atom &priorityQueue (0.0 $initialState ()))) ; Initialize with (cost=0.0, initialState, empty plan)
          )
-      (aStarLoop $pq $goal $testedActions $visited $ruleSpace)
+      (aStarLoop &priorityQueue $goal $testedActions $visited $ruleSpace)
    )
 )
 ;recursive A* loop: Pops min-cost state; skips if visited; expands untried actions if not goal
