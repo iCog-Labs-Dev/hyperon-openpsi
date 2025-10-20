@@ -1,7 +1,4 @@
-!(register-module! ../../../hyperon-openpsi)
-!(import! &self hyperon-openpsi:main:modulator:modulator)
-!(import! &self hyperon-openpsi:use-cases:qwestor:out)
+
 (= (fetchModulatorsFromDb)
-    (match &self (modulators $modulators) $modulators)
+    (collapse (match &self (modulators $modulators) $modulators))
 )
-!(fetchModulatorsFromDb)

@@ -1,89 +1,49 @@
 (= (populateRuleSpace $ruleSpace) 
-    (add-reduct $ruleSpace (superpose (
-        ;; r1: initiate dialogue when conversation starts
-((: r1 
-    ((TTV 1 (STV 0.8 0.7)) 
-      (IMPLICATION_LINK 
-        (AND_LINK ((Goal Conversation-Started 0.9 0.6) initiate-dialogue)) 
-        (Goal Send-Greeting 1.0 1.0))))
-  3)
-
-;; r2: collect information after greeting
-((: r2 
-    ((TTV 1 (STV 0.75 0.65)) 
-      (IMPLICATION_LINK 
-        (AND_LINK ((Goal Send-Greeting 1.0 1.0) gather-information)) 
-        (Goal Information-Collected 1.0 1.0))))
-  4)
-
-;; r3: analyze after collecting information
-((: r3 
-    ((TTV 1 (STV 0.7 0.6)) 
-      (IMPLICATION_LINK 
-        (AND_LINK ((Goal Information-Collected 1.0 1.0) analyze-data)) 
-        (Goal Insights-Extracted 1.0 1.0))))
-  3)
-
-;; r4: generate summary after insights are extracted
-((: r4 
-    ((TTV 1 (STV 0.68 0.6)) 
-      (IMPLICATION_LINK 
-        (AND_LINK ((Goal Insights-Extracted 1.0 1.0) summarize-findings)) 
-        (Goal Summary-Ready 1.0 1.0))))
-  3)
-
-;; r5: prepare report after summary is ready
-((: r5 
-    ((TTV 1 (STV 0.7 0.65)) 
-      (IMPLICATION_LINK 
-        (AND_LINK ((Goal Summary-Ready 1.0 1.0) compile-report)) 
-        (Goal Report-Prepared 1.0 1.0))))
-  2)
-
-;; r6: send report after preparation
-((: r6 
-    ((TTV 1 (STV 0.8 0.7)) 
-      (IMPLICATION_LINK 
-        (AND_LINK ((Goal Report-Prepared 1.0 1.0) deliver-results)) 
-        (Goal Report-Sent 1.0 1.0))))
-  2)
-
-;; r7: reflect after sending report
-((: r7 
-    ((TTV 1 (STV 0.75 0.65)) 
-      (IMPLICATION_LINK 
-        (AND_LINK ((Goal Report-Sent 1.0 1.0) self-reflect)) 
-        (Goal Reflection-Complete 1.0 1.0))))
-  4)
-
-        
-    )))
+    (add-reduct $ruleSpace 
+      (superpose (
+          ((: r1 ((TTV 1 (STV 0.8 0.7)) (IMPLICATION_LINK (AND_LINK ((Goal ambiguous_query 0.9 0.6) assess_scope)) (Goal optimal_research_strategy 1.0 1.0)))) 5)
+          ((: r2a ((TTV 2 (STV 0.8 0.7)) (IMPLICATION_LINK (AND_LINK ((Goal optimal_research_strategy 0.9 0.6) deepen_research)) (Goal thorough_insight 1.0 1.0)))) 8)
+          ((: r2b ((TTV 2 (STV 0.8 0.7)) (IMPLICATION_LINK (AND_LINK ((Goal optimal_research_strategy 0.9 0.6) expand_search)) (Goal comprehensive_coverage 1.0 1.0)))) 7)
+          ((: r3a ((TTV 3 (STV 0.8 0.7)) (IMPLICATION_LINK (AND_LINK ((Goal thorough_insight 0.9 0.6) filter_key_insights)) (Goal focused_response 1.0 1.0)))) 6)
+          ((: r3b ((TTV 3 (STV 0.8 0.7)) (IMPLICATION_LINK (AND_LINK ((Goal comprehensive_coverage 0.9 0.6) filter_key_insights)) (Goal focused_response 1.0 1.0)))) 6)
+          ((: r4 ((TTV 4 (STV 0.8 0.7)) (IMPLICATION_LINK (AND_LINK ((Goal focused_response 0.9 0.6) maintain_professionalism)) (Goal appropriate_engagement 1.0 1.0)))) 9)
+          ((: r5 ((TTV 5 (STV 0.8 0.7)) (IMPLICATION_LINK (AND_LINK ((Goal appropriate_engagement 0.9 0.6) encourage_positivity)) (Goal boosted_user_motivation 1.0 1.0)))) 4)
+          ((: r6 ((TTV 6 (STV 0.8 0.7)) (IMPLICATION_LINK (AND_LINK ((Goal boosted_user_motivation 0.9 0.6) broaden_exploration)) (Goal sustained_user_engagement 1.0 1.0)))) 5)
+          ((: r7 ((TTV 7 (STV 0.8 0.7)) (IMPLICATION_LINK (AND_LINK ((Goal sustained_user_engagement 0.9 0.6) quick_prioritization)) (Goal timely_resolution 1.0 1.0)))) 3)
+      )
+    )
+  )
 )
 
 (= (addDemandGoalRels $space)
     (add-reduct $space (superpose (
-
-        ;; Affiliation → initiating social engagement
-        (: affiliation (Goal Send-Greeting 1.0 1.0))
-
-        ;; Competence → mastering the process of collecting and structuring knowledge
-        (: competence (Goal Information-Collected 1.0 1.0))
-        (: competence (Goal Summary-Ready 1.0 1.0))
-
-        ;; Certainty → ensuring understanding and extracting insights
-        (: certainty (Goal Insights-Extracted 1.0 1.0))
-
-        ;; Integrity → ensuring that the work is documented and reported accurately
-        (: integrity (Goal Report-Prepared 1.0 1.0))
-
-        ;; Affiliation again → sharing outcomes for social and collaborative connection
-        (: affiliation (Goal Report-Sent 1.0 1.0))
-
-        ;; Energy → reflection and rejuvenation after completing intellectual work
-        (: energy (Goal Reflection-Complete 1.0 1.0))
-    
+      (: affiliation (Goal focused_response 1.0 1.0))
+      (: affiliation (Goal appropriate_engagement 1.0 1.0))
+      (: affiliation (Goal boosted_user_motivation 1.0 1.0))
+      (: affiliation (Goal sustained_user_engagement 1.0 1.0))
+      (: competence (Goal ambiguous_query 1.0 1.0))
+      (: competence (Goal optimal_research_strategy 1.0 1.0))
+      (: competence (Goal thorough_insight 1.0 1.0))
+      (: competence (Goal comprehensive_coverage 1.0 1.0))
+      (: certainty (Goal optimal_research_strategy 1.0 1.0))
+      (: certainty (Goal thorough_insight 1.0 1.0))
+      (: certainty (Goal comprehensive_coverage 1.0 1.0))
+      (: certainty (Goal focused_response 1.0 1.0))
+      (: certainty (Goal sustained_user_engagement 1.0 1.0))
+      (: certainty (Goal timely_resolution 1.0 1.0))
+      (: integrity (Goal ambiguous_query 1.0 1.0))
+      (: integrity (Goal optimal_research_strategy 1.0 1.0))
+      (: integrity (Goal thorough_insight 1.0 1.0))
+      (: integrity (Goal comprehensive_coverage 1.0 1.0))
+      (: integrity (Goal focused_response 1.0 1.0))
+      (: integrity (Goal appropriate_engagement 1.0 1.0))
+      (: energy (Goal optimal_research_strategy 1.0 1.0))
+      (: energy (Goal comprehensive_coverage 1.0 1.0))
+      (: energy (Goal appropriate_engagement 1.0 1.0))
+      (: energy (Goal boosted_user_motivation 1.0 1.0))
+      (: energy (Goal sustained_user_engagement 1.0 1.0))
+      (: energy (Goal timely_resolution 1.0 1.0))
     )))
-
 )
 
 (= (populateDemandSpace $demandspace) 
