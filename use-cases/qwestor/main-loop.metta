@@ -13,6 +13,8 @@
 !(import! &self hyperon-openpsi:psi-utilities:normalization)
 !(import! &self hyperon-openpsi:use-cases:qwestor:out)
 !(import! &self hyperon-openpsi:use-cases:qwestor:in)
+!(import! &self hyperon-openpsi:use-cases:qwestor:rules)
+!(import! &self hyperon-openpsi:use-cases:qwestor:demand-goal-links)
 
 
 (= (fetchContext) (match &self (INPUT_CONTEXT $ctx) $ctx))
@@ -73,8 +75,8 @@
    ) 
 )
 
-!(addDemandGoalRels &kb)
-!(populateRuleSpace &ruleSpace)
+!(addDemandGoalRels &self &kb)
+!(populateRuleSpace &self &ruleSpace)
 !(populateDemands &demandspace)
 !(addModulators &modulator-space)
 !(kb-initializer &kb)
