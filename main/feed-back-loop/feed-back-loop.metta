@@ -4,18 +4,11 @@
 !(bind! &modulator-space (new-space))
 !(bind! &demandspace (new-space))
 
-(= (remove-atoms' $space $expressions)
-	(let () (println! $expressions)
-        (remove-atom $space $expressions)
-    )  
-)
-
-
 ;; This function removes values from a given atomspace
 ;;(:remove-atoms (-> Grounded))
 (= (remove-atoms $space)
     (let $atoms (get-atoms $space)
-        (remove-atoms' $space $atoms)
+        (remove-atom $space $atoms)
     )
  )
 ;; Remove The remove occurrences function removes values based on a given 

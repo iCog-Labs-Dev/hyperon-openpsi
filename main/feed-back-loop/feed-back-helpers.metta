@@ -1,30 +1,10 @@
-;;(: remove-atoms' (-> hyperon::space::DynSpace Expression Expression))
-; (= (remove-atoms' $space $expression)
-;     (if (== $expression ())
-;         ()
-;         (let* (
-;             (($head $tail) (decons-atom $expression))
-;             ($_  (remove-atom $space $head))
-;            ($rem (collapse (get-atoms $space)))
-;            ;;($_ (println! (remaining-atoms $rem)))
-;         )
-;             (remove-atoms' $space $tail)
-;         )
-;     )
-; )
-
-
-(= (remove-atoms' $space $expressions)
-   (remove-atom $space $expressions)   
-)
-
 ;; This function removes values from a given atomspace
-;;(:remove-atoms (-> hyperon::space::DynSpace))
+;;(:remove-atoms (-> Grounded))
 (= (remove-atoms $space)
     (let $atoms (get-atoms $space)
-        (remove-atoms' $space $atoms)
+        (remove-atom $space $atoms)
     )
-)
+ )
 ;; Remove The remove occurrences function removes values based on a given 
 ;;pattern for instance a perception updater value can be stored as 
 ;;(perception value time)
