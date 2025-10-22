@@ -14,22 +14,11 @@
 ;; (: perception (-> Number Expression Perception))
 
 ;; A custom function to remove atoms given an s-expression.
-(= (remove-atoms' $space $expression)
-    (if (== $expression ())
-        ()
-        (let* (
-            (($head $tail) (decons-atom $expression))
-            ($_ (remove-atom $space $head))
-        )
-            (remove-atoms' $space $tail)
-        )
-    )
-)
 (= (remove-atoms $space)
-    (let $atoms (collapse (get-atoms $space))
-        (remove-atoms' $space $atoms)
+    (let $atoms (get-atoms $space)
+        (remove-atom $space $atoms)
     )
-)
+ )
 
 ;; adds perceptions in the percepta space after 
 ;; checking defensively if the perceptions are empty
@@ -78,7 +67,7 @@
     (if (and (> $max-recur 0) (not (== (collapse (get-atoms $cacheSpace)) ())))
         (let* (
             ($newData (collapse (get-atoms $cacheSpace)))
-            ($_ (remove-atoms $cacheSpace))
+            ($__ (collapse(remove-atoms $cacheSpace)))
             ($maxCycle (fetchMaxCycle $percepta))
             ($newPercepta (if (== $newData ())
                                 ()
