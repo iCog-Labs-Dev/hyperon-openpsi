@@ -59,3 +59,11 @@
       )
     )
    )
+
+(= (fetchModulatorsFromDb)
+    (collapse (match &self (modulators $modulators) $modulators))
+)
+
+(= (fetchDemandsFromDb)
+    (collapse (match &self (demands $demands) $demands))
+)

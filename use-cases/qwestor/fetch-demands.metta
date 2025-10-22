@@ -1,5 +1,8 @@
+!(register-module! ../../../hyperon-openpsi)
+!(import! &self hyperon-openpsi:main:demand:demand)
+!(import! &self hyperon-openpsi:use-cases:qwestor:out)
 
 (= (fetchDemandsFromDb)
-    (collapse (match &self (demands $demands) $demands))
+    (match &self (demands $demands) $demands)
 )
-
+!(fetchDemandsFromDb)

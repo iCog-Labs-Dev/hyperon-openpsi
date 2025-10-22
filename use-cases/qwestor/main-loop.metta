@@ -13,8 +13,6 @@
 !(import! &self hyperon-openpsi:psi-utilities:normalization)
 !(import! &self hyperon-openpsi:use-cases:qwestor:out)
 !(import! &self hyperon-openpsi:use-cases:qwestor:in)
-!(import! &self hyperon-openpsi:use-cases:qwestor:fetch-modulators)
-!(import! &self hyperon-openpsi:use-cases:qwestor:fetch-demands)
 
 
 (= (fetchContext) (match &self (INPUT_CONTEXT $ctx) $ctx))
