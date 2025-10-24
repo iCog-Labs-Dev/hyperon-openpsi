@@ -12,8 +12,8 @@
 (= (miner $perceptaSpace $noOfRules)
     (let* (
           ($perceptaList (collapse (get-atoms $perceptaSpace)))
-          ($preprocessedResult (pyModuleX query_llm  ($perceptaList $noOfRules)))
-          ($_ (println! (LLM Response: $llm_response)))
+          ($perceptaCount (size-atom $perceptaList))
+          ($preprocessedResult (pyModuleX query_llm  ($perceptaList $noOfRules $perceptaCount)))
     )
       $preprocessedResult
 ))
