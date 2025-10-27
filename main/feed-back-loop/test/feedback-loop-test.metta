@@ -82,24 +82,14 @@
 
 
 
-(: remove-atoms' (-> hyperon::space::DynSpace Expression Expression))
-(= (remove-atoms' $space $expression)
-    (if (== $expression ())
-        ()
-        (let* (
-            (($head $tail) (decons-atom $expression))
-            ($_  (remove-atom $space $head))
-           ($rem (collapse (get-atoms $space)))
-           ($_ (println! (remaining-atoms $rem)))
-        )
-            (remove-atoms' $space $tail)
-        )
-    )
+(= (remove-atoms' $space $expressions)
+   (remove-atom $space $expressions)   
 )
+
 ;; This function removes values from a given atomspace
 ;;(:remove-atoms (-> hyperon::space::DynSpace))
 (= (remove-atoms $space)
-    (let $atoms (collapse (get-atoms $space))
+    (let $atoms  (get-atoms $space)
         (remove-atoms' $space $atoms)
     )
  )
@@ -108,11 +98,11 @@
 ;;(perception value time)
 (: remove-occurrences (-> hyperon::space::DynSpace Expression Expression)) 
 (= (remove-occurrences $space $pattern)
-   	(let* (
-            ($atoms (collapse (match $space $pattern $pattern)))
+   	(collapse(let* (
+            ($atoms (match $space $pattern $pattern))
             ($_ (println! (atoms-to-remove $atoms)))
            ) 
-	  	(remove-atoms' $space $atoms)))
+	  	(remove-atoms' $space $atoms))))
 
 
 (= (add-atoms $space $values)

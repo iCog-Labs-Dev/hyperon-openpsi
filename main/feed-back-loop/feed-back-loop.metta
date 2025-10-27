@@ -4,37 +4,23 @@
 !(bind! &modulator-space (new-space))
 !(bind! &demandspace (new-space))
 
-(: remove-atoms' (-> Grounded Expression Expression))
-(= (remove-atoms' $space $expression)
-    (if (== $expression ())
-        ()
-        (let* (
-            (($head $tail) (decons-atom $expression))
-            ($_  (remove-atom $space $head))
-           ($rem (collapse (get-atoms $space)))
-           ;($_ (println! (remaining-atoms $rem)))
-        )
-            (remove-atoms' $space $tail)
-        )
-    )
-)
 ;; This function removes values from a given atomspace
 ;;(:remove-atoms (-> Grounded))
 (= (remove-atoms $space)
-    (let $atoms (collapse (get-atoms $space))
-        (remove-atoms' $space $atoms)
+    (let $atoms (get-atoms $space)
+        (remove-atom $space $atoms)
     )
  )
 ;; Remove The remove occurrences function removes values based on a given 
 ;;pattern for instance a perception updater value can be stored as 
 ;;(perception value time)
-(: remove-occurrences (-> Grounded Expression Expression)) 
+(: remove-occurrences (-> hyperon::space::DynSpace Expression Expression)) 
 (= (remove-occurrences $space $pattern)
-   	(let* (
-            ($atoms (collapse (match $space $pattern $pattern)))
-            ;($_ (println! (atoms-to-remove $atoms)))
+   	(collapse(let* (
+            ($atoms (match $space $pattern $pattern))
+            ($_ (println! (atoms-to-remove $atoms)))
            ) 
-	  	(remove-atoms' $space $atoms)))
+	  	(remove-atoms' $space $atoms))))
 
 
 (= (add-atoms $space $values)

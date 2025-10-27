@@ -58,24 +58,17 @@
 ;a function that removes previous changes with tv and with args from 
 ;a provided space
 
-(: removePrevChanges (-> Grounded Expression (->)))
 (= (removePrevChanges $space $atoms)
-   (if (== $atoms ())
-     ()
-     (let* (
-            (($h $t) (decons-atom $atoms))
-            ($list-link (out $h ))
-            ;(() (println! (remove' $list-link $h)))
-            )
-        (if (== $h ())
-          ()
-          (let $_ (let () (remove-atom $space $list-link) (remove-atom $space $h)) 
-            (removePrevChanges $space $t)
-            )
+   (collapse (let* (
+            ($atm (superpose $atoms))
+            ($link (out $atm))
+            ; (() (println! ($atm $link) ))
+            ($_ (remove-atom $space $link)) 
+            ($_ (remove-atom $space $atm))
           )
-       )
-     )
+    ())
    )
+)
 
 (= (addPredicate $pred $space)
    (if (== (collapse (match $space $pred $pred)) ())
@@ -95,17 +88,15 @@
 
 ; Record the changes in the atomspace
 (= (record-changes-tv $space $changes-tv)
-  (if (== $changes-tv ())
+   (collapse (let* 
+       (
+         ($atom (superpose $changes-tv))
+        ;  (() (println! ("Recording change with tv" $atom)))
+         ($_ (add-atom $space (LIST_LINK $atom)))
+         ($_ (add-atom $space (REFERENCE_LINK ((Predicate change-with-tv) (LIST_LINK $atom)))))
+       )
     ()
-    (let* 
-      (
-        (($head $tail) (decons-atom $changes-tv))
-        ($_ (add-atom $space (LIST_LINK $head)))
-        ($_ (add-atom $space (REFERENCE_LINK ((Predicate change-with-tv) (LIST_LINK $head)))))
-      )
-      (record-changes-tv $space $tail)
-    )
-  )
+    ))
 )
 
 (= (record-changes-arg $space $changes-arg)
@@ -142,54 +133,51 @@
     )
   )
 
+
+; Detect changes helper with Non-determinism
 (: detectChangesHelper (-> Grounded Expression Expression Number Expression Expression))
 (= (detectChangesHelper $space $time $previous_times $delta $accum)
-	(if (== $previous_times ())
-      $accum
-      (let* (
-             (($head $tail) (decons-atom $previous_times)) 
-             ($x (getImplication $head $space))
-             ($y (getImplication $time $space))
+     (let* (
+            ($head (superpose $previous_times))
+            ; (() (println! ("head" $head)))
+            ($x (getImplication $head $space))
+            ($y (getImplication $time $space))
           )
-        (if (== $x $y)
-          (let* (
-                  ($timeTv (extractTvFromRule $time $space))
-                  ($latestTv (extractTvFromRule $head $space))
-                  ($prevTvMean (cogTvMean $timeTv))
-                  ($latestTvMean (cogTvMean $latestTv))
-                  ($diff (- $latestTvMean $prevTvMean))
-                  ;(() (println! ($diff $accum)))
-                 )
-            (if (>= (abs-math $diff) $delta)
-              (let* 
-                (
-                 ($accum'  (union-atom $accum (($time $head))))
-                 ;(() (println! (accum $accum')))
-                 )
-                (detectChangesHelper $space $time $tail $delta $accum')
-                )
-              (detectChangesHelper $space  $time $tail $delta $accum)
+       (if (== $x $y)
+         (let* (
+                 ($timeTv (extractTvFromRule $time $space))
+                 ($latestTv (extractTvFromRule $head $space))
+                 ($prevTvMean (cogTvMean $timeTv))
+                 ($latestTvMean (cogTvMean $latestTv))
+                 ($diff (- $latestTvMean $prevTvMean))
+               )
+           (if (>= (abs-math $diff) $delta)
+               (union-atom $accum (($time $head)))
+               $accum
             )
-           )
-          (detectChangesHelper $space $time $tail $delta $accum)
-        )
-      )
-    )
+         )
+         $accum
+       )
+     
+   )
 )
 
-;;The following function is written for checking 
-;; the state of the atomspace. This is between two consecutive time cycles.
+
+;The following function is written for checking 
+; the state of the atomspace. This is between two consecutive time cycles.
 (: detectChanges (-> Grounded Expression Expression Number Expression Expression))
 (= (detectChanges $space $prev_times $latest_times $delta $accum)
-	(if (or (== $prev_times ()) (== $latest_times ()))
-		$accum
-		(let* (
-          (($head $tail) (decons-atom $latest_times))
-          ($accum' (detectChangesHelper $space $head $prev_times $delta $accum))
-        )
-        (detectChanges $space $prev_times $tail $delta $accum')
-		)
-	)
+   (if (or (== $prev_times ()) (== $latest_times ()))
+       $accum
+       (let* (
+                ($latest (superpose $latest_times))
+                ($res (detectChangesHelper $space $latest $prev_times $delta ()))
+                ; (() (println! ("res" $res)))
+               )
+           (union-atom $accum $res)
+         )
+       
+   )
 )
 
 (: monitor-changes (-> Grounded (->)))
@@ -219,7 +207,7 @@
 
                 ($at_times_latest' (get-incoming-by-type $space $latest_time TimeValue)) 
                 ($at_times_previous' (get-incoming-by-type $space $previous_time TimeValue))
-                ($_ (record-changes-tv $space $changes-with-tv))
+                ($__ (record-changes-tv $space $changes-with-tv))
                 ($remainingChanges (detectChanges $space $at_times_previous' $at_times_latest' $delta ()))
               )
               (if (== $remainingChanges ())
