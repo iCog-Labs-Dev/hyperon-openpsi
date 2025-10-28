@@ -57,7 +57,7 @@ def check_duplicate(rule: str):
     rules = "(\n" + "\n".join([r for r in (list(map(str, rules)))]) + "\n)"
     result = run_metta_function(
         """
-        (= (ruleComparator $rule $ruleList)
+        (= (comparatorFn $rule $ruleList)
             (if (== $ruleList ())
                 False
                 (let* (
@@ -65,14 +65,14 @@ def check_duplicate(rule: str):
                 )
                     (if (== $rule $head)
                         True
-                        (ruleComparator $rule $tail)
+                        (comparatorFn $rule $tail)
                     )
                 )
             )
         )
 
         """,
-        "ruleComparator",
+        "comparatorFn",
         [rule, rules],
     )
 

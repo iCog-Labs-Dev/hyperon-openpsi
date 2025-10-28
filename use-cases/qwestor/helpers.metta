@@ -1,10 +1,16 @@
+
+
 (= (ruleComparator $rule $ruleList)
     (if (== $ruleList ())
         False
+
         (let* (
             (($head $tail) (decons-atom $ruleList))
+            (((: $handle $rule') $weight) $head)
+             
+            
         )
-            (if (== $rule $head)
+            (if (== $rule $rule')
                 True
                 (ruleComparator $rule $tail)
             )
@@ -19,3 +25,18 @@
     )
 )
 
+
+(= (comparatorFn $rule $ruleList)
+    (if (== $ruleList ())
+        False
+
+        (let* (
+            (($head $tail) (decons-atom $ruleList))
+        )
+            (if (== $rule $rule')
+                True
+                (ruleComparator $rule $tail)
+            )
+        )
+    )
+)
