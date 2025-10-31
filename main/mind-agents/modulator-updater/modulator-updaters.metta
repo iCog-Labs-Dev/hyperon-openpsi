@@ -30,9 +30,9 @@
 	(let* (
 	       	($stimulus 0.5)
 		    ($integrity 0.5)
-       		((demand competence $competenceValue) $competence-demand)
-		    ((demand affiliation $affiliationValue) $affiliation-demand)
-		    ((demand energy $energyValue) $energy-demand)
+       		((demand competence $minComp $maxComp $competenceValue) $competence-demand)
+		    ((demand affiliation $minAff $maxAff $affiliationValue) $affiliation-demand)
+		    ((demand energy $minEne $maxEne $energyValue) $energy-demand)
 		    ($activationValue (ActivationHelper $competenceValue $energyValue $stimulus))
 			($activationValue' (normalizeWithSpecificRange $activationValue 0.0 1.0))
 		    ($securingValue (SecuringThresholdHelper $integrity $stimulus))
