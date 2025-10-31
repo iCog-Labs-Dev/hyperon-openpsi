@@ -15,7 +15,7 @@
 ;; Space initialization
 !(bind! &kb (new-space))
 !(bind! &modulator-space (new-space))
-!(bind! &demandspace (new-space))
+!(bind! &demandSpace (new-space))
 
 (= (addRulesToTestSpace $space) (
 	add-reduct $space (superpose     
@@ -74,9 +74,9 @@
 !(addRulesToTestSpace &ruleSpace) 
 !(insert-modulators &modulator-space)
 
-!(addDemand &demandspace energy -10 10 -15)
-!(addDemand &demandspace affiliation -10 10 5)
-!(addDemand &demandspace competence -10 10 0)
+!(addDemand &demandSpace energy -10 10 -15)
+!(addDemand &demandSpace affiliation -10 10 5)
+!(addDemand &demandSpace competence -10 10 0)
 
 
 ;; This function implements the kb-initializer for the open-psi loop to work
@@ -85,7 +85,7 @@
 	let* (
 	  	($rules (collapse (get-atoms &ruleSpace)))
 		($modulators (collapse (get-atoms &modulator-space)))
-		($demands (collapse (get-atoms &demandspace)))
+		($demands (collapse (get-atoms &demandSpace)))
 		($partialKb (union-atom $rules $modulators))
 		($kbExp (union-atom $partialKb $demands))
 		($_ (collapse (add-atoms $kb $kbExp)))
@@ -106,11 +106,11 @@
         ($_ (println! (goal-psi $goal)))
 		($actions (planner &ruleSpace $state $goal))
         ($_ (println! (actions-psi-to-apply $actions goal $goal demand $currDemand)))
-		($applyValue (applyActions $actions $goalObj $currDemand)) 
+		($applyValue (applyActions $actions $goalObj $currDemand &ruleSpace &demandSpace)) 
         ($_ (println! (applyValue $applyValue)))
-		($competenceDemand (getDemandByName &demandspace competence)) 
-		($affiliationDemand (getDemandByName &demandspace affiliation))
-		($energyDemand (getDemandByName &demandspace energy))
+		($competenceDemand (getDemandByName &demandSpace competence)) 
+		($affiliationDemand (getDemandByName &demandSpace affiliation))
+		($energyDemand (getDemandByName &demandSpace energy))
     
         ($_ (println! (demandValues $competenceDemand $affiliationDemand $energyDemand)))
 		($modUpdate (modulatorUpdaterAgent &modulator-space $competenceDemand $affiliationDemand $energyDemand))
@@ -126,7 +126,7 @@
 		($hateValue (hateFeelingUpdater &modulator-space))
 		($gratitude (gratitudeFeelingUpdater &modulator-space))
  	    ($_ (update-all modulator &modulator-space $kb))  
-        ($_ (update-all demand &demandspace $kb))
+        ($_ (update-all demand &demandSpace $kb))
 	)
 	 (happinessValue $happinessValue sadnessValue $sadnessValue angerValue $angerValue fearValue $fearValue gratitudeValue $gratitude) 
 	)	

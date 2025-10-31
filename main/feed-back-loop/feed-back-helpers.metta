@@ -1,42 +1,30 @@
-(= (clear-space $space) (
-	let $atoms  (get-atoms $space)
-        (remove-atom $space $atoms)
-))
 
 ;; Remove The remove occurrences function removes values based on a given 
-;;pattern for instance a perception updater value can be stored as 
-;;(perception value time)
+;; pattern for instance a perception updater value can be stored as 
+;; (perception value time)
 (: remove-occurrences (-> hyperon::space::DynSpace Expression Expression)) 
-(= (remove-occurrences $space $pattern)
-   	(collapse(let* (
+(= (remove-occurrences $space $pattern) (
+	collapse (let* (
             ($atoms (match $space $pattern $pattern))
-           ) 
-	  	(remove-atom $space $atoms))
+        ) 
+	(remove-atom $space $atoms))
 ))
 
+(: add-atoms (-> hyperon::space::DynSpace Expression (->)))
 (= (add-atoms $space $values)
 	(add-reduct $space (superpose $values)
 ))
 
-;;The below function is used to synchronize two atomspaces for having the same
-;;Replicated value. The updater space belongs to the mind-agent while the atomspace to be synchronized is the 
-;; knowledge base atomspace.
+;; The below function is used to synchronize two atomspaces for having the same replicated value. 
+;; The updater space belongs to the mind-agent while the atomspace to be synchronized is the knowledge base atomspace.
 (: update-atoms (-> Expression hyperon::space::DynSpace hyperon::space::DynSpace Expression ))
 (= (update-atoms $pattern $updater $updated)
    	(let* (
-	       ($updater-atoms (collapse (get-atoms $updater)))
-        ;;    ($_ (println! (pattern $pattern)))
-	       ($rem-res (remove-occurrences $updated $pattern))
-		;;    ($_ (println! (removed successfully $rem-res)))
-        ;;    ($atoms (collapse (get-atoms $updated)))
-        ;;    ($_ (println! (atomsKb $atoms)))
-            ($res (collapse (add-atoms $updated $updater-atoms)))
-            ;; ($_ (println! (result-after-added $res)))
-            ;;($atoms' (collapse (get-atoms $updated)))
-	       )
-	  	()	
-	)
-)
+	        ($updater-atoms (collapse (get-atoms $updater)))
+	        ($rem-res (remove-occurrences $updated $pattern))
+        	($res (collapse (add-atoms $updated $updater-atoms)))
+	    ) ()	
+))
 
 ;;Tag based specification for atomspace updation
 (: update-all (-> Symbol hyperon::space::DynSpace hyperon::space::DynSpace Expression))
@@ -79,17 +67,19 @@
 ))
 
 ;;(: applyActions (-> Expression Goal Expression Expression))
-(= (applyActions $actions $goal $demand $ruleSpace) 
+(= (applyActions $actions $goal $demand $ruleSpace $demandSpace) 
    (if (== $actions ())
-     		()
+     	()
 		(let $isGoalMet? (isGoalMet? $actions $goal $ruleSpace)
 		  	(if $isGoalMet?
                 (let* (
-                       ($_ (println! (goalMet $isGoalMet?)))
                        ((demand $demandName $minVal $maxVal $demandValue) $demand)
+						(() (println! (Goal Met! Updating Demand... $demand)))
 					   ($newDemValue (+ $demandValue (* (- 1 $demandValue) 0.5)))
+					   (() (println! (New Demand Value: $newDemValue)))
                 )
-			  	    (updateDemandValue &demandspace $demandName $newDemValue)
+				; !(updateDemandValue &demandSpace competence 0.8)
+			  	    (updateDemandValue $demandSpace $demandName $newDemValue)
                 )
 				()
 			)
@@ -105,11 +95,8 @@
 		False
 		(let* (
 			(($rule $tail) (decons-atom $rules))
-            ($_ (println! (isGoalMetInnerRule $rule tail $tail)))
 			($ruleGoal (extractGoalFromRule $rule))
-            ($_ (println! (this is the goal $ruleGoal)))
-		)
-		  (if (== $ruleGoal $goal)
+		) (if (== $ruleGoal $goal)
 		    	True
 		    	(isGoalMet' $tail $goal)
 		  )
@@ -118,19 +105,15 @@
 )
 
 ;; How would this function work? how can I check whether the goal is met?
-;; This function is used for a follow-up after the action-selection mind agent
-;; is applied.
+;; This function is used for a follow-up after the action-selection mind agent is applied.
 (: isGoalMet? (-> Expression Goal hyperon::space::DynSpace Bool))
 (= (isGoalMet? $actions $goal $ruleSpace)
 	(let* (
 	       ($length (size-atom $actions))
 	       ($lastAction (index-atom $actions (- $length 1)))
 	       ($rules' (findRulesWithAction $ruleSpace $lastAction))
-           ($_ (println! (rulesinGoal $rules')))
-	)
-		 (isGoalMet' $rules' $goal)
-	)	
-)
+	) (isGoalMet' $rules' $goal)
+))
 
 ;; This function updates the modulator values in the atomspace.
 (:update-modulator (-> Symbol Number Expression))
@@ -138,8 +121,6 @@
 	(let* (
 	       ($modulator (fetch-modulator &modulator-space $modulatorName))
 	       ($_ (update-atom &modulator-space $modulator ($modulatorName $modulatorValue)))
-	)
-	  	()
-	)
-)
+	) ()
+))
 
