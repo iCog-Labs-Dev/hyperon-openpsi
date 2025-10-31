@@ -94,15 +94,15 @@
 (: demandDecay (-> hyperon::space::DynSpace Expression Number (->)))
 (= (demandDecay $space $demand $value)
     (let* (
-        ($oldValue  (match $space (demand $demand $minVal $maxVal $oldValue) $oldValue))
+        ((demand $name $min $max $oldValue) $demand)
         ($newValue (- $oldValue $value))
     )
     (if (>= $newValue 0)
-        (updateDemandValue $space $demand $newValue)
+        (updateDemandValue $space $name $newValue)
         (let* (
-            ($demandAtom (match $space (demand $demand $minVal $maxVal $oldValue) (demand $demand $minVal $maxVal $oldValue)))
-            (() (remove-atom $space $demandAtom))
-        ) (remove-atom $space (skip $demand))
+            (() (remove-atom $space $demand))
+            (() (remove-atom $space (skip $name)))
+        ) ()
         )
     )
 ))
@@ -112,11 +112,11 @@
 (= (decaySkippedDemands $space $decayValue)
     (let* (
         ($skippedDemandNames (collapse (match $space (skip $x) $x)))
-        ($skippedDemands (collapse (match $space (demand $x $minVal $maxVal $value) (demand $x $minVal $maxVal $value))))
+        ($skippedDemands (collapse (let $demandName (superpose $skippedDemandNames) (fetchDemand $space $demandName))))
     )
     (if (== (size-atom $skippedDemands) 0)
         (There are no skipped demands) 
-        (demandDecay $space (superpose $skippedDemandNames) $decayValue)
+        (demandDecay $space (superpose $skippedDemands) $decayValue)
     ))
 )
 
@@ -125,11 +125,10 @@
 (= (decayAllDemands $space $decayValue)
     (let* (
         ($allDemands (getAllDemands $space))
-        ($demandNames (collapse (match $space (demand $name $minVal $maxVal $val) $name)))
     )
     (if (== (size-atom $allDemands) 0)
         (No demands in the space)
-        (demandDecay $space (superpose $demandNames) $decayValue)
+        (let $demand (superpose $allDemands) (demandDecay $space $demand $decayValue))
     ))
 )
 
@@ -148,3 +147,52 @@
     ))
 )
 
+;; alpha denotes how fast the fuzzy_equal output decreases when current deviates from minVal.
+(: alpha (-> Number))
+(= (alpha) 150)
+
+;; Function to calculate demand satisfaction according to Ben's Paper
+;; Requires random function which should be imported from utils
+(: calculateDemandSatisfaction (-> hyperon::space::DynSpace Symbol Number))
+(= (calculateDemandSatisfaction $space $demandName) (
+    let* (
+        ((demand $demandName $minVal $maxVal $currentValue) (fetchDemand $space $demandName))
+        ($alpha (alpha))
+    ) (if (and (>= $currentValue $minVal) (<= $currentValue $maxVal))
+        (+ 0.8 (* 0.2 (random 0 1)))
+        (if (< $currentValue $minVal)
+            (fuzzy_equal $currentValue $minVal $alpha)
+            (+ 0.9 (* 0.1 (random 0 1)))
+        )
+    )
+))
+
+;; Function to fetch the least satisfied demand from a list of demands
+(: fetchLeastSatisfiedDemand' (-> hyperon::space::DynSpace Expression Demand Demand))
+(= (fetchLeastSatisfiedDemand' $space $demands $leastSatisfiedDemand)
+    (if (== $demands ())
+        $leastSatisfiedDemand
+        (let* (
+            (($currentDemand $restDemands) (decons-atom $demands))
+            ((demand $currentName $currentMin $currentMax $currentValue) $currentDemand)
+            ((demand $leastName $leastMin $leastMax $leastValue) $leastSatisfiedDemand)
+            ($currentSatisfaction (calculateDemandSatisfaction $space $currentName))
+            ($leastSatisfaction (calculateDemandSatisfaction $space $leastName))
+        )
+        (if (< $currentSatisfaction $leastSatisfaction)
+            (fetchLeastSatisfiedDemand' $space $restDemands $currentDemand)
+            (fetchLeastSatisfiedDemand' $space $restDemands $leastSatisfiedDemand)
+        )
+    )
+))
+
+;; Function to fetch the least satisfied demand
+(: fetchLeastSatisfiedDemand (-> hyperon::space::DynSpace Demand))
+(= (fetchLeastSatisfiedDemand $space) (
+    let* (
+        ($activeDemands (getEnabledDemands $space))
+    ) (if (== $activeDemands ())
+        ("No active demands found")
+        (fetchLeastSatisfiedDemand' $space $activeDemands (car-atom $activeDemands))
+    )
+))
