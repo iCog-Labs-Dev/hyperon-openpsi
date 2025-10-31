@@ -12,9 +12,9 @@
 !(bind! &demandspace (new-space))
 !(bind! &modulator-space (new-space))
 
-!(addDemand &demandspace energy 0.6)
-!(addDemand &demandspace affiliation 0.5)
-!(addDemand &demandspace competence 0.2)
+!(addDemand &demandspace energy -10 10 -15)
+!(addDemand &demandspace affiliation -10 10 5)
+!(addDemand &demandspace competence -10 10 0)
 
 !(insert-modulators &modulator-space)
 !(assertEqual (ActivationHelper 4 3 2) 4.8743169398907105)
