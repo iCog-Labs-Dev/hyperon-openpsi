@@ -1,27 +1,28 @@
-(: psi-loop (-> Symbol hyperon::space::DynSpace Expression)) 
-(= (psi-loop $state $kb)
+
+(: psi-loop-v2 (-> Symbol hyperon::space::DynSpace Expression)) 
+(= (psi-loop-v2 $state $kb)
 	(let* (
 	    ($demands (queryAll $kb demand))
-        ($_ (println! (demands $demands)))
+        ($_ (println! (Available Demands $demands)))
 
-		($currDemand (demandSelector $demands))
-        ($_ (println! (dmSelector $currDemand)))
+		($currDemand (fetchLeastSatisfiedDemand $kb))
+        ($_ (println! (Selected Demand: $currDemand)))
 
-        ($goalObj (goalSelector $currDemand))
+		((demand $demandName $minVal $maxVal $demandValue) $currDemand)
+        ($goalObj (goalSelector $demandName))
 		((Goal $goal $goalVal1 $goalVal2) $goalObj) 
-        ($_ (println! (goal-psi $goal)))
+        ($_ (println! (Selected Goal: $goal)))
 
-		($actions-reversed (hillClimbingPlanner $state $goal (TestedActions) () &ruleSpace)) ;; Hillclimber returns actions in reverse order.
-		($actions (reverse $actions-reversed ()))
-        ($_ (println! (actions-psi-to-apply $actions goal $goal demand $currDemand)))
-
-		($applyValue (applyActions $actions $goalObj $currDemand)) 
+		($actions (hillClimbingPlanner $state $goal (Tested Actions) () &ruleSpace))
+        ($_ (println! (Actions: $actions goal $goal demand $currDemand)))
+		(() (updateDemandValue &demandSpace $demandName 1.77))
+		($applyValue (applyActions $actions $goalObj $currDemand &ruleSpace &demandSpace)) 
         ($_ (println! (applyValue $applyValue)))
 
-		($competenceDemand (getDemandByName &demandspace competence)) 
-		($affiliationDemand (getDemandByName &demandspace affiliation))
-		($energyDemand (getDemandByName &demandspace energy))
-        ($_ (println! (demandValues $competenceDemand $affiliationDemand $energyDemand)))
+		($competenceDemand (getDemandByName &demandSpace competence)) 
+		($affiliationDemand (getDemandByName &demandSpace affiliation))
+		($energyDemand (getDemandByName &demandSpace energy))
+        ($_ (println! (Demand Values: $competenceDemand $affiliationDemand $energyDemand)))
 		
 		($modUpdate (modulatorUpdaterAgent &modulator-space $competenceDemand $affiliationDemand $energyDemand))
         ($_ (println! (modUpdate $modUpdate modulatorValues (collapse (get-atoms &modulator-space))))) 
@@ -36,8 +37,8 @@
 		($gratitude (gratitudeFeelingUpdater &modulator-space))
 	    
 		($_ (update-all modulator &modulator-space $kb))
-        ($_ (update-all demand &demandspace $kb))
+        ($_ (update-all demand &demandSpace $kb))
 	)
-	  (hateValue $hateValue happinessValue $happinessValue sadnessValue $sadnessValue angerValue $angerValue)
+	  (happinessValue $happinessValue sadnessValue $sadnessValue angerValue $angerValue fearValue $fearValue gratitudeValue $gratitude) 
 	)	
 )
