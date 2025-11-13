@@ -29,6 +29,7 @@ Do not include any explanations, additional text, or duplicates. Ensure every re
 
 class AgentState(TypedDict):
     rules: str  # Input: the rules string
+    comparator_rules: str
     output: Optional[str] | None  # Output: the generated linkages
 
 

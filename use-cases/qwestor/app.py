@@ -117,7 +117,14 @@ async def addRules(payload: list[RuleCreate]):
     try:
         result = await pair_to_goals(payload=payload)
 
-        return {"status": 201, "message": "Rules Created", "rules": result}
+        if result["status"] == "success":
+            return {"status": 201, "message": "Rules Created", "rules": result["data"]}
+        elif result["status"] == "duplicate found":
+            return {
+                "status": 400,
+                "message": "Rules already exist",
+                "rules": result["data"],
+            }
 
     except Exception as e:
         print("Error adding rules: ", e)
