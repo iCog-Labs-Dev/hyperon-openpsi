@@ -47,4 +47,4 @@
 
 !(println! "Starting Ping-Pong Agent ...")
 !(setGv (agent motivation) 1.0 &r)
-!(main-loop 1)
+!(mainLoop 1)
