@@ -73,20 +73,27 @@
         True
         (let* (
             (($head $rest) (decons-atom $plan))
+            ; ($_ (println! ("Head and Rest:" $head $rest)))
         )
             (if (== $head act-ping)
                 (let* (
                     ($res (ping))
                     ($lost (collapse (match &r (Goal (ball lost) 1.0 $d) (ball lost))))
                     )
-                    (if (== () $lost) True False))
+                    (if (== () $lost) 
+                        (executePlan $rest)
+                        False
+                    ))
 
                 (if (== $head act-wait)
                     (let* (
                         ($res (executeWait))
                         ($lost (collapse (match &r (Goal (ball lost) 1.0 $d) (ball lost))))
                         )
-                        (if (== () $lost) True False))
+                        (if (== () $lost) 
+                            (executePlan $rest)
+                            False
+                        ))
                     (println! "Unknown Action")
                 )
             )

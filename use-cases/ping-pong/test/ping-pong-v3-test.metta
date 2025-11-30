@@ -12,8 +12,8 @@
 ;; 2. (ball heading-to-opponent)
 ;; 3. (ball lost) - End of game
 
-!(addGoal (ball heading-to-agent)    1.0 0.0 &r)
-!(addGoal (ball heading-to-opponent) 0.0 0.0 &r)
+!(addGoal (ball heading-to-agent)    1.0 1.0 &r)  ;; current=1.0, desired=1.0
+!(addGoal (ball heading-to-opponent) 0.0 1.0 &r)  ;; current=0.0, desired=1.0
 !(addGoal (ball lost)                0.0 0.0 &r)
 !(addGoal (agent motivation)         1.0 1.0 &r) ;; Target 1.0 if it drops too low, agent makes mistakes.
 
@@ -44,6 +44,13 @@
         )
      ) 1.0)
 )
+
+!(assertEqual (goal-value (agent motivation) &r) 1.0)
+!(assertEqual (goal-value (ball heading-to-agent) &r) 1.0)
+!(assertEqual (goal-value (ball heading-to-opponent) &r) 0.0)
+
+!(let $rules (collapse (match &r ((: $h $rest) $w) $h))
+    (assertEqual (size-atom $rules) 2))  ;; should have 2 rules
 
 !(println! "Starting Ping-Pong Agent ...")
 !(setGv (agent motivation) 1.0 &r)
