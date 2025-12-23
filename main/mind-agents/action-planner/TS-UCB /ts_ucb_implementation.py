@@ -94,3 +94,5 @@ if __name__ == "__main__":
     print("Final posterior means:", bandit.get_posterior_means())
     print(f"Total reward collected: {total_reward} out of {trials} trials")
     print(f"Regret (how much reward was 'lost'): {expected_max - total_reward:.1f}")
+    print(f"Average reward: {total_reward}/{trials} ({total_reward/trials*100:.1f}%)")
+ 
