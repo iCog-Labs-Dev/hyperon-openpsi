@@ -25,19 +25,29 @@ class StandardTS:
 def run_bandit(Algorithm, n_arms, true_probs, trials, n_runs=200, seed=42):
     np.random.seed(seed)
     random.seed(seed)
+    best_prob = max(true_probs)
+
     cumulative_rewards = np.zeros((n_runs, trials))
+    cumulative_regret = np.zeros((n_runs, trials))
     for run in range(n_runs):
         bandit = Algorithm(n_arms=n_arms, seed=seed + run)
-        total = 0
+        total = 0.0
+        total_regret = 0.0
         for t in range(trials):
             arm = bandit.select_arm()
             reward = 1 if random.random() < true_probs[arm] else 0
             bandit.update(arm, reward)
             total += reward
+            total_regret += best_prob - true_probs[arm] 
             cumulative_rewards[run, t] = total
+            cumulative_regret[run, t] = total_regret
     avg_cumulative = np.mean(cumulative_rewards, axis=0)
+    avg_cumulative_regret = np.mean(cumulative_regret, axis=0)
+
     final_avg_reward = avg_cumulative[-1] / trials
-    return avg_cumulative, final_avg_reward
+    return avg_cumulative, avg_cumulative_regret, final_avg_reward
+
+    # return avg_cumulative, final_avg_reward,avg_cumulative_regret
 
 if __name__ == "__main__":
     # TS-UCB Helps More When Probabilities Are Close
@@ -54,8 +64,8 @@ if __name__ == "__main__":
 
     print(f"Running {n_runs} simulations for each algorithm... (this may take a minute)")
 
-    std_cumulative, std_avg = run_bandit(StandardTS, n_arms, true_probs, trials, n_runs)
-    ucb_cumulative, ucb_avg = run_bandit(TSUCB, n_arms, true_probs, trials, n_runs)
+    std_cumulative, std_regret, std_avg = run_bandit(StandardTS, n_arms, true_probs, trials, n_runs)
+    ucb_cumulative, ucb_regret, ucb_avg = run_bandit(TSUCB, n_arms, true_probs, trials, n_runs)
 
     print("\n" + "="*60)
     print(f"True best arm probability: {max(true_probs):.3f}")
@@ -77,6 +87,19 @@ if __name__ == "__main__":
     plt.ylim(0, max(true_probs) * 1.1)
     plt.tight_layout()
     plt.show()
+
+    plt.figure(figsize=(10, 6))
+    plt.plot(std_regret, label="Standard Thompson Sampling", color="orange", alpha=0.9)
+    plt.plot(ucb_regret, label="TS-UCB", color="teal", linewidth=2.5)
+
+    plt.title(f"Cumulative Regret Comparison ({n_runs} runs)")
+    plt.xlabel("Trial")
+    plt.ylabel("Cumulative expected regret")
+    plt.legend()
+    plt.grid(True, alpha=0.3)
+    plt.tight_layout()
+    plt.show()
+
 
     print("\nExample final beliefs from a single illustrative run:")
     
