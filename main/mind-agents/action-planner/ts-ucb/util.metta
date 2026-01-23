@@ -1,4 +1,4 @@
-;; Utility functions for Thompson Sampling based action planner
+;; Utility functions for ts-usb taken from Thompson Sampling based action planner
 
 ;; Convert confidence to count
 (: confidenceToCount (-> Number Number))
@@ -149,6 +149,124 @@
     ) ()
 ))
 
-;;;; added for ts-ucb 
+;added for ts-ucb 
 
+;reverse function 
+(= (reverse $lst) 
+   (superpose $lst)
+)
+;get alphas/betas for a list of ruleIds
+(: get_alphas_betas (-> Expression hyperon::space::DynSpace Expression))
+(= (get_alphas_betas $ruleIds $space) (
+    collapse (let $ruleId (superpose $ruleIds)
+        (let* (
+            (($strength $confidence) (getSTV $ruleId $space))
+            (($alpha $beta) (stvToBeta ($strength $confidence)))
+        ) ($ruleId $alpha $beta)
+    ))
+))
+
+(: max_list (-> Expression Number))
+(= (max_list $vals) (
+    if (== (size-atom $vals) 1)
+        (car-atom $vals)
+        (let* (
+            ($head (car-atom $vals))
+            ($tail (cdr-atom $vals))
+            ($tail_max (max_list $tail))
+        )
+            (if (> $head $tail_max) $head $tail_max)
+        )
+))
+(= (compute_max_total $ab_list)
+   (let* (
+        (($id $a $b) (superpose $ab_list))         
+        ($sum (+ $a $b))
+        )
+       $sum
+    )
+)
+
+; sample thetas for all rules: input superposed (ruleId a b), output superposed (ruleId theta)
+(: sample_thetas (-> Expression Expression))
+(= (sample_thetas $ab_list) (
+    collapse (let ($id $a $b) (superpose $ab_list)
+        (let $theta (betaSample $a $b)
+            (superpose ($id $theta))
+        )
+    )
+))
+
+; estimate f_tilde: sample m times, each time max(theta samples), then mean
+(: estimate_f_tilde (-> Expression Number Number))
+(= (estimate_f_tilde $ab_list $m) (
+    mean_list (collect_opt_samples $ab_list $m ())
+))
+
+(: collect_opt_samples (-> Expression Number Expression Expression))
+(= (collect_opt_samples $ab_list $m $samples) (
+    if (== $m 0)
+        $samples
+        (let* (
+            ($thetas (collapse (let ($id $theta) (superpose (sample_thetas $ab_list)) $theta)))
+            ($opt (max_list $thetas))
+        ) (collect_opt_samples $ab_list (- $m 1) (superpose $samples $opt))
+    )
+))
+
+; get superposed means: from (ruleId a b) → mean = a / (a+b)
+(: get_means (-> Expression Expression))
+(= (get_means $ab_list) (
+    collapse (let ($id $a $b) (superpose $ab_list) (/ $a (+ $a $b)))
+))
+
+; get superposed totals: from (ruleId a b) → a + b
+(: get_totals (-> Expression Expression))
+(= (get_totals $ab_list) (
+    collapse (let ($id $a $b) (superpose $ab_list) (+ $a $b)))
+)
+; get superposed radii: sqrt( log(2*(max_total +1)) / (2 * total) ), min 1e-6
+(: get_radii (-> Number Expression Expression))
+(= (get_radii $max_total $totals) (
+    collapse (let $total (superpose $totals)
+        (max 1e-6 (sqrt (/ (log (* 2 (+ $max_total 1))) (* 2 $total))))
+    )
+))
+
+; get superposed scores: (f_tilde - mean) / radius for each
+(: get_scores (-> Number Expression Expression Expression))
+(= (get_scores $f_tilde $means $radii) (
+    collapse (let* (
+        (($m_head $m_tail) (decons-atom $means))
+        (($r_head $r_tail) (decons-atom $radii))
+    ) (superpose (/ (- $f_tilde $m_head) $r_head) (get_scores $f_tilde $m_tail $r_tail)))
+))
+
+; ts-ucb selector
+(: ts_ucb_select (-> Expression hyperon::space::DynSpace Number (Number Number)))
+(= (ts_ucb_select $ruleIds $space $m) (
+    if (== $ruleIds ())
+        (-1 0)  
+        (let* (
+            ($ab_list (get_alphas_betas $ruleIds $space))
+            ($max_total (compute_max_total $ab_list))
+            ($f_tilde (estimate_f_tilde $ab_list $m))
+            ($means (get_means $ab_list))
+            ($totals (get_totals $ab_list))
+            ($radii (get_radii $max_total $totals))
+            ($scores (get_scores $f_tilde $means $radii))
+            (($min_score $min_index) (min_list_with_index $scores))
+            ($chosenId (nth-atom $ruleIds $min_index))  
+            ($_ (println! ("TS-UCB: f_tilde=" $f_tilde " scores=" $scores " chose=" $chosenId)))
+        ) ($chosenId $min_score)
+    )
+))
+
+;; get nth item from superposed list 
+(: nth-atom (-> Expression Number Expression))
+(= (nth-atom $list $n) (
+    if (== $n 0)
+        (car-atom $list)
+        (nth-atom (cdr-atom $list) (- $n 1))
+))
  
