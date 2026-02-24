@@ -17,9 +17,10 @@
 !(addDemand &demandspace competence -10 10 0)
 
 !(insert-modulators &modulator-space)
-!(assertEqual (ActivationHelper 4 3 2) 4.8743169398907105)
-!(assertEqual (SecuringThresholdHelper 4 3) 70.0)
-!(assertEqual (SelectionThresholdHelper 3 4) 8)
+
+!(assertEqual (ActivationHelper 4 3) 0.8743169398907105)
+!(assertEqual (SecuringThresholdHelper 4 0.8) 60.23529411764706)
+!(assertEqual (SelectionThresholdHelper 3.0) 0.01639344262295082)
 !(assertEqual (compareModulatorValues (modulator arousal 0.5) (modulator arousal 0.5)) True)
 !(assertEqual (compareModulatorValues (modulator selection-threshold 0.5) (modulator arousal 0.5)) False)
 !(assertEqual (compareModulatorValues (modulator arousal 0.4) (modulator arousal 0.5)) False)
