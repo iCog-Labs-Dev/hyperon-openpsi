@@ -176,3 +176,16 @@
 ;; Uncomment the following lines to run psi-agent-loop
 ;; !(kb-initializer &kb)
 ;; !(psi-agent-loop init &kb)
+
+;; ============================================
+;; goalSelector - per-demand goal mapping tests
+;; ============================================
+
+!(assertEqual (goalSelector competence) (Goal task_done 1.0 1.0))
+!(assertEqual (goalSelector energy) (Goal reset_system 1.0 1.0))
+!(assertEqual (goalSelector affiliation) (Goal mission_complete 1.0 1.0))
+
+;; The core bug: previously every demand returned the SAME goal.
+;; This checks they're now genuinely different from each other.
+!(assertEqual (== (goalSelector competence) (goalSelector energy)) False)
+!(assertEqual (== (goalSelector energy) (goalSelector affiliation)) False)
