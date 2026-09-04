@@ -43,3 +43,51 @@
 !(assertEqual (calculateDemandSatisfaction &demandSpace energy) 0.8400000000000001)
 !(assertEqual (calculateDemandSatisfaction &demandSpace affiliation) 0.92)
 !(assertEqual (fetchLeastSatisfiedDemand &demandSpace) (demand energy 0 1 0.38))
+;; ============================================
+;; Demand Arbitration - Tie-Break Tests
+;; Priority order: energy > competence > affiliation
+;; ============================================
+
+!(bind! &tieSpace (new-space))
+
+;; --- Test: energy vs competence tie ---
+;; Both values are inside their [min,max] range, so under the
+;; deterministic (random $x $y) 0.2 override, both get satisfaction
+;; = 0.8 + 0.2*0.2 = 0.84 -- an exact tie.
+!(addDemand &tieSpace energy 0 1 0.5)
+!(addDemand &tieSpace competence 0 1 0.5)
+
+!(assertEqual (calculateDemandSatisfaction &tieSpace energy) 0.8400000000000001)
+!(assertEqual (calculateDemandSatisfaction &tieSpace competence) 0.8400000000000001)
+
+;; energy should win, since it's higher priority than competence
+!(assertEqual (fetchLeastSatisfiedDemand &tieSpace) (demand energy 0 1 0.5))
+
+
+;; --- Test: competence vs affiliation tie ---
+!(bind! &tieSpace2 (new-space))
+!(addDemand &tieSpace2 competence 0 1 0.5)
+!(addDemand &tieSpace2 affiliation 0 1 0.5)
+
+;; competence should win, since it's higher priority than affiliation
+!(assertEqual (fetchLeastSatisfiedDemand &tieSpace2) (demand competence 0 1 0.5))
+
+
+;; --- Test: three-way tie (all equal) ---
+!(bind! &tieSpace3 (new-space))
+!(addDemand &tieSpace3 affiliation 0 1 0.5)
+!(addDemand &tieSpace3 competence 0 1 0.5)
+!(addDemand &tieSpace3 energy 0 1 0.5)
+
+;; energy should win overall, since it's top of the priority order
+!(assertEqual (fetchLeastSatisfiedDemand &tieSpace3) (demand energy 0 1 0.5))
+
+
+;; --- Test: no tie, priority irrelevant ---
+;; competence is genuinely less satisfied (below its min), so it
+;; should win regardless of priority order -- priority only matters on ties.
+!(bind! &tieSpace4 (new-space))
+!(addDemand &tieSpace4 energy 0 1 0.5)
+!(addDemand &tieSpace4 competence 0 1 -0.5)
+
+!(assertEqual (fetchLeastSatisfiedDemand &tieSpace4) (demand competence 0 1 -0.5))

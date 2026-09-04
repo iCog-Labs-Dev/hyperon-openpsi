@@ -59,11 +59,11 @@
 ;; This goal selector maps from the demand and applies the goal to it
 ;; This is an unfinished function
 (= (goalSelector $demandName) (
-	case $demandName (
-		(affiliation (Goal mission_complete 1.0 1.0))
-		(competence (Goal mission_complete 1.0 1.0))
-        (energy (Goal mission_complete 1.0 1.0))
-	)
+    case $demandName (
+        (affiliation (Goal mission_complete 1.0 1.0))
+        (competence (Goal task_done 1.0 1.0))
+        (energy (Goal reset_system 1.0 1.0))
+    )
 ))
 
 ;;(: applyActions (-> Expression Goal Expression Expression))

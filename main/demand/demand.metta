@@ -167,7 +167,33 @@
     )
 ))
 
-;; Function to fetch the least satisfied demand from a list of demands
+;; Priority order for demand-arbitration tie-breaking.
+;; Lower index = higher priority = wins on a tie.
+(: demandPriorityOrder (-> Expression))
+(= (demandPriorityOrder) (energy competence affiliation))
+
+;; Looks up how important a demand is, by its position in the priority list.
+;; A demand not in the list gets treated as lowest priority.
+(: demandPriorityIndex' (-> Expression Symbol Number Number))
+(= (demandPriorityIndex' $list $name $idx)
+    (if (== $list ())
+        999
+        (let ($head $tail) (decons-atom $list)
+            (if (== $head $name)
+                $idx
+                (demandPriorityIndex' $tail $name (+ $idx 1))
+            )
+        )
+    )
+)
+
+(: demandPriorityIndex (-> Symbol Number))
+(= (demandPriorityIndex $name)
+    (let $order (demandPriorityOrder)
+        (demandPriorityIndex' $order $name 0)
+    )
+)
+
 (: fetchLeastSatisfiedDemand' (-> hyperon::space::DynSpace Expression Demand Demand))
 (= (fetchLeastSatisfiedDemand' $space $demands $leastSatisfiedDemand)
     (if (== $demands ())
@@ -181,11 +207,17 @@
         )
         (if (< $currentSatisfaction $leastSatisfaction)
             (fetchLeastSatisfiedDemand' $space $restDemands $currentDemand)
-            (fetchLeastSatisfiedDemand' $space $restDemands $leastSatisfiedDemand)
+            (if (== $currentSatisfaction $leastSatisfaction)
+                (if (< (demandPriorityIndex $currentName) (demandPriorityIndex $leastName))
+                    (fetchLeastSatisfiedDemand' $space $restDemands $currentDemand)
+                    (fetchLeastSatisfiedDemand' $space $restDemands $leastSatisfiedDemand)
+                )
+                (fetchLeastSatisfiedDemand' $space $restDemands $leastSatisfiedDemand)
+            )
         )
     )
 ))
-
+ 
 ;; Function to fetch the least satisfied demand
 (: fetchLeastSatisfiedDemand (-> hyperon::space::DynSpace Demand))
 (= (fetchLeastSatisfiedDemand $space) (
